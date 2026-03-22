@@ -1,0 +1,22 @@
+# IDE / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Database & Backups
+*.sql
+*.zip
+*.log
+
+# Sensitive Data
+database.sql
+taskflow_db.sql
+
+# Uploads & Temp
+uploads/*
+!uploads/.gitkeep
+temp/
+tmp/
+node_modules/
+vendor/

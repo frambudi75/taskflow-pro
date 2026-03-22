@@ -1,0 +1,42 @@
+# TaskFlow Security Configuration
+# Prevent access to sensitive files and directories
+
+# Prevent directory listing
+Options -Indexes
+
+# Enable mod_rewrite for clean URLs
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+</IfModule>
+
+# Deny access to sensitive file types
+<FilesMatch "\.(sql|zip|tar|log|env|yml|yaml)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Deny access to config files
+<Files config.php>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Deny access to .htaccess
+<Files .htaccess>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Deny PHP execution in uploads directories
+<FilesMatch "^/(uploads|logs)/.*\.php$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Security headers
+<IfModule mod_headers.c>
+    Header always set X-Frame-Options "DENY"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

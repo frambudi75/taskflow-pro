@@ -1,0 +1,60 @@
+{
+  "entities": {
+    "Todo": {
+      "title": "Todo",
+      "description": "Tugas atau item daftar pekerjaan.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Judul tugas" },
+        "date": { "type": "string", "format": "date", "description": "Tanggal tugas (YYYY-MM-DD)" },
+        "completed": { "type": "boolean", "description": "Status penyelesaian" },
+        "userId": { "type": "string", "description": "ID pengguna pemilik" }
+      },
+      "required": ["title", "date", "completed", "userId"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "Catatan teks.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "description": "Judul catatan" },
+        "content": { "type": "string", "description": "Isi catatan" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Waktu pembaruan terakhir" },
+        "userId": { "type": "string", "description": "ID pengguna pemilik" }
+      },
+      "required": ["title", "content", "updatedAt", "userId"]
+    },
+    "Document": {
+      "title": "Document",
+      "description": "Metadata dokumen yang disimpan.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "Nama file" },
+        "type": { "type": "string", "description": "Tipe file (ekstensi)" },
+        "uploadDate": { "type": "string", "format": "date-time", "description": "Tanggal unggah" },
+        "size": { "type": "number", "description": "Ukuran file dalam bytes" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Tag untuk pencarian" },
+        "userId": { "type": "string", "description": "ID pengguna pemilik" }
+      },
+      "required": ["name", "type", "uploadDate", "userId"]
+    },
+    "User": {
+      "title": "User",
+      "description": "Profil pengguna dengan peran.",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "description": "Email pengguna" },
+        "displayName": { "type": "string", "description": "Nama tampilan" },
+        "role": { "type": "string", "enum": ["administrator", "user"], "description": "Peran pengguna" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Waktu pendaftaran" }
+      },
+      "required": ["email", "role"]
+    }
+  },
+  "firestore": {
+    "/todos/{todoId}": { "schema": "Todo", "description": "Koleksi tugas" },
+    "/notes/{noteId}": { "schema": "Note", "description": "Koleksi catatan" },
+    "/documents/{docId}": { "schema": "Document", "description": "Koleksi metadata dokumen" },
+    "/users/{uid}": { "schema": "User", "description": "Koleksi profil pengguna" }
+  }
+}
