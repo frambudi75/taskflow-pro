@@ -8,10 +8,16 @@ Thumbs.db
 *.sql
 *.zip
 *.log
+*.sqlite
 
 # Sensitive Data
 database.sql
 taskflow_db.sql
+firebase-applet-config.json
+google-services.json
+.htaccess
+.env
+*.json
 
 # Uploads & Temp
 uploads/*
