@@ -41,8 +41,35 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_doc'])) {
         $stmt->execute([$_SESSION['user_id'], $name, $file_path, $type, $file_size, $tags]);
         $doc_id = $pdo->lastInsertId();
         logActivity("Mengunggah dokumen: " . $name, "document", $doc_id);
-        header("Location: index.php?page=documents");
+        header("Location: index.php?page=documents&success=uploaded");
         exit;
+    }
+}
+
+// Logic: Delete Document
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_doc'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $doc_id = $_POST['doc_id'];
+        
+        // Fetch to get path & verify ownership
+        $stmt = $pdo->prepare("SELECT file_path, name FROM documents WHERE id = ? AND user_id = ?");
+        $stmt->execute([$doc_id, $_SESSION['user_id']]);
+        $doc = $stmt->fetch();
+        
+        if ($doc) {
+            // Delete physical file
+            if ($doc['file_path'] && file_exists($doc['file_path'])) {
+                unlink($doc['file_path']);
+            }
+            
+            // Delete from DB
+            $del = $pdo->prepare("DELETE FROM documents WHERE id = ?");
+            $del->execute([$doc_id]);
+            
+            logActivity("Menghapus dokumen: " . $doc['name'], "document_delete");
+            header("Location: index.php?page=documents&success=deleted");
+            exit;
+        }
     }
 }
 
@@ -110,6 +137,22 @@ function docSvgIcon($type, $color) {
     </div>
     <?php endif; ?>
 
+    <?php if (isset($_GET['success'])): ?>
+    <div class="mb-5 flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-3xl px-6 py-4 animate-in fade-in slide-in-from-top-4 duration-500">
+        <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <div>
+            <p class="text-emerald-900 text-sm font-black italic">
+                <?php 
+                if($_GET['success'] === 'uploaded') echo "Dokumen Berhasil Diunggah!"; 
+                if($_GET['success'] === 'deleted') echo "Dokumen Berhasil Dihapus!"; 
+                ?>
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-7">
 
         <!-- ===== DOCUMENT LIST ===== -->
@@ -170,29 +213,37 @@ function docSvgIcon($type, $color) {
                             </div>
                         </div>
                         <!-- Actions -->
-                        <?php if ($file_url): ?>
-                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="viewDocument('<?php echo htmlspecialchars($file_url); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars($doc['name']); ?>')"
+                        <div class="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button onclick="viewDocument('<?php echo htmlspecialchars($file_url ?? ''); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars($doc['name']); ?>')"
                                     title="Preview"
-                                    class="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
-                                    style="color:#6366f1;hover:background:#eef2ff">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:bg-indigo-50"
+                                    style="color:#6366f1">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                             </button>
-                            <a href="<?php echo htmlspecialchars($file_url); ?>" target="_blank" title="Buka di Tab Baru"
-                               class="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
-                               style="color:#0ea5e9">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                            </a>
+                            <?php if ($file_url): ?>
                             <a href="<?php echo htmlspecialchars($file_url); ?>" download title="Download"
-                               class="w-9 h-9 flex items-center justify-center rounded-xl transition-all"
+                               class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:bg-emerald-50"
                                style="color:#10b981">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             </a>
+                            <?php endif; ?>
+                            <button onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
+                                    title="Hapus"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:bg-rose-50"
+                                    style="color:#ef4444">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                            </button>
                         </div>
-                        <?php endif; ?>
                     </div>
                     <?php endforeach; ?>
                 </div>
+
+                <!-- Hidden Delete Form -->
+                <form id="deleteForm" method="POST" class="hidden">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    <input type="hidden" name="delete_doc" value="1">
+                    <input type="hidden" name="doc_id" id="deleteDocId">
+                </form>
                 <?php endif; ?>
             </div>
         </div>
@@ -350,8 +401,10 @@ function closeModal() {
     document.getElementById('documentViewer').innerHTML = '';
 }
 
-document.getElementById('viewModal').addEventListener('click', function(e) {
-    if (e.target === this) closeModal();
-});
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+function confirmDelete(id, name) {
+    if (confirm('Apakah Anda yakin ingin menghapus dokumen "' + name + '"? File akan dihapus permanen dari server.')) {
+        document.getElementById('deleteDocId').value = id;
+        document.getElementById('deleteForm').submit();
+    }
+}
 </script>
