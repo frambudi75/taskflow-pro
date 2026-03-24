@@ -26,7 +26,7 @@ $stmt->execute([$currentUser, $currentUser, $currentUser, $currentUser, $current
 $activeConversations = $stmt->fetchAll();
 
 // 2. Fetch ALL users for the "New Chat" modal search
-$stmt = $pdo->prepare("SELECT id, display_name, role FROM users WHERE id != ? ORDER BY display_name ASC");
+$stmt = $pdo->prepare("SELECT id, display_name, role, profile_photo FROM users WHERE id != ? ORDER BY display_name ASC");
 $stmt->execute([$currentUser]);
 $allUsers = $stmt->fetchAll();
 
