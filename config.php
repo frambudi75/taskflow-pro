@@ -246,4 +246,31 @@ function getSetting($key, $default = '') {
     return $val !== false ? $val : $default;
 }
 
+/**
+ * Send a notification via Telegram Bot API.
+ */
+function sendTelegramNotif($chat_id, $message) {
+    $token = getSetting('telegram_bot_token');
+    if (empty($token) || empty($chat_id)) return false;
+
+    $url = "https://api.telegram.org/bot{$token}/sendMessage";
+    $data = [
+        'chat_id' => $chat_id,
+        'text' => $message,
+        'parse_mode' => 'HTML'
+    ];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method'  => 'POST',
+            'content' => http_build_query($data),
+            'timeout' => 5
+        ]
+    ];
+    $context  = stream_context_create($options);
+    $result = @file_get_contents($url, false, $context);
+    return $result !== false;
+}
+
 ?>

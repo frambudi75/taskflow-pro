@@ -12,7 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
         try {
             $updates = [
                 'app_name' => $_POST['app_name'],
-                'allow_registration' => isset($_POST['allow_registration']) ? '1' : '0'
+                'allow_registration' => isset($_POST['allow_registration']) ? '1' : '0',
+                'telegram_bot_token' => $_POST['telegram_bot_token']
             ];
 
             $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
@@ -31,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
 
 $app_name = getSetting('app_name', 'TaskFlow Pro');
 $allow_reg = getSetting('allow_registration', '1') === '1';
+$tg_token = getSetting('telegram_bot_token', '');
 ?>
 
 <div class="p-5 md:p-8 max-w-3xl mx-auto">
@@ -66,16 +68,32 @@ $allow_reg = getSetting('allow_registration', '1') === '1';
                     <p class="mt-2 text-[11px] text-slate-400 px-1 italic">Nama ini akan muncul di sidebar dan tab browser.</p>
                 </div>
 
-                <!-- Registration Toggle -->
-                <div class="flex items-center justify-between p-5 bg-slate-50 dark:bg-slate-800/30 rounded-2xl border border-slate-100 dark:border-slate-800">
-                    <div>
-                        <h4 class="text-sm font-black text-slate-900 dark:text-white mb-1">Izinkan Registrasi</h4>
-                        <p class="text-[11px] text-slate-400 font-medium">Buka akses bagi pengguna baru untuk mendaftar akun.</p>
+                <!-- Telegram Bot Token -->
+                <div class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-2xl bg-sky-100 dark:bg-sky-900/30 flex items-center justify-center text-sky-600">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-black text-slate-900 dark:text-white">Telegram Integration</h4>
+                            <p class="text-[11px] text-slate-400 font-medium tracking-tight">Kirim notifikasi sistem langsung ke bot Telegram.</p>
+                        </div>
                     </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="checkbox" name="allow_registration" class="sr-only peer" <?php echo $allow_reg ? 'checked' : ''; ?>>
-                        <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Bot Token</label>
+                            <input type="password" name="telegram_bot_token" value="<?php echo htmlspecialchars($tg_token); ?>" 
+                                   placeholder="Contoh: 123456789:ABCDEF..."
+                                   class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none">
+                            <div class="mt-3 flex items-start gap-2 bg-sky-50/50 dark:bg-sky-900/10 p-3 rounded-xl border border-sky-100/50 dark:border-sky-800/50">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" class="mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                                <p class="text-[10px] text-sky-700 dark:text-sky-400 leading-normal">
+                                    Dapatkan token Anda dengan membuat bot di <a href="https://t.me/botfather" target="_blank" class="font-bold underline hover:text-sky-800">@BotFather</a>. Pastikan bot sudah di-<em>start</em> oleh user agar bisa menerima pesan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Footer Section -->

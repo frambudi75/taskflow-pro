@@ -8,7 +8,7 @@ if (!isLoggedIn()) {
 $user_id = $_SESSION['user_id'];
 $error = $success = '';
 
-$stmt = $pdo->prepare("SELECT email, display_name, profile_photo FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT email, display_name, profile_photo, telegram_chat_id FROM users WHERE id = ?");
 $stmt->execute([$user_id]);
 $user = $stmt->fetch();
 
@@ -30,6 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
     if (validateCSRF($_POST['csrf_token'])) {
         $display_name = trim($_POST['display_name']);
         $email        = trim($_POST['email']);
+        $telegram_chat_id = trim($_POST['telegram_chat_id']);
 
         if (empty($display_name) || empty($email)) {
             $error = 'Semua field harus diisi.';
@@ -65,8 +66,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
             }
 
             if (!$error) {
-                $stmt = $pdo->prepare("UPDATE users SET display_name = ?, email = ?, profile_photo = ? WHERE id = ?");
-                if ($stmt->execute([$display_name, $email, $profilePhotoName, $user_id])) {
+                $stmt = $pdo->prepare("UPDATE users SET display_name = ?, email = ?, profile_photo = ?, telegram_chat_id = ? WHERE id = ?");
+                if ($stmt->execute([$display_name, $email, $profilePhotoName, $telegram_chat_id, $user_id])) {
                     $_SESSION['display_name']  = $display_name;
                     $_SESSION['email']         = $email;
                     $_SESSION['profile_photo'] = $profilePhotoName;
@@ -74,6 +75,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
                     $user['display_name']  = $display_name;
                     $user['email']         = $email;
                     $user['profile_photo'] = $profilePhotoName;
+                    $user['telegram_chat_id'] = $telegram_chat_id;
                 } else {
                     $error = 'Gagal update profil.';
                 }
@@ -81,6 +83,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_profile'])) {
         }
     } else {
         $error = 'CSRF token tidak valid.';
+    }
+}
+
+// Telegram Test Notification
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['test_telegram'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $chat_id = $user['telegram_chat_id'] ?? '';
+        if (empty($chat_id)) {
+            $error = 'Atur Chat ID Anda terlebih dahulu.';
+        } else {
+            $msg = "<b>🚀 TaskFlow Pro</b>\n\nHalo <b>" . $user['display_name'] . "</b>!\nIni adalah pesan uji coba dari sistem TaskFlow. Koneksi Telegram Anda berhasil dikonfigurasi.";
+            if (sendTelegramNotif($chat_id, $msg)) {
+                $success = 'Pesan uji coba telah dikirim ke Telegram Anda!';
+            } else {
+                $error = 'Gagal mengirim pesan. Pastikan Bot Token sudah benar di Pengaturan Sistem dan Anda sudah menekan /start pada bot.';
+            }
+        }
     }
 }
 
@@ -249,12 +268,38 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
                         </div>
                     </div>
 
+                    <!-- Telegram Chat ID -->
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Telegram Chat ID</label>
+                            <a href="https://t.me/userinfobot" target="_blank" class="text-[9px] font-bold text-sky-500 hover:underline">Dapatkan ID Anda ↗</a>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
+                            </span>
+                            <input type="text" name="telegram_chat_id"
+                                   value="<?php echo htmlspecialchars($user['telegram_chat_id'] ?? ''); ?>"
+                                   placeholder="Contoh: 12345678"
+                                   class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none transition-all"
+                                   style="font-family:inherit">
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2">Untuk menerima notifikasi sistem di Telegram secara langsung.</p>
+                    </div>
                     <button type="submit"
                             class="w-full py-4 rounded-2xl font-bold text-white transition-all active:scale-95 flex items-center justify-center gap-2"
                             style="background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 8px 20px rgba(14,165,233,0.3)">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                         Simpan Perubahan
                     </button>
+                    
+                    <?php if (!empty($user['telegram_chat_id'])): ?>
+                    <button type="submit" name="test_telegram"
+                            class="w-full py-3 rounded-xl font-bold text-sky-600 border-2 border-sky-100 hover:bg-sky-50 transition-all active:scale-95 flex items-center justify-center gap-2 mt-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
+                        Test Notifikasi Telegram
+                    </button>
+                    <?php endif; ?>
                 </form>
             </div>
         </div>
