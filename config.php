@@ -46,6 +46,7 @@ function route($page) {
         'cache' => 'index.php?page=cache',
         'notif-harian' => 'notif_harian.php',
         'test-mail' => 'test_mail.php',
+        'chat' => 'index.php?page=chat',
         'logout' => 'index.php?logout=1'
     ];
     return baseUrl($map[$page] ?? "index.php?page=" . $page);

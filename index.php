@@ -215,6 +215,13 @@ if (isset($_GET['logout'])) {
                     Aktivitas
                 </a>
 
+                <a href="<?php echo route('chat'); ?>" class="nav-item <?php echo $page==='chat'?'active':''; ?>">
+                    <span class="nav-icon">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </span>
+                    Pesan
+                </a>
+
                 <div class="sidebar-divider"></div>
 
                 <!-- Account -->
@@ -305,6 +312,7 @@ if (isset($_GET['logout'])) {
             case 'documents': include 'pages/documents.php'; break;
             case 'projects': include 'pages/projects.php'; break;
             case 'activities': include 'pages/activities.php'; break;
+            case 'chat': include 'pages/chat.php'; break;
             case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
             case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
             case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
