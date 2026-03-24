@@ -1,7 +1,12 @@
 <?php
 require_once 'config.php';
 
-$to      = 'habib@omit.avi.id'; // Ganti dengan email tes kamu
+if (!isLoggedIn()) {
+    header('Location: auth');
+    exit;
+}
+
+$to      = $_SESSION['email'] ?? 'admin@taskflow.local';
 $subject = '📧 Test Notifikasi TaskFlow Pro';
 $message = "Halo! Ini adalah pesan tes dari sistem TaskFlow Pro untuk memverifikasi pengaturan email Anda.\n\n"
          . "Jika Anda menerima email ini, berarti konfigurasi pengiriman email sudah berjalan!";

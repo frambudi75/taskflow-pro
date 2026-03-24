@@ -1,5 +1,7 @@
 <?php
 // config.php
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 // Base URL and Routing Helper
 function baseUrl($path = '') {
     // Determine the base path (e.g., /taskflow/)
@@ -299,28 +301,58 @@ function sendTelegramNotif($chat_id, $message) {
 }
 
 /**
- * Send a notification via Email.
+ * Send a notification via Email using PHPMailer and stored SMTP settings.
  */
 function sendEmailNotif($to, $subject, $message) {
     if (empty($to)) return false;
-    
-    $from = getSetting('smtp_from', 'admin@taskflow.local');
-    $headers = "From: $from\r\n";
-    $headers .= "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
 
-    // Convert newlines to <br> for HTML email
-    $htmlMessage = nl2br($message);
-
-    // Note: On local XAMPP, mail() might not work without sendmail config.
-    // In production, this should ideally use PHPMailer with the stored SMTP settings.
-    $result = @mail($to, $subject, $htmlMessage, $headers);
-    
-    if (!$result) {
-        error_log("Email Error: Failed to send to $to");
+    // Load autoload if exists
+    $autoload = __DIR__ . '/vendor/autoload.php';
+    if (!file_exists($autoload)) {
+        error_log("Email Error: PHPMailer autoload not found. Falling back to mail().");
+        return @mail($to, $subject, nl2br($message));
     }
-    
-    return $result;
+    require_once $autoload;
+
+    $host    = getSetting('smtp_host');
+    $user    = getSetting('smtp_user');
+    $pass    = getSetting('smtp_pass');
+    $port    = getSetting('smtp_port', '587');
+    $from    = getSetting('smtp_from', 'admin@taskflow.local');
+
+    // If host is empty, fall back to mail()
+    if (empty($host)) {
+        $headers = "From: $from\r\nContent-Type: text/html; charset=UTF-8\r\n";
+        return @mail($to, $subject, nl2br($message), $headers);
+    }
+
+    $mail = new PHPMailer(true);
+
+    try {
+        // Server settings
+        $mail->isSMTP();
+        $mail->Host       = $host;
+        $mail->SMTPAuth   = !empty($user);
+        $mail->Username   = $user;
+        $mail->Password   = $pass;
+        $mail->SMTPSecure = ($port == '465') ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = $port;
+
+        // Recipients
+        $mail->setFrom($from, getSetting('app_name', 'TaskFlow Pro'));
+        $mail->addAddress($to);
+
+        // Content
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body    = nl2br($message);
+        $mail->AltBody = strip_tags($message);
+
+        return $mail->send();
+    } catch (Exception $e) {
+        error_log("PHPMailer Error: " . $mail->ErrorInfo);
+        return false;
+    }
 }
 
 ?>
