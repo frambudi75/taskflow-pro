@@ -7,13 +7,22 @@ $targetUser  = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
 
 // 1. Fetch CURRENT ACTIVE conversations (people you've chatted with)
 $stmt = $pdo->prepare("
-    SELECT DISTINCT u.id, u.display_name, u.role, u.profile_photo 
+    SELECT u.id, u.display_name, u.role, u.profile_photo,
+           (SELECT message FROM messages 
+            WHERE (sender_id = u.id AND receiver_id = ?) OR (sender_id = ? AND receiver_id = u.id)
+            ORDER BY created_at DESC LIMIT 1) as last_msg,
+           (SELECT created_at FROM messages 
+            WHERE (sender_id = u.id AND receiver_id = ?) OR (sender_id = ? AND receiver_id = u.id)
+            ORDER BY created_at DESC LIMIT 1) as last_time,
+           (SELECT COUNT(*) FROM messages WHERE sender_id = u.id AND receiver_id = ? AND is_read = 0) as unread_from_user
     FROM users u
-    JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id)
-    WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?
-    ORDER BY m.created_at DESC
+    WHERE u.id IN (
+        SELECT DISTINCT CASE WHEN sender_id = ? THEN receiver_id ELSE sender_id END
+        FROM messages WHERE sender_id = ? OR receiver_id = ?
+    )
+    ORDER BY last_time DESC
 ");
-$stmt->execute([$currentUser, $currentUser, $currentUser]);
+$stmt->execute([$currentUser, $currentUser, $currentUser, $currentUser, $currentUser, $currentUser, $currentUser, $currentUser]);
 $activeConversations = $stmt->fetchAll();
 
 // 2. Fetch ALL users for the "New Chat" modal search
@@ -59,7 +68,7 @@ if ($targetUser > 0) {
             <?php foreach ($activeConversations as $u): ?>
                 <a href="index.php?page=chat&user_id=<?php echo $u['id']; ?>" 
                    class="flex items-center gap-3 p-3 rounded-2xl transition-all <?php echo $targetUser === $u['id'] ? 'bg-indigo-600 shadow-lg shadow-indigo-600/20 text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'; ?>">
-                    <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold">
+                    <div class="w-12 h-12 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold">
                         <?php if($u['profile_photo']): ?>
                             <img src="uploads/avatars/<?php echo $u['profile_photo']; ?>" class="w-full h-full object-cover">
                         <?php else: ?>
@@ -67,8 +76,20 @@ if ($targetUser > 0) {
                         <?php endif; ?>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="text-sm font-bold truncate"><?php echo htmlspecialchars($u['display_name']); ?></div>
-                        <div class="text-[10px] opacity-60 font-medium uppercase tracking-tighter"><?php echo $u['role']; ?></div>
+                        <div class="flex items-center justify-between mb-0.5">
+                            <div class="text-[13px] font-black truncate"><?php echo htmlspecialchars($u['display_name']); ?></div>
+                            <div class="text-[9px] font-bold opacity-60"><?php echo date('H:i', strtotime($u['last_time'])); ?></div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <div class="text-[11px] opacity-60 truncate font-medium max-w-[120px]">
+                                <?php echo htmlspecialchars($u['last_msg']); ?>
+                            </div>
+                            <?php if ($u['unread_from_user'] > 0): ?>
+                                <span class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[9px] font-black shadow-lg shadow-emerald-500/20">
+                                    <?php echo $u['unread_from_user']; ?>
+                                </span>
+                            <?php endif; ?>
+                        </div>
                     </div>
                 </a>
             <?php endforeach; ?>
@@ -222,8 +243,14 @@ function fetchMessages() {
                                 <div class="p-4 rounded-3xl text-sm font-medium shadow-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-800 rounded-tl-none'}">
                                     ${msg.message}
                                 </div>
-                                <div class="mt-1.5 px-1 text-[9px] font-bold text-slate-400 uppercase tracking-tighter ${isMe ? 'text-right' : 'text-left'}">
-                                    ${msg.time} ${isMe ? (msg.is_read == 1 ? '· DIBACA' : '· TERKIRIM') : ''}
+                                <div class="mt-1.5 px-1 flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tighter ${isMe ? 'justify-end' : 'justify-start'}">
+                                    ${msg.time} 
+                                    ${isMe ? `
+                                        <span class="${msg.is_read == 1 ? 'text-sky-400' : 'text-slate-300'}">
+                                            ${msg.is_read == 1 ? 
+                                                `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/><polyline points="15 6 9 12 11 15"/></svg>` : 
+                                                `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>`}
+                                        </span>` : ''}
                                 </div>
                             </div>
                         </div>
