@@ -317,6 +317,7 @@ function sendEmailNotif($to, $subject, $message) {
     $pass    = getSetting('smtp_pass');
     $port    = getSetting('smtp_port', '587');
     $from    = getSetting('smtp_from', 'admin@taskflow.local');
+    $appName = getSetting('app_name', 'TaskFlow Pro');
 
     // If host is empty, fall back to mail()
     if (empty($host)) {
@@ -328,6 +329,8 @@ function sendEmailNotif($to, $subject, $message) {
 
     try {
         // Server settings
+        $mail->CharSet    = 'UTF-8';
+        $mail->Encoding   = 'base64';
         $mail->isSMTP();
         $mail->Host       = $host;
         $mail->SMTPAuth   = !empty($user);
@@ -337,13 +340,41 @@ function sendEmailNotif($to, $subject, $message) {
         $mail->Port       = $port;
 
         // Recipients
-        $mail->setFrom($from, getSetting('app_name', 'TaskFlow Pro'));
+        $mail->setFrom($from, $appName);
         $mail->addAddress($to);
 
         // Content
         $mail->isHTML(true);
         $mail->Subject = $subject;
-        $mail->Body    = nl2br($message);
+
+        // Premium HTML Template
+        $htmlBody = "
+        <html>
+        <body style='margin:0;padding:0;background-color:#f8fafc;font-family:sans-serif;'>
+            <div style='max-width:600px;margin:40px auto;background-color:#ffffff;border-radius:24px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,0.05);border:1px solid #e2e8f0;'>
+                <div style='background:linear-gradient(135deg,#0f172a 0%,#1e3a8a 100%);padding:40px;text-align:center;'>
+                    <h1 style='color:#ffffff;margin:0;font-size:24px;font-weight:900;letter-spacing:-0.5px;'>$appName</h1>
+                    <p style='color:#93c5fd;margin:10px 0 0 0;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1px;'>Sistem Notifikasi Pintar</p>
+                </div>
+                <div style='padding:40px;'>
+                    <div style='margin-bottom:30px;'>
+                        <h2 style='color:#0f172a;font-size:18px;font-weight:800;margin:0 0 15px 0;'>$subject</h2>
+                        <div style='height:2px;width:40px;background-color:#3b82f6;'></div>
+                    </div>
+                    <div style='color:#475569;font-size:15px;line-height:1.6;font-weight:400;'>
+                        " . nl2br($message) . "
+                    </div>
+                    <div style='margin-top:40px;padding-top:30px;border-top:1px solid #f1f5f9;text-align:center;'>
+                        <p style='color:#94a3b8;font-size:11px;font-weight:500;margin:0;'>Email ini dikirim otomatis oleh sistem TaskFlow Pro. Mohon tidak membalas email ini.</p>
+                        <p style='color:#94a3b8;font-size:11px;font-weight:500;margin:5px 0 0 0;'>&copy; 2026 " . $appName . ". Terus Produktif!</p>
+                    </div>
+                </div>
+            </div>
+        </body>
+        </html>
+        ";
+
+        $mail->Body    = $htmlBody;
         $mail->AltBody = strip_tags($message);
 
         return $mail->send();
