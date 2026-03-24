@@ -19,7 +19,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
                 'smtp_user'   => $_POST['smtp_user'] ?? '',
                 'smtp_pass'   => $_POST['smtp_pass'] ?? '',
                 'smtp_from'   => $_POST['smtp_from'] ?? '',
-                'notif_time'  => $_POST['notif_time'] ?? '08'
+                'notif_time'  => $_POST['notif_time'] ?? '08',
+                'app_url'     => $_POST['app_url'] ?? ''
             ];
 
             $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
@@ -74,6 +75,14 @@ $tg_token = getSetting('telegram_bot_token', '');
                     <input type="text" name="app_name" value="<?php echo htmlspecialchars($app_name); ?>" required
                            class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
                     <p class="mt-2 text-[11px] text-slate-400 px-1 italic">Nama ini akan muncul di sidebar dan tab browser.</p>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">URL Situs (Penting untuk Notifikasi)</label>
+                    <input type="url" name="app_url" value="<?php echo htmlspecialchars(getSetting('app_url')); ?>" 
+                           placeholder="Contoh: https://taskflow.overheat.my.id"
+                           class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
+                    <p class="mt-2 text-[11px] text-slate-400 px-1 italic font-medium">Gunakan protokol lengkap (seperti <b>https://</b>) agar link di email & telegram bisa diklik.</p>
                 </div>
 
                 <!-- Telegram Config -->

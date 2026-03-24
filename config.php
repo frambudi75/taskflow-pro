@@ -5,9 +5,27 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 // Base URL and Routing Helper
 function baseUrl($path = '') {
-    // Determine the base path (e.g., /taskflow/)
+    // 1. Try to get from database settings first
+    $appUrl = getSetting('app_url');
+    if (!empty($appUrl)) {
+        return rtrim($appUrl, '/') . '/' . ltrim($path, '/');
+    }
+
+    // 2. Fallback to auto-detection (Works for Web, might fail for CLI)
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    
+    // Determine the base folder (e.g., /taskflow/)
     $script_dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-    return $script_dir . '/' . ltrim($path, '/');
+    
+    // On CLI, SCRIPT_NAME might be absolute filesystem path. Try to cleanup.
+    if (php_sapi_name() === 'cli' || empty($_SERVER['HTTP_HOST'])) {
+        // If it's a server path, we can't reliably guess the URL without a setting.
+        // We'll just return the relative path as a fallback.
+        return '/' . ltrim($path, '/');
+    }
+    
+    return $protocol . $host . $script_dir . '/' . ltrim($path, '/');
 }
 
 function route($page) {
