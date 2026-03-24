@@ -18,6 +18,8 @@ function route($page) {
         'projects' => 'kanban',
         'activities' => 'activities',
         'settings' => 'settings',
+        'profile' => 'profile',
+        'reset-password' => 'reset-password',
         'logout' => 'logout'
     ];
     return baseUrl($map[$page] ?? $page);

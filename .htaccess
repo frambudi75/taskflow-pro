@@ -18,6 +18,8 @@ Options -Indexes
     RewriteRule ^kanban$ index.php?page=projects [L,QSA]
     RewriteRule ^activities$ index.php?page=activities [L,QSA]
     RewriteRule ^settings$ index.php?page=settings [L,QSA]
+    RewriteRule ^profile$ index.php?page=profile [L,QSA]
+    RewriteRule ^reset-password$ index.php?page=reset-password [L,QSA]
     RewriteRule ^logout$ index.php?logout=1 [L,QSA]
 
     # "Encrypted" style link example
