@@ -388,11 +388,21 @@ function updateChatBadge() {
         .then(data => {
             const badge = document.getElementById('unreadChatBadge');
             if (badge) {
-                // Play sound if new message arrives
+                // Play sound and show Desktop notification if new message arrives
                 if (data.unread_count > lastUnreadCount) {
+                    // Sound
                     const sound = document.getElementById('notifSound');
-                    if (sound) {
-                        sound.play().catch(e => console.log('Audio play blocked:', e));
+                    if (sound) sound.play().catch(e => console.log('Audio play blocked:', e));
+
+                    // Desktop Notification
+                    if (Notification.permission === "granted") {
+                        new Notification("TaskFlow Pro", {
+                            body: "Pesan baru masuk! Klik untuk baca.",
+                            icon: "favicon.ico"
+                        }).onclick = function() {
+                            window.focus();
+                            location.href = 'index.php?page=chat';
+                        };
                     }
                 }
                 lastUnreadCount = data.unread_count;
@@ -405,6 +415,11 @@ function updateChatBadge() {
                 }
             }
         }).catch(e => console.log('Chat badge error:', e));
+}
+
+// Request Desktop Notification Permission
+if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+    Notification.requestPermission();
 }
 setInterval(updateChatBadge, 10000); 
 updateChatBadge(); 

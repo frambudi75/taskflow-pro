@@ -190,8 +190,8 @@ if ($targetUser > 0) {
         </div>
         <div class="max-h-[350px] overflow-y-auto p-4 space-y-2 custom-scrollbar" id="userSearchList">
             <?php foreach ($allUsers as $u): ?>
-                <a href="index.php?page=chat&user_id=<?php echo $u['id']; ?>" 
-                   class="user-row flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
+                <div onclick="handleSelection(<?php echo $u['id']; ?>)" 
+                   class="user-row flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group cursor-pointer">
                     <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0 overflow-hidden font-black group-hover:bg-indigo-600 transition-all">
                         <?php if($u['profile_photo']): ?>
                             <img src="uploads/avatars/<?php echo $u['profile_photo']; ?>" class="w-full h-full object-cover">
@@ -203,7 +203,7 @@ if ($targetUser > 0) {
                         <div class="text-[13px] font-black text-slate-900 dark:text-white search-name"><?php echo htmlspecialchars($u['display_name']); ?></div>
                         <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"><?php echo $u['role']; ?></div>
                     </div>
-                </a>
+                </div>
             <?php endforeach; ?>
         </div>
         <div class="p-6 bg-slate-50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800 text-center">
@@ -223,8 +223,46 @@ function openNewChatModal() {
     document.getElementById('userSearchInput').focus();
 }
 
+let forwardData = null;
+
+function forwardMessage(id, messageBase64, filePath) {
+    forwardData = {
+        message: atob(messageBase64),
+        file_path: filePath
+    };
+    document.querySelector('#newChatModal h3').innerText = 'Teruskan Pesan Ke...';
+    openNewChatModal();
+}
+
+function handleSelection(targetId) {
+    if (forwardData) {
+        // DO FORWARD
+        const fd = new FormData();
+        fd.append('action', 'send');
+        fd.append('receiver_id', targetId);
+        fd.append('message', forwardData.message);
+        if (forwardData.file_path) {
+            // Special handling for forwarded files: we just send the file_path
+            // But api_chat.php expects 'attachment' OR existing 'message'.
+            // Let's modify api_chat.php briefly OR just send it as message if simple.
+            // Better: Add a 'forwarded_file' param to api_chat.php
+            fd.append('forwarded_file', forwardData.file_path);
+        }
+
+        fetch('api_chat.php', { method: 'POST', body: fd }).then(() => {
+            alert('Pesan berhasil diteruskan!');
+            closeNewChatModal();
+            location.href = 'index.php?page=chat&user_id=' + targetId;
+        });
+    } else {
+        location.href = 'index.php?page=chat&user_id=' + targetId;
+    }
+}
+
 function closeNewChatModal() {
     document.getElementById('newChatModal').classList.add('hidden');
+    document.querySelector('#newChatModal h3').innerText = 'Mulai Chat Baru';
+    forwardData = null;
 }
 
 function filterUsers() {
@@ -233,6 +271,14 @@ function filterUsers() {
     rows.forEach(row => {
         const name = row.querySelector('.search-name').innerText.toLowerCase();
         row.style.display = name.includes(q) ? '' : 'none';
+    });
+}
+
+function linkify(text) {
+    if (!text) return "";
+    const urlRegex = /(https?:\/\/[^\s]+)/g;
+    return text.replace(urlRegex, function(url) {
+        return `<a href="${url}" target="_blank" class="underline decoration-2 underline-offset-2 hover:text-white/80 transition-all font-black text-indigo-400 dark:text-sky-400">${url}</a>`;
     });
 }
 
@@ -269,13 +315,21 @@ function fetchMessages() {
 
                     html += `
                         <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
-                            <div class="max-w-[75%] md:max-w-[60%] relative">
-                                ${isMe ? `<button onclick="deleteMessage(${msg.id})" class="absolute -left-8 top-2 p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
+                            <div class="max-w-[75%] md:max-w-[60%] relative flex items-start gap-2 ${isMe ? 'flex-row-reverse' : 'flex-row'}">
                                 <div class="p-4 rounded-3xl text-sm font-medium shadow-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-800 rounded-tl-none'}">
                                     ${attachmentHtml}
-                                    ${msg.message ? `<div class="${attachmentHtml ? 'mt-2' : ''}">${msg.message}</div>` : ''}
+                                    ${msg.message ? `<div class="${attachmentHtml ? 'mt-2' : ''}">${linkify(msg.message)}</div>` : ''}
                                 </div>
-                                <div class="mt-1.5 px-1 flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tighter ${isMe ? 'justify-end' : 'justify-start'}">
+                                
+                                <!-- Action Buttons (Hover) -->
+                                <div class="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    ${isMe ? `<button onclick="deleteMessage(${msg.id})" class="p-1.5 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all" title="Hapus"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
+                                    <button onclick="forwardMessage('${msg.id}', '${btoa(msg.message || '')}', '${msg.file_path || ''}')" class="p-1.5 rounded-lg hover:bg-sky-50 text-slate-300 hover:text-sky-500 transition-all" title="Teruskan">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="15 3 21 3 21 9"/><path d="M18 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h5"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                                    </button>
+                                </div>
+                                
+                                <div class="absolute -bottom-5 ${isMe ? 'right-1' : 'left-5'} flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tighter">
                                     ${msg.time} 
                                     ${isMe ? `
                                         <span class="${msg.is_read == 1 ? 'text-sky-400' : 'text-slate-300'}">

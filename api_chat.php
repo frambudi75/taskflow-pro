@@ -26,6 +26,8 @@ if ($action === 'send') {
         if (move_uploaded_file($_FILES['attachment']['tmp_name'], $targetFile)) {
             $filePath = $fileName;
         }
+    } elseif (!empty($_POST['forwarded_file'])) {
+        $filePath = $_POST['forwarded_file'];
     }
     
     if ($receiverId > 0 && (!empty($message) || $filePath)) {
