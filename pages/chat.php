@@ -5,8 +5,19 @@ if (!isLoggedIn()) exit;
 $currentUser = $_SESSION['user_id'];
 $targetUser  = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
 
-// Fetch all users except self
-$stmt = $pdo->prepare("SELECT id, display_name, role, profile_photo FROM users WHERE id != ? ORDER BY display_name ASC");
+// 1. Fetch CURRENT ACTIVE conversations (people you've chatted with)
+$stmt = $pdo->prepare("
+    SELECT DISTINCT u.id, u.display_name, u.role, u.profile_photo 
+    FROM users u
+    JOIN messages m ON (u.id = m.sender_id OR u.id = m.receiver_id)
+    WHERE (m.sender_id = ? OR m.receiver_id = ?) AND u.id != ?
+    ORDER BY m.created_at DESC
+");
+$stmt->execute([$currentUser, $currentUser, $currentUser]);
+$activeConversations = $stmt->fetchAll();
+
+// 2. Fetch ALL users for the "New Chat" modal search
+$stmt = $pdo->prepare("SELECT id, display_name, role FROM users WHERE id != ? ORDER BY display_name ASC");
 $stmt->execute([$currentUser]);
 $allUsers = $stmt->fetchAll();
 
@@ -28,13 +39,24 @@ if ($targetUser > 0) {
     
     <!-- User List (Sidebar) -->
     <div class="w-full md:w-80 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-800/10">
-        <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-            <h3 class="text-lg font-black text-slate-900 dark:text-white mb-1">Pesan</h3>
-            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kontak Internal</p>
+        <div class="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-black text-slate-900 dark:text-white mb-1">Pesan</h3>
+                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kontak Aktif</p>
+            </div>
+            <button onclick="openNewChatModal()" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-95" title="Mulai Chat Baru">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
         </div>
         
         <div class="flex-1 overflow-y-auto custom-scrollbar p-3 space-y-1">
-            <?php foreach ($allUsers as $u): ?>
+            <?php if (empty($activeConversations)): ?>
+                <div class="text-center py-10 px-4">
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-relaxed">Belum ada obrolan aktif. Klik (+) untuk memulai.</p>
+                </div>
+            <?php endif; ?>
+            
+            <?php foreach ($activeConversations as $u): ?>
                 <a href="index.php?page=chat&user_id=<?php echo $u['id']; ?>" 
                    class="flex items-center gap-3 p-3 rounded-2xl transition-all <?php echo $targetUser === $u['id'] ? 'bg-indigo-600 shadow-lg shadow-indigo-600/20 text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'; ?>">
                     <div class="w-10 h-10 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold">
@@ -104,11 +126,64 @@ if ($targetUser > 0) {
     </div>
 </div>
 
+<!-- New Chat Modal -->
+<div id="newChatModal" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm" onclick="closeNewChatModal()"></div>
+    <div class="relative bg-white dark:bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl border border-slate-100 dark:border-slate-800 overflow-hidden scale-100 transition-all duration-300">
+        <div class="p-8 border-b border-slate-100 dark:border-slate-800">
+            <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2">Mulai Chat Baru</h3>
+            <div class="relative mt-4">
+                <input type="text" id="userSearchInput" onkeyup="filterUsers()" 
+                       placeholder="Cari nama kolega..." 
+                       class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all pl-12">
+                <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+            </div>
+        </div>
+        <div class="max-h-[350px] overflow-y-auto p-4 space-y-2 custom-scrollbar" id="userSearchList">
+            <?php foreach ($allUsers as $u): ?>
+                <a href="index.php?page=chat&user_id=<?php echo $u['id']; ?>" 
+                   class="user-row flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 flex items-center justify-center font-black group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                        <?php echo strtoupper(substr($u['display_name'], 0, 1)); ?>
+                    </div>
+                    <div class="flex-1">
+                        <div class="text-[13px] font-black text-slate-900 dark:text-white search-name"><?php echo htmlspecialchars($u['display_name']); ?></div>
+                        <div class="text-[10px] text-slate-400 font-bold uppercase tracking-widest"><?php echo $u['role']; ?></div>
+                    </div>
+                </a>
+            <?php endforeach; ?>
+        </div>
+        <div class="p-6 bg-slate-50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800 text-center">
+            <button onclick="closeNewChatModal()" class="text-[11px] font-black text-slate-400 uppercase tracking-widest hover:text-slate-600 dark:hover:text-slate-200 transition-all">TUTUP</button>
+        </div>
+    </div>
+</div>
+
 <script>
 const targetId = <?php echo $targetUser; ?>;
 const chatMessages = document.getElementById('chatMessages');
 const chatForm = document.getElementById('chatForm');
 const messageInput = document.getElementById('messageInput');
+
+function openNewChatModal() {
+    document.getElementById('newChatModal').classList.remove('hidden');
+    document.getElementById('userSearchInput').focus();
+}
+
+function closeNewChatModal() {
+    document.getElementById('newChatModal').classList.add('hidden');
+}
+
+function filterUsers() {
+    const q = document.getElementById('userSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('.user-row');
+    rows.forEach(row => {
+        const name = row.querySelector('.search-name').innerText.toLowerCase();
+        row.style.display = name.includes(q) ? '' : 'none';
+    });
+}
 
 function fetchMessages() {
     if (targetId === 0) return;
