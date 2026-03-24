@@ -42,5 +42,15 @@ if ($action === 'send') {
 } elseif ($action === 'count_unread') {
     $count = countUnreadMessages($currentUser);
     echo json_encode(['unread_count' => $count]);
+} elseif ($action === 'delete_msg') {
+    $msgId = (int)$_POST['message_id'];
+    $stmt = $pdo->prepare("DELETE FROM messages WHERE id = ? AND sender_id = ?");
+    $stmt->execute([$msgId, $currentUser]);
+    echo json_encode(['status' => 'success']);
+} elseif ($action === 'delete_all') {
+    $targetId = (int)$_POST['user_id'];
+    $stmt = $pdo->prepare("DELETE FROM messages WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)");
+    $stmt->execute([$currentUser, $targetId, $targetId, $currentUser]);
+    echo json_encode(['status' => 'success']);
 }
 ?>

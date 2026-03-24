@@ -92,6 +92,14 @@ if ($targetUser > 0) {
                         </div>
                     </div>
                 </div>
+                <div class="flex items-center gap-3">
+                    <button onclick="clearChat()" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all active:scale-90" title="Bersihkan Riwayat Chat">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                    <a href="index.php?page=chat" class="md:hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </a>
+                </div>
             </div>
 
             <!-- Messages Area -->
@@ -200,8 +208,9 @@ function fetchMessages() {
                 data.forEach(msg => {
                     const isMe = msg.sender_id == <?php echo $currentUser; ?>;
                     html += `
-                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'}">
-                            <div class="max-w-[75%] md:max-w-[60%]">
+                        <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
+                            <div class="max-w-[75%] md:max-w-[60%] relative">
+                                ${isMe ? `<button onclick="deleteMessage(${msg.id})" class="absolute -left-8 top-2 p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
                                 <div class="p-4 rounded-3xl text-sm font-medium shadow-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-800 rounded-tl-none'}">
                                     ${msg.message}
                                 </div>
@@ -219,6 +228,24 @@ function fetchMessages() {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }
         });
+}
+
+function deleteMessage(id) {
+    if (!confirm('Hapus pesan ini?')) return;
+    const fd = new FormData();
+    fd.append('action', 'delete_msg');
+    fd.append('message_id', id);
+    fetch('api_chat.php', { method: 'POST', body: fd }).then(() => fetchMessages());
+}
+
+function clearChat() {
+    if (!confirm('Bersihkan semua riwayat chat dengan user ini? Tindakan ini tidak bisa dibatalkan.')) return;
+    const fd = new FormData();
+    fd.append('action', 'delete_all');
+    fd.append('user_id', targetId);
+    fetch('api_chat.php', { method: 'POST', body: fd }).then(() => {
+        location.href = 'index.php?page=chat';
+    });
 }
 
 if (chatForm) {
