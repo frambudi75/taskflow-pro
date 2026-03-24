@@ -1,57 +1,70 @@
-# 🚀 TaskFlow Pro - Installation Guide
+# 🚀 Panduan Instalasi – TaskFlow Pro (Professional Edition)
 
-Follow these steps to set up TaskFlow Pro on your local machine or server.
-
-## 📋 Prerequisites
-- **Web Server**: Apache (XAMPP, WAMP, or Laragon recommended)
-- **PHP**: Version 7.4 or higher
-- **Database**: MySQL / MariaDB
-- **Browser**: Modern browser (Chrome, Firefox, Edge, Safari)
-
-## 🛠️ Step-by-Step Setup
-
-### 1. Clone or Extract
-Place the `taskflow` folder into your web server's root directory:
-- **XAMPP**: `C:\xampp\htdocs\taskflow`
-- **Linux**: `/var/www/html/taskflow`
-
-### 2. Database Configuration
-1. Open **phpMyAdmin** (`http://localhost/phpmyadmin`).
-2. Create a new database named `taskflow`.
-3. Import the database schema:
-   - Click the **Import** tab.
-   - Choose the `database.sql` file from the project root.
-   - Click **Go**.
-
-### 3. Application Settings
-Open `config.php` in your text editor and update the database credentials if necessary:
-```php
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'taskflow');
-define('DB_USER', 'root');
-define('DB_PASS', '');
-```
-
-### 4. Run the Application
-Open your browser and navigate to:
-`http://localhost/taskflow`
+TaskFlow Pro dirancang untuk kemudahan satu klik, namun beberapa konfigurasi sistem tambahan diperlukan agar fitur premium berjalan sempurna.
 
 ---
 
-## 🐳 Docker Setup (Recommended)
-If you have **Docker** and **Docker Compose** installed, you can set up the entire environment with a single command:
-
-1. Open your terminal in the project root.
-2. Run:
-   ```bash
-   docker-compose up -d --build
-   ```
-3. The application will be available at:
-   `http://localhost:8080`
-
-**Note**: The database will be automatically created and imported on the first run.
+## 📋 Prasyarat Sistem
+-   **PHP**: 8.0 atau lebih tinggi (Direkomendasikan 8.1+)
+-   **Ext PHP**: `pdo_mysql`, `curl`, `json`, `mbstring`, `fileinfo`
+-   **Database**: MySQL 5.7+ atau MariaDB 10.3+
+-   **SMTP Server**: Dibutuhkan untuk fitur notifikasi email (Host, Port, User, Pass).
 
 ---
-**Default Admin Credentials:**
-- **Email**: `habib@omit.avi.id`
-- **Password**: `admin123` (Please change this immediately after login)
+
+## 🛠️ Langkah-langkah Instalasi
+
+### 1. Database & Config
+1.  Buat database baru di MySQL (misalnya `taskflow_db`).
+2.  Impor file `database.sql` (jika tersedia) atau gunakan file skema terbaru.
+3.  Buka `config.php`:
+    ```php
+    define('DB_HOST', 'localhost');
+    define('DB_NAME', 'nama_database_anda');
+    define('DB_USER', 'user_anda');
+    define('DB_PASS', 'password_anda');
+    ```
+4.  Pastikan `baseUrl()` sudah mengarah ke root atau subfolder yang benar.
+
+### 2. Notifikasi Telegram (Bot)
+1.  Buka Telegram dan cari **@BotFather**.
+2.  Gunakan `/newbot` untuk membuat bot baru dan dapatkan **Token API**.
+3.  Setelah bot dibuat, cari bot Anda di Telegram dan tekan **START**.
+4.  Masukkan token ini ke menu **Pengaturan (Settings)** di dashboard TaskFlow Pro.
+
+### 3. Notifikasi Email (SMTP)
+1.  Pastikan Anda memiliki detail SMTP dari layanan email (seperti Gmail, Titan Mail, atau Corporate Email).
+2.  Konfigurasikan di menu **Pengaturan**:
+    *   **SMTP Host**: `smtp.domainanda.com`
+    *   **SMTP Port**: `465` (SSL) atau `587` (TLS)
+    *   **SMTP User/Pass**: Email & Password asli Anda.
+3.  Klik tombol **"Test Kirim Email Sekarang"** untuk memverifikasi.
+
+---
+
+## ⚙️ Integrasi aaPanel & Cron Job (Sangat Penting)
+
+Agar notifikasi harian terkirim otomatis, Anda **WAJIB** mendaftarkan script pengiriman ke sistem Cron.
+
+### Menambahkan Cron Job di aaPanel:
+1.  Masuk ke menu **Cron** di panel aaPanel Anda.
+2.  **Type of Task**: Shell Script.
+3.  **Name of Task**: `TaskFlow Daily Notif`.
+4.  **Execution cycle**: **Hour** (Setiap 1 Jam).
+5.  **Minute**: `00` (Tepat di menit ke-0).
+6.  **Script content**:
+    ```bash
+    php /www/wwwroot/domain-anda/notif_harian.php
+    ```
+    *(Ganti `/www/wwwroot/domain-anda/` dengan path folder project Anda yang sebenarnya).*
+
+---
+
+## 🔒 Keamanan (Security)
+-   **Folder Uploads**: Pastikan folder `/uploads/` dan subfoldernya memiliki izin tulis (`chmod 755`).
+-   **File Config**: Jangan membagikan file `config.php` ke siapa pun.
+-   **SSL**: Sangat direkomendasikan menjalankan TaskFlow Pro menggunakan HTTPS (SSL) melalui fitur One-Click SSL di aaPanel.
+
+---
+
+© 2026 **TaskFlow Pro**. Dikembangkan oleh **Habib Frambudi**.
