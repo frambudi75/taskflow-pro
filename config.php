@@ -10,26 +10,24 @@ function baseUrl($path = '') {
 }
 
 function route($page) {
-    // Map pages to clean URLs defined in .htaccess
+    // Map pages to standard PHP URLs for broad compatibility
     $map = [
-        'login' => 'auth',
-        'dashboard' => 'dashboard',
-        'calendar' => 'calendar',
-        'notes' => 'notes',
-        'documents' => 'dokumen',
-        'projects' => 'kanban',
-        'activities' => 'activities',
-        'settings' => 'settings',
-        'profile' => 'profile',
-        'reset-password' => 'reset-password',
-        'admin' => 'pengguna',
-        'backup' => 'backup',
-        'cache' => 'cache',
-        'notif-harian' => 'notif-harian',
-        'test-mail' => 'test-mail',
-        'logout' => 'logout'
+        'login' => 'login.php',
+        'dashboard' => 'index.php?page=dashboard',
+        'calendar' => 'index.php?page=calendar',
+        'notes' => 'index.php?page=notes',
+        'documents' => 'index.php?page=documents',
+        'projects' => 'index.php?page=projects',
+        'activities' => 'index.php?page=activities',
+        'settings' => 'index.php?page=settings',
+        'profile' => 'index.php?page=profile',
+        'reset-password' => 'index.php?page=reset-password',
+        'admin' => 'index.php?page=admin',
+        'backup' => 'index.php?page=backup',
+        'cache' => 'index.php?page=cache',
+        'logout' => 'index.php?logout=1'
     ];
-    return baseUrl($map[$page] ?? $page);
+    return baseUrl($map[$page] ?? "index.php?page=" . $page);
 }
 
 // Database Configuration
