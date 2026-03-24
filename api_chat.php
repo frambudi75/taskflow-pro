@@ -39,5 +39,8 @@ if ($action === 'send') {
     $messages = $stmt->fetchAll();
     
     echo json_encode($messages);
+} elseif ($action === 'count_unread') {
+    $count = countUnreadMessages($currentUser);
+    echo json_encode(['unread_count' => $count]);
 }
 ?>

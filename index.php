@@ -219,7 +219,15 @@ if (isset($_GET['logout'])) {
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </span>
-                    Pesan
+                    <span class="flex-1">Pesan</span>
+                    <?php 
+                        $unreadMsg = countUnreadMessages($user_id);
+                        $badgeStyle = $unreadMsg > 0 ? '' : 'display:none';
+                    ?>
+                    <span id="unreadChatBadge" style="<?php echo $badgeStyle; ?>" 
+                          class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-[#1e293b]">
+                        <?php echo $unreadMsg; ?>
+                    </span>
                 </a>
 
                 <div class="sidebar-divider"></div>
@@ -366,10 +374,23 @@ document.querySelectorAll('#sidebar .nav-item').forEach(function(el) {
         if (window.innerWidth < 768) closeSidebar();
     });
 });
-// Auto-close on resize to desktop
-window.addEventListener('resize', function() {
-    if (window.innerWidth >= 768) closeSidebar();
-});
+function updateChatBadge() {
+    fetch('api_chat.php?action=count_unread')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.getElementById('unreadChatBadge');
+            if (badge) {
+                if (data.unread_count > 0) {
+                    badge.innerText = data.unread_count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }).catch(e => console.log('Chat badge error:', e));
+}
+setInterval(updateChatBadge, 10000); // Check every 10 seconds
+updateChatBadge(); // Initial check
 </script>
 </body>
 </html>
