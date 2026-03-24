@@ -18,7 +18,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
                 'smtp_port'   => $_POST['smtp_port'] ?? '587',
                 'smtp_user'   => $_POST['smtp_user'] ?? '',
                 'smtp_pass'   => $_POST['smtp_pass'] ?? '',
-                'smtp_from'   => $_POST['smtp_from'] ?? ''
+                'smtp_from'   => $_POST['smtp_from'] ?? '',
+                'notif_time'  => $_POST['notif_time'] ?? '08'
             ];
 
             $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
@@ -93,13 +94,35 @@ $tg_token = getSetting('telegram_bot_token', '');
                                 <input type="password" name="telegram_bot_token" value="<?php echo htmlspecialchars($tg_token); ?>" 
                                        placeholder="Contoh: 123456789:ABCDEF..."
                                        class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none">
-                                <div class="mt-3 flex items-start gap-2 bg-sky-50/50 dark:bg-sky-900/10 p-3 rounded-xl border border-sky-100/50 dark:border-sky-800/50">
+                            </div>
+
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Jadwal Pengiriman (Jam)</label>
+                                <select name="notif_time" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none appearance-none">
+                                    <?php 
+                                    $currentTime = getSetting('notif_time', '08');
+                                    for ($i = 0; $i < 24; $i++): 
+                                        $h = str_pad($i, 2, '0', STR_PAD_LEFT);
+                                    ?>
+                                        <option value="<?php echo $h; ?>" <?php echo $currentTime == $h ? 'selected' : ''; ?>>
+                                            Pukul <?php echo $h; ?>:00 WIB
+                                        </option>
+                                    <?php endfor; ?>
+                                </select>
+                                <div class="mt-3 flex items-start gap-2 bg-amber-50/50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100/50 dark:border-amber-800/50">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" class="mt-0.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                                    <p class="text-[10px] text-amber-700 dark:text-amber-400 leading-normal">
+                                        Pesan akan dikirim otomatis setiap hari pada jam yang dipilih. Pastikan Cron Job di aaPanel sudah aktif.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="mt-3 flex items-start gap-2 bg-sky-50/50 dark:bg-sky-900/10 p-3 rounded-xl border border-sky-100/50 dark:border-sky-800/50">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" class="mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
                                     <p class="text-[10px] text-sky-700 dark:text-sky-400 leading-normal">
                                         Dapatkan token Anda dengan membuat bot di <a href="https://t.me/botfather" target="_blank" class="font-bold underline hover:text-sky-800">@BotFather</a>. Pastikan bot sudah di-<em>start</em> oleh user agar bisa menerima pesan.
                                     </p>
                                 </div>
-                            </div>
                         </div>
                     </div>
 

@@ -1,13 +1,21 @@
 <?php
 require_once 'config.php';
 
-$isTest = isset($_GET['test']) && $_GET['test'] == '1';
+// Logic: Only run on working days (Mon-Fri), or if test mode is on
+$isTest = isset($_GET['test']);
 $dayOfWeek = date('N'); // 1 (Mon) to 7 (Sun)
-$isWorkingDay = ($dayOfWeek >= 1 && $dayOfWeek <= 5);
+$currentHour = date('H');
+$targetHour = getSetting('notif_time', '08'); // Assuming getSetting function is available
 
-if (!$isWorkingDay && !$isTest) {
-    echo "Hari ini bukan hari kerja. Gunakan ?test=1 untuk memaksa pengiriman.\n";
-    exit;
+if (!$isTest) {
+    // 1. Check if it's a working day
+    if ($dayOfWeek > 5) { // 6 = Saturday, 7 = Sunday
+        exit("Hari libur. Notifikasi tidak dikirim.\n");
+    }
+    // 2. Check if it's the scheduled hour
+    if ($currentHour !== $targetHour) {
+        exit("Bukan jadwal pengiriman (Jadwal: $targetHour:00, Sekarang: $currentHour:00). Notifikasi dilewati.\n");
+    }
 }
 
 $today = date('Y-m-d');
