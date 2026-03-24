@@ -25,6 +25,8 @@ function route($page) {
         'admin' => 'index.php?page=admin',
         'backup' => 'index.php?page=backup',
         'cache' => 'index.php?page=cache',
+        'notif-harian' => 'notif_harian.php',
+        'test-mail' => 'test_mail.php',
         'logout' => 'index.php?logout=1'
     ];
     return baseUrl($map[$page] ?? "index.php?page=" . $page);
