@@ -20,7 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_settings'])) {
                 'smtp_pass'   => $_POST['smtp_pass'] ?? '',
                 'smtp_from'   => $_POST['smtp_from'] ?? '',
                 'notif_time'  => $_POST['notif_time'] ?? '08',
-                'app_url'     => $_POST['app_url'] ?? ''
+                'app_url'     => $_POST['app_url'] ?? '',
+                'enable_chat' => isset($_POST['enable_chat']) ? '1' : '0'
             ];
 
             $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
@@ -83,6 +84,25 @@ $tg_token = getSetting('telegram_bot_token', '');
                            placeholder="Contoh: https://taskflow.overheat.my.id"
                            class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
                     <p class="mt-2 text-[11px] text-slate-400 px-1 italic font-medium">Gunakan protokol lengkap (seperti <b>https://</b>) agar link di email & telegram bisa diklik.</p>
+                </div>
+
+                <!-- Feature Toggle -->
+                <div class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.8.9L22 4l-2 5z"/></svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Fitur Chat Internal</h4>
+                                <p class="text-[11px] text-slate-400 font-medium tracking-tight">Aktifkan atau nonaktifkan fitur pesan antar user.</p>
+                            </div>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" name="enable_chat" class="sr-only peer" <?php echo getSetting('enable_chat', '1') === '1' ? 'checked' : ''; ?>>
+                            <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 rounded-full"></div>
+                        </label>
+                    </div>
                 </div>
 
                 <!-- Telegram Config -->

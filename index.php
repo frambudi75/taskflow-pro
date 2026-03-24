@@ -215,6 +215,7 @@ if (isset($_GET['logout'])) {
                     Aktivitas
                 </a>
 
+                <?php if (getSetting('enable_chat', '1') === '1'): ?>
                 <a href="<?php echo route('chat'); ?>" class="nav-item <?php echo $page==='chat'?'active':''; ?>">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -229,6 +230,7 @@ if (isset($_GET['logout'])) {
                         <?php echo $unreadMsg; ?>
                     </span>
                 </a>
+                <?php endif; ?>
 
                 <div class="sidebar-divider"></div>
 
@@ -380,6 +382,7 @@ document.querySelectorAll('#sidebar .nav-item').forEach(function(el) {
 </audio>
 
 <script>
+<?php if (getSetting('enable_chat', '1') === '1'): ?>
 let lastUnreadCount = <?php echo countUnreadMessages($user_id); ?>;
 
 function updateChatBadge() {
@@ -423,6 +426,7 @@ if (Notification.permission !== "granted" && Notification.permission !== "denied
 }
 setInterval(updateChatBadge, 3000); 
 updateChatBadge(); 
+<?php endif; ?>
 </script>
 </body>
 </html>
