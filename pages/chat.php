@@ -29,7 +29,7 @@ if ($targetUser === 0 && !empty($allUsers)) {
 // Fetch target user info
 $targetInfo = null;
 if ($targetUser > 0) {
-    $stmt = $pdo->prepare("SELECT display_name, role FROM users WHERE id = ?");
+    $stmt = $pdo->prepare("SELECT display_name, role, profile_photo FROM users WHERE id = ?");
     $stmt->execute([$targetUser]);
     $targetInfo = $stmt->fetch();
 }
@@ -81,8 +81,12 @@ if ($targetUser > 0) {
             <!-- Header -->
             <div class="p-4 md:p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between z-10 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md">
                 <div class="flex items-center gap-4">
-                    <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center font-bold">
-                        <?php echo strtoupper(substr($targetInfo['display_name'], 0, 1)); ?>
+                    <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold">
+                        <?php if($targetInfo['profile_photo']): ?>
+                            <img src="uploads/avatars/<?php echo $targetInfo['profile_photo']; ?>" class="w-full h-full object-cover">
+                        <?php else: ?>
+                            <div class="text-orange-600"><?php echo strtoupper(substr($targetInfo['display_name'], 0, 1)); ?></div>
+                        <?php endif; ?>
                     </div>
                     <div>
                         <h4 class="text-sm font-black text-slate-900 dark:text-white"><?php echo htmlspecialchars($targetInfo['display_name']); ?></h4>
@@ -153,8 +157,12 @@ if ($targetUser > 0) {
             <?php foreach ($allUsers as $u): ?>
                 <a href="index.php?page=chat&user_id=<?php echo $u['id']; ?>" 
                    class="user-row flex items-center gap-4 p-4 rounded-3xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
-                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 flex items-center justify-center font-black group-hover:bg-indigo-600 group-hover:text-white transition-all">
-                        <?php echo strtoupper(substr($u['display_name'], 0, 1)); ?>
+                    <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center flex-shrink-0 overflow-hidden font-black group-hover:bg-indigo-600 transition-all">
+                        <?php if($u['profile_photo']): ?>
+                            <img src="uploads/avatars/<?php echo $u['profile_photo']; ?>" class="w-full h-full object-cover">
+                        <?php else: ?>
+                            <div class="text-indigo-600 group-hover:text-white"><?php echo strtoupper(substr($u['display_name'], 0, 1)); ?></div>
+                        <?php endif; ?>
                     </div>
                     <div class="flex-1">
                         <div class="text-[13px] font-black text-slate-900 dark:text-white search-name"><?php echo htmlspecialchars($u['display_name']); ?></div>
