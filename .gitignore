@@ -19,9 +19,10 @@ google-services.json
 .env
 *.json
 
-# Uploads & Temp
 uploads/*
 !uploads/.gitkeep
+cache/
+logs/
 temp/
 tmp/
 node_modules/

@@ -7,6 +7,26 @@ Options -Indexes
 # Enable mod_rewrite for clean URLs
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /taskflow/
+
+    # Clean URLs for core pages
+    RewriteRule ^auth$ login.php [L,QSA]
+    RewriteRule ^dashboard$ index.php?page=dashboard [L,QSA]
+    RewriteRule ^calendar$ index.php?page=calendar [L,QSA]
+    RewriteRule ^notes$ index.php?page=notes [L,QSA]
+    RewriteRule ^dokumen$ index.php?page=documents [L,QSA]
+    RewriteRule ^kanban$ index.php?page=projects [L,QSA]
+    RewriteRule ^activities$ index.php?page=activities [L,QSA]
+    RewriteRule ^settings$ index.php?page=settings [L,QSA]
+    RewriteRule ^logout$ index.php?logout=1 [L,QSA]
+
+    # "Encrypted" style link example
+    RewriteRule ^secure-login-([a-f0-9]{8})$ login.php?token=$1 [L,QSA]
+
+    # Fallback to index.php if not a file or directory
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php?path=$1 [L,QSA]
 </IfModule>
 
 # Deny access to sensitive file types

@@ -1,5 +1,28 @@
 <?php
 // config.php
+// Base URL and Routing Helper
+function baseUrl($path = '') {
+    // Determine the base path (e.g., /taskflow/)
+    $script_dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    return $script_dir . '/' . ltrim($path, '/');
+}
+
+function route($page) {
+    // Map pages to clean URLs defined in .htaccess
+    $map = [
+        'login' => 'auth',
+        'dashboard' => 'dashboard',
+        'calendar' => 'calendar',
+        'notes' => 'notes',
+        'documents' => 'dokumen',
+        'projects' => 'kanban',
+        'activities' => 'activities',
+        'settings' => 'settings',
+        'logout' => 'logout'
+    ];
+    return baseUrl($map[$page] ?? $page);
+}
+
 // Database Configuration
 define('DB_HOST', getenv('DB_HOST') ?: 'localhost');
 define('DB_NAME', getenv('DB_NAME') ?: 'taskflow_db');
@@ -16,7 +39,7 @@ $options = [
 ];
 
 try {
-     $pdo = new PDO($dsn, $user, $pass, $options);
+     $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
 } catch (\PDOException $e) {
      die("Koneksi Database Gagal: " . $e->getMessage());
 }

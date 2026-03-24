@@ -3,7 +3,7 @@
 require_once 'config.php';
 
 if (isLoggedIn()) {
-    header('Location: index.php');
+    header('Location: ' . route('dashboard'));
     exit;
 }
 
@@ -23,7 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_SESSION['display_name'] = $user['display_name'];
         $_SESSION['role']         = $user['role'];
         $_SESSION['profile_photo'] = $user['profile_photo'] ?? null;
-        header('Location: index.php');
+        header('Location: ' . route('dashboard'));
         exit;
     } else {
         $error = 'Email atau password salah.';
