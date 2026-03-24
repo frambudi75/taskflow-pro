@@ -124,46 +124,82 @@ if (isset($_GET['logout'])) {
             color: #fecaca;
         }
         /* ===== MOBILE RESPONSIVE ===== */
-        /* Sidebar: hidden off-left on mobile, fixed width on desktop */
         .sidebar-wrap {
-            position: fixed; top: 0; left: 0; height: 100vh; width: 260px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 280px;
             z-index: 200;
             transform: translateX(-100%);
-            transition: transform 0.28s cubic-bezier(.4,0,.2,1);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
         }
-        .sidebar-wrap.open { transform: translateX(0); }
+        .sidebar-wrap.open {
+            transform: translateX(0);
+        }
+        
+        /* Desktop */
         @media (min-width: 768px) {
-            .sidebar-wrap { position: sticky; transform: translateX(0) !important; flex-shrink: 0; }
-            .mobile-topbar { display: none !important; }
-            .sidebar-overlay { display: none !important; }
+            .sidebar-wrap {
+                position: sticky;
+                top: 0;
+                transform: translateX(0) !important;
+                flex-shrink: 0;
+                z-index: 10;
+            }
+            .mobile-topbar {
+                display: none !important;
+            }
+            .sidebar-overlay {
+                display: none !important;
+            }
         }
 
         /* Mobile top bar */
         .mobile-topbar {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             padding: 12px 16px;
-            background: linear-gradient(160deg, #0f172a, #1e293b);
-            position: sticky; top: 0; z-index: 100;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+            background: #0f172a;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         .hamburger-btn {
-            width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;
-            border-radius: 10px; background: rgba(255,255,255,0.08); border: none; cursor: pointer; color: #fff;
-            transition: background 0.2s;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer;
+            color: #fff;
         }
-        .hamburger-btn:hover { background: rgba(255,255,255,0.15); }
 
         /* Overlay backdrop */
         .sidebar-overlay {
-            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
-            z-index: 199; backdrop-filter: blur(2px);
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 190;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
         }
-        .sidebar-overlay.active { display: block; }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </head>
 <body class="min-h-screen bg-stone-50" style="display:flex;flex-direction:column">
 
-    <!-- Overlay backdrop (mobile only) -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
     <!-- Mobile Topbar -->
