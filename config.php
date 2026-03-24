@@ -255,28 +255,46 @@ function getSetting($key, $default = '') {
 /**
  * Send a notification via Telegram Bot API.
  */
+/**
+ * Send a notification via Telegram Bot API using cURL.
+ */
 function sendTelegramNotif($chat_id, $message) {
+    if (empty($chat_id)) return false;
+    
     $token = getSetting('telegram_bot_token');
-    if (empty($token) || empty($chat_id)) return false;
+    if (empty($token)) {
+        error_log("Telegram Error: Bot Token is empty.");
+        return false;
+    }
 
     $url = "https://api.telegram.org/bot{$token}/sendMessage";
     $data = [
         'chat_id' => $chat_id,
         'text' => $message,
-        'parse_mode' => 'HTML'
+        'parse_mode' => 'HTML',
+        'disable_web_page_preview' => true
     ];
 
-    $options = [
-        'http' => [
-            'header'  => "Content-type: application/x-www-form-urlencoded\r\n",
-            'method'  => 'POST',
-            'content' => http_build_query($data),
-            'timeout' => 5
-        ]
-    ];
-    $context  = stream_context_create($options);
-    $result = @file_get_contents($url, false, $context);
-    return $result !== false;
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // For local dev compatibility
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    
+    $result = curl_exec($ch);
+    $error = curl_error($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($result === false || $http_code !== 200) {
+        $log_msg = "Telegram Error (HTTP $http_code): " . ($error ?: $result);
+        error_log($log_msg);
+        return false;
+    }
+
+    return true;
 }
 
 ?>
