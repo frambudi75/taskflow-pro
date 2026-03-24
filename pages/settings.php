@@ -65,154 +65,143 @@ $tg_token = getSetting('telegram_bot_token', '');
         </div>
     <?php endif; ?>
 
+    <!-- Tab Navigation -->
+    <div class="flex items-center gap-2 mb-8 bg-slate-100 dark:bg-slate-800/50 p-1.5 rounded-2xl w-fit">
+        <button onclick="switchTab('umum')" class="setting-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all active-tab bg-indigo-600 text-white shadow-lg shadow-indigo-600/20" data-tab="umum">🏢 Umum</button>
+        <button onclick="switchTab('notif')" class="setting-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" data-tab="notif">🤖 Notifikasi</button>
+        <button onclick="switchTab('email')" class="setting-tab px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" data-tab="email">📧 Email</button>
+    </div>
+
     <div class="bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
         <form method="POST" action="index.php?page=settings" class="p-8">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             
             <div class="space-y-8">
-                <!-- App Name -->
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Nama Aplikasi</label>
-                    <input type="text" name="app_name" value="<?php echo htmlspecialchars($app_name); ?>" required
-                           class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
-                    <p class="mt-2 text-[11px] text-slate-400 px-1 italic">Nama ini akan muncul di sidebar dan tab browser.</p>
-                </div>
+                <!-- Tab: Umum -->
+                <div id="pane-umum" class="tab-pane space-y-8">
+                    <!-- App Name -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">Nama Aplikasi</label>
+                        <input type="text" name="app_name" value="<?php echo htmlspecialchars($app_name); ?>" required
+                               class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
+                        <p class="mt-2 text-[11px] text-slate-400 px-1 italic">Nama ini akan muncul di sidebar dan tab browser.</p>
+                    </div>
 
-                <div>
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">URL Situs (Penting untuk Notifikasi)</label>
-                    <input type="url" name="app_url" value="<?php echo htmlspecialchars(getSetting('app_url')); ?>" 
-                           placeholder="Contoh: https://taskflow.overheat.my.id"
-                           class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
-                    <p class="mt-2 text-[11px] text-slate-400 px-1 italic font-medium">Gunakan protokol lengkap (seperti <b>https://</b>) agar link di email & telegram bisa diklik.</p>
-                </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 px-1">URL Situs</label>
+                        <input type="url" name="app_url" value="<?php echo htmlspecialchars(getSetting('app_url')); ?>" 
+                               placeholder="Contoh: https://taskflow.overheat.my.id"
+                               class="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all outline-none">
+                    </div>
 
-                <!-- Feature Toggle -->
-                <div class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.8.9L22 4l-2 5z"/></svg>
+                    <!-- Feature Toggle -->
+                    <div class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.8.9L22 4l-2 5z"/></svg>
+                                </div>
+                                <div>
+                                    <h4 class="text-sm font-black text-slate-900 dark:text-white">Fitur Chat Internal</h4>
+                                    <p class="text-[11px] text-slate-400 font-medium tracking-tight">Aktifkan atau nonaktifkan fitur pesan antar user.</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Fitur Chat Internal</h4>
-                                <p class="text-[11px] text-slate-400 font-medium tracking-tight">Aktifkan atau nonaktifkan fitur pesan antar user.</p>
-                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" name="enable_chat" class="sr-only peer" <?php echo getSetting('enable_chat', '1') === '1' ? 'checked' : ''; ?>>
+                                <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 rounded-full"></div>
+                            </label>
                         </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="enable_chat" class="sr-only peer" <?php echo getSetting('enable_chat', '1') === '1' ? 'checked' : ''; ?>>
-                            <div class="w-12 h-6 bg-slate-200 peer-focus:outline-none dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 rounded-full"></div>
-                        </label>
                     </div>
                 </div>
 
-                <!-- Telegram Config -->
-                <div class="p-6 bg-slate-50 dark:bg-slate-800/30 rounded-3xl border border-slate-100 dark:border-slate-800">
-                    <div class="mb-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-sky-100 dark:bg-sky-900/30 text-sky-600">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Telegram Integration</h4>
-                                <p class="text-[11px] text-slate-400 font-medium tracking-tight">Kirim notifikasi sistem langsung ke bot Telegram.</p>
-                            </div>
-                        </div>
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Bot Token</label>
-                                <input type="password" name="telegram_bot_token" value="<?php echo htmlspecialchars($tg_token); ?>" 
-                                       placeholder="Contoh: 123456789:ABCDEF..."
-                                       class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none">
-                            </div>
-
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Jadwal Pengiriman (Jam)</label>
-                                <select name="notif_time" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none appearance-none">
-                                    <?php 
-                                    $currentTime = getSetting('notif_time', '08');
-                                    for ($i = 0; $i < 24; $i++): 
-                                        $h = str_pad($i, 2, '0', STR_PAD_LEFT);
-                                    ?>
-                                        <option value="<?php echo $h; ?>" <?php echo $currentTime == $h ? 'selected' : ''; ?>>
-                                            Pukul <?php echo $h; ?>:00 WIB
-                                        </option>
-                                    <?php endfor; ?>
-                                </select>
-                                <div class="mt-3 flex items-start gap-2 bg-amber-50/50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100/50 dark:border-amber-800/50">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" class="mt-0.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                                    <p class="text-[10px] text-amber-700 dark:text-amber-400 leading-normal">
-                                        Pesan akan dikirim otomatis setiap hari pada jam yang dipilih. Pastikan Cron Job di aaPanel sudah aktif.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <div class="mt-3 flex items-start gap-2 bg-sky-50/50 dark:bg-sky-900/10 p-3 rounded-xl border border-sky-100/50 dark:border-sky-800/50">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0ea5e9" stroke-width="2.5" class="mt-0.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-                                    <p class="text-[10px] text-sky-700 dark:text-sky-400 leading-normal">
-                                        Dapatkan token Anda dengan membuat bot di <a href="https://t.me/botfather" target="_blank" class="font-bold underline hover:text-sky-800">@BotFather</a>. Pastikan bot sudah di-<em>start</em> oleh user agar bisa menerima pesan.
-                                    </p>
-                                </div>
-                        </div>
+                <!-- Tab: Notif -->
+                <div id="pane-notif" class="tab-pane hidden space-y-6">
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Bot Token Telegram</label>
+                        <input type="password" name="telegram_bot_token" value="<?php echo htmlspecialchars($tg_token); ?>" 
+                                placeholder="Contoh: 123456789:ABCDEF..."
+                                class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none">
                     </div>
 
-                    <!-- SMTP Config -->
-                    <div class="mb-10">
-                        <div class="flex items-center gap-3 mb-6">
-                            <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-sm font-black text-slate-900 dark:text-white">Email (SMTP)</h4>
-                                <p class="text-[11px] text-slate-400 font-medium tracking-tight">Konfigurasi Pengiriman Email</p>
-                            </div>
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Jadwal Pengiriman (Jam)</label>
+                        <select name="notif_time" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-bold text-slate-800 dark:text-white focus:ring-2 focus:ring-sky-500/20 outline-none appearance-none">
+                            <?php 
+                            $currentTime = getSetting('notif_time', '08');
+                            for ($i = 0; $i < 24; $i++): 
+                                $h = str_pad($i, 2, '0', STR_PAD_LEFT);
+                            ?>
+                                <option value="<?php echo $h; ?>" <?php echo $currentTime == $h ? 'selected' : ''; ?>>
+                                    Pukul <?php echo $h; ?>:00 WIB
+                                </option>
+                            <?php endfor; ?>
+                        </select>
+                        <div class="mt-3 flex items-start gap-2 bg-amber-50/50 dark:bg-amber-900/10 p-3 rounded-xl border border-amber-100/50 dark:border-amber-800/50">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2.5" class="mt-0.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <p class="text-[10px] text-amber-700 dark:text-amber-400 leading-normal">Pesan dikirim otomatis setiap hari. Pastikan Cron Job aktif di aaPanel.</p>
                         </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">SMTP Host</label>
-                                <input type="text" name="smtp_host" value="<?php echo htmlspecialchars(getSetting('smtp_host')); ?>" placeholder="smtp.gmail.com"
-                                       class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">SMTP Port</label>
-                                <input type="text" name="smtp_port" value="<?php echo htmlspecialchars(getSetting('smtp_port')); ?>" placeholder="587"
-                                       class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">SMTP User (Email)</label>
-                                <input type="text" name="smtp_user" value="<?php echo htmlspecialchars(getSetting('smtp_user')); ?>"
-                                       class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">SMTP Password</label>
-                                <input type="password" name="smtp_pass" value="<?php echo htmlspecialchars(getSetting('smtp_pass')); ?>"
-                                       class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
-                            </div>
-                            <div class="md:col-span-2">
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">From Email (Pengirim)</label>
-                                <input type="email" name="smtp_from" value="<?php echo htmlspecialchars(getSetting('smtp_from')); ?>" placeholder="noreply@domain.com"
-                                       class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
-                            </div>
+                    </div>
+                </div>
+
+                <!-- Tab: Email -->
+                <div id="pane-email" class="tab-pane hidden space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="md:col-span-2">
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">From Email (Pengirim)</label>
+                            <input type="email" name="smtp_from" value="<?php echo htmlspecialchars(getSetting('smtp_from')); ?>" placeholder="noreply@domain.com"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
                         </div>
-                        <div class="mt-4">
-                            <a href="<?php echo route('test-mail'); ?>" target="_blank"
-                               class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 text-[11px] font-bold hover:bg-indigo-100 transition-all border border-indigo-100">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
-                                Test Kirim Email Sekarang
-                            </a>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">SMTP Host</label>
+                            <input type="text" name="smtp_host" value="<?php echo htmlspecialchars(getSetting('smtp_host')); ?>" placeholder="smtp.gmail.com"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">SMTP Port</label>
+                            <input type="text" name="smtp_port" value="<?php echo htmlspecialchars(getSetting('smtp_port')); ?>" placeholder="587"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">SMTP User (Email)</label>
+                            <input type="text" name="smtp_user" value="<?php echo htmlspecialchars(getSetting('smtp_user')); ?>"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">SMTP Password</label>
+                            <input type="password" name="smtp_pass" value="<?php echo htmlspecialchars(getSetting('smtp_pass')); ?>"
+                                    class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-mono text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none">
                         </div>
                     </div>
                 </div>
 
                 <!-- Footer Section -->
-                <div class="pt-6 border-t border-slate-50 dark:border-slate-800 flex items-center justify-end gap-4">
-                    <button type="reset" class="px-6 py-3 rounded-xl text-sm font-black text-slate-400 hover:text-slate-600 transition-colors">Reset</button>
+                <div class="pt-6 border-t border-slate-50 dark:border-slate-800 flex items-center justify-end gap-3">
                     <button type="submit" name="save_settings" class="px-8 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-black text-sm shadow-lg shadow-indigo-500/20 transition-all active:scale-95">
-                        Simpan Perubahan
+                        Simpan Semua Pengaturan
                     </button>
                 </div>
             </div>
         </form>
     </div>
+
+<script>
+function switchTab(tab) {
+    // Hide all panes
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+    // Show target pane
+    document.getElementById('pane-' + tab).classList.remove('hidden');
+    
+    // Update tab buttons style
+    document.querySelectorAll('.setting-tab').forEach(t => {
+        t.classList.remove('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/20');
+        t.classList.add('text-slate-400');
+    });
+    
+    const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
+    activeBtn.classList.remove('text-slate-400');
+    activeBtn.classList.add('bg-indigo-600', 'text-white', 'shadow-lg', 'shadow-indigo-600/20');
+}
+</script>
 
     <!-- Info Card -->
     <div class="mt-8 p-6 bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-800 rounded-3xl">
