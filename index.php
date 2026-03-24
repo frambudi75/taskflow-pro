@@ -123,102 +123,38 @@ if (isset($_GET['logout'])) {
             background: rgba(239,68,68,0.2);
             color: #fecaca;
         }
-        /* ===== MOBILE RESPONSIVE ===== */
-        .sidebar-wrap {
-            position: fixed;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            width: 280px;
-            z-index: 200;
-            transform: translateX(-100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            background: linear-gradient(160deg, #0f172a 0%, #1e293b 100%);
-        }
-        .sidebar-wrap.open {
-            transform: translateX(0);
-        }
-        
-        /* Desktop */
-        @media (min-width: 768px) {
-            .sidebar-wrap {
-                position: sticky;
-                top: 0;
-                transform: translateX(0) !important;
-                flex-shrink: 0;
-                z-index: 10;
-            }
-            .mobile-topbar {
-                display: none !important;
-            }
-            .sidebar-overlay {
-                display: none !important;
-            }
-        }
-
-        /* Mobile top bar */
-        .mobile-topbar {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            background: #0f172a;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .hamburger-btn {
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 12px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
-            cursor: pointer;
-            color: #fff;
-        }
-
-        /* Overlay backdrop */
+        /* Mobile Overlaybackdrop */
         .sidebar-overlay {
-            position: fixed;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.6);
-            backdrop-filter: blur(4px);
-            z-index: 190;
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px); z-index: 40;
+            transition: all 0.3s ease; opacity: 0; visibility: hidden;
         }
-        .sidebar-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
+        .sidebar-overlay.active { opacity: 1; visibility: visible; }
     </style>
 </head>
-<body class="min-h-screen bg-stone-50" style="display:flex;flex-direction:column">
+<body class="bg-slate-50 min-h-screen">
 
+    <!-- Mobile Header -->
+    <header class="md:hidden flex items-center justify-between px-5 py-4 bg-[#0f172a] shadow-lg shadow-blue-900/10 sticky top-0 z-30">
+        <div class="flex items-center gap-3">
+             <div class="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+             </div>
+             <span class="text-white font-black text-sm uppercase tracking-tight"><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow')); ?></span>
+        </div>
+        <button onclick="toggleSidebar()" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
+             <svg id="iconMenu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+             <svg id="iconClose" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+    </header>
+
+    <!-- Overlay Backdrop -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <!-- Mobile Topbar -->
-    <div class="mobile-topbar" id="mobileTopbar">
-        <div class="flex items-center gap-3">
-            <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-            </div>
-            <div class="sidebar-brand-text" style="font-size:15px"><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow')); ?></div>
-        </div>
-        <button class="hamburger-btn" onclick="toggleSidebar()" aria-label="Menu">
-            <svg id="iconMenu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-            <svg id="iconClose" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
-    </div>
-
-    <div class="flex flex-1" style="min-height:0">
-        <!-- NEW DARK SIDEBAR (drawer on mobile, fixed column on desktop) -->
-        <aside class="sidebar-bg sidebar-wrap flex flex-col" id="sidebar" style="height:100vh;overflow-y:auto">
+    <div class="flex min-h-screen">
+        <!-- SIDEBAR -->
+        <aside id="sidebar" 
+               class="sidebar-bg fixed inset-y-0 left-0 z-50 w-72 transform -translate-x-full transition-transform duration-300 md:static md:translate-x-0 md:inset-auto md:w-64 flex flex-col h-screen overflow-y-auto">
 
             <!-- Brand -->
             <div class="px-5 pt-6 pb-4 flex items-center gap-3 relative z-20">
@@ -395,14 +331,24 @@ function toggleSidebar() {
     var overlay = document.getElementById('sidebarOverlay');
     var iMenu   = document.getElementById('iconMenu');
     var iClose  = document.getElementById('iconClose');
-    var isOpen  = sidebar.classList.toggle('open');
+    
+    var isOpen = sidebar.classList.toggle('translate-x-0');
+    if (isOpen) {
+        sidebar.classList.remove('-translate-x-full');
+    } else {
+        sidebar.classList.add('-translate-x-full');
+    }
     overlay.classList.toggle('active', isOpen);
+    
     iMenu.style.display  = isOpen ? 'none' : '';
     iClose.style.display = isOpen ? '' : 'none';
 }
 function closeSidebar() {
-    document.getElementById('sidebar').classList.remove('open');
-    document.getElementById('sidebarOverlay').classList.remove('active');
+    var sidebar = document.getElementById('sidebar');
+    var overlay = document.getElementById('sidebarOverlay');
+    sidebar.classList.remove('translate-x-0');
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.remove('active');
     document.getElementById('iconMenu').style.display  = '';
     document.getElementById('iconClose').style.display = 'none';
 }
