@@ -24,6 +24,7 @@ Options -Indexes
     RewriteRule ^backup$ index.php?page=backup [L,QSA]
     RewriteRule ^cache$ index.php?page=cache [L,QSA]
     RewriteRule ^notif-harian$ notif_harian.php [L,QSA]
+    RewriteRule ^test-mail$ test_mail.php [L,QSA]
     RewriteRule ^logout$ index.php?logout=1 [L,QSA]
 
     # "Encrypted" style link example

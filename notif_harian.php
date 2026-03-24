@@ -16,8 +16,8 @@ $dayNameArr = [
 ];
 $displayDay = $dayNameArr[$dayOfWeek];
 
-// Fetch all users with Telegram Chat ID
-$stmt = $pdo->query("SELECT id, display_name, telegram_chat_id FROM users WHERE telegram_chat_id IS NOT NULL AND telegram_chat_id != ''");
+// Fetch all users with Telegram Chat ID or active email
+$stmt = $pdo->query("SELECT id, email, display_name, telegram_chat_id FROM users");
 $users = $stmt->fetchAll();
 
 foreach ($users as $user) {
@@ -44,9 +44,26 @@ foreach ($users as $user) {
     $message .= "\nBuka aplikasi: " . baseUrl('dashboard');
 
     if (sendTelegramNotif($user['telegram_chat_id'], $message)) {
-        echo "✅ Berhasil mengirim notifikasi ke: " . $user['display_name'] . " (" . $user['telegram_chat_id'] . ")\n";
+        echo "✅ Telegram sent: " . $user['display_name'] . "\n";
+    }
+
+    // --- Sent Email Notif ---
+    $subject = "📅 TaskFlow: Daftar Tugas Harian - " . $displayDay;
+    // Prepare HTML/Text message for email
+    $emailBody = "Halo <b>" . $user['display_name'] . "</b>, berikut adalah tugas hari ini:\n\n";
+    if ($taskCount > 0) {
+        foreach ($tasks as $i => $task) {
+            $emailBody .= ($i+1) . ". " . htmlspecialchars($task['title']) . " (" . $task['status'] . ")\n";
+        }
     } else {
-        echo "❌ Gagal mengirim notifikasi ke: " . $user['display_name'] . " (Cek Bot Token atau Chat ID)\n";
+        $emailBody .= "Tidak ada tugas mendesak hari ini.";
+    }
+    $emailBody .= "\n\nBuka dashboard: " . baseUrl('dashboard');
+
+    if (sendEmailNotif($user['email'] ?? '', $subject, $emailBody)) {
+        echo "📧 Email sent: " . ($user['email'] ?? 'undefined') . "\n";
+    } else {
+        echo "❌ Email failed: " . ($user['email'] ?? 'undefined') . "\n";
     }
 }
 ?>

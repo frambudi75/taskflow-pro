@@ -24,6 +24,7 @@ function route($page) {
         'backup' => 'backup',
         'cache' => 'cache',
         'notif-harian' => 'notif-harian',
+        'test-mail' => 'test-mail',
         'logout' => 'logout'
     ];
     return baseUrl($map[$page] ?? $page);
@@ -295,6 +296,31 @@ function sendTelegramNotif($chat_id, $message) {
     }
 
     return true;
+}
+
+/**
+ * Send a notification via Email.
+ */
+function sendEmailNotif($to, $subject, $message) {
+    if (empty($to)) return false;
+    
+    $from = getSetting('smtp_from', 'admin@taskflow.local');
+    $headers = "From: $from\r\n";
+    $headers .= "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+
+    // Convert newlines to <br> for HTML email
+    $htmlMessage = nl2br($message);
+
+    // Note: On local XAMPP, mail() might not work without sendmail config.
+    // In production, this should ideally use PHPMailer with the stored SMTP settings.
+    $result = @mail($to, $subject, $htmlMessage, $headers);
+    
+    if (!$result) {
+        error_log("Email Error: Failed to send to $to");
+    }
+    
+    return $result;
 }
 
 ?>
