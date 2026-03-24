@@ -374,12 +374,29 @@ document.querySelectorAll('#sidebar .nav-item').forEach(function(el) {
         if (window.innerWidth < 768) closeSidebar();
     });
 });
+<!-- Notification Audio -->
+<audio id="notifSound" preload="auto">
+    <source src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZTU4LjI5LjEwMAAAAAAAAAAAAAAA//MUxAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUxAsAAANIAAAAAE1hZ2ljIFNvdW5kIC0gRGluZyAtIDEyOCBrYnBzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//MUxBsAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUxBsAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" type="audio/mp3">
+</audio>
+
+<script>
+let lastUnreadCount = <?php echo countUnreadMessages($user_id); ?>;
+
 function updateChatBadge() {
     fetch('api_chat.php?action=count_unread')
         .then(res => res.json())
         .then(data => {
             const badge = document.getElementById('unreadChatBadge');
             if (badge) {
+                // Play sound if new message arrives
+                if (data.unread_count > lastUnreadCount) {
+                    const sound = document.getElementById('notifSound');
+                    if (sound) {
+                        sound.play().catch(e => console.log('Audio play blocked:', e));
+                    }
+                }
+                lastUnreadCount = data.unread_count;
+
                 if (data.unread_count > 0) {
                     badge.innerText = data.unread_count;
                     badge.style.display = 'flex';
@@ -389,8 +406,8 @@ function updateChatBadge() {
             }
         }).catch(e => console.log('Chat badge error:', e));
 }
-setInterval(updateChatBadge, 10000); // Check every 10 seconds
-updateChatBadge(); // Initial check
+setInterval(updateChatBadge, 10000); 
+updateChatBadge(); 
 </script>
 </body>
 </html>
