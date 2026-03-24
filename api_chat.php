@@ -12,11 +12,25 @@ $action = $_REQUEST['action'] ?? '';
 
 if ($action === 'send') {
     $receiverId = (int)$_POST['receiver_id'];
-    $message = trim($_POST['message']);
+    $message = trim($_POST['message'] ?? '');
+    $filePath = null;
+
+    if (isset($_FILES['attachment']) && $_FILES['attachment']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = 'uploads/chat/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        
+        $ext = pathinfo($_FILES['attachment']['name'], PATHINFO_EXTENSION);
+        $fileName = time() . '_' . uniqid() . '.' . $ext;
+        $targetFile = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['attachment']['tmp_name'], $targetFile)) {
+            $filePath = $fileName;
+        }
+    }
     
-    if ($receiverId > 0 && !empty($message)) {
-        $stmt = $pdo->prepare("INSERT INTO messages (sender_id, receiver_id, message) VALUES (?, ?, ?)");
-        $stmt->execute([$currentUser, $receiverId, $message]);
+    if ($receiverId > 0 && (!empty($message) || $filePath)) {
+        $stmt = $pdo->prepare("INSERT INTO messages (sender_id, receiver_id, message, file_path) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$currentUser, $receiverId, $message, $filePath]);
         echo json_encode(['status' => 'success']);
     }
 } elseif ($action === 'get') {
@@ -28,7 +42,7 @@ if ($action === 'send') {
     
     // Fetch conversation
     $stmt = $pdo->prepare("
-        SELECT id, sender_id, receiver_id, message, is_read, DATE_FORMAT(created_at, '%H:%i') as time 
+        SELECT id, sender_id, receiver_id, message, file_path, is_read, DATE_FORMAT(created_at, '%H:%i') as time 
         FROM messages 
         WHERE (sender_id = ? AND receiver_id = ?) 
            OR (sender_id = ? AND receiver_id = ?)

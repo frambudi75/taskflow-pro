@@ -127,8 +127,9 @@ if ($targetUser > 0) {
                 </div>
             </div>
 
-            <!-- Messages Area -->
-            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/30 dark:bg-slate-950/20">
+            <!-- Messages Area with Wallpaper -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar relative"
+                 style="background-image: url('data:image/svg+xml,%3Csvg width=\"100\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 35c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm60-17c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM66 46c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM25 76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM7 39c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM90 71c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM21 34c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM45 44c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM80 80c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 20c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6 48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm35-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM24 5c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm57 4c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-15 1c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-2 90c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm35-24c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM5 69c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25 1c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm37 7c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm13 17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\" fill=\"%236366f1\" fill-opacity=\"0.05\" fill-rule=\"evenodd\"/%3E%3C/svg%3E'); font-family: 'Inter', sans-serif;">
                 <!-- Loaded via AJAX -->
                 <div class="flex justify-center py-10 opacity-50">
                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
@@ -137,11 +138,24 @@ if ($targetUser > 0) {
 
             <!-- Input Area -->
             <div class="p-4 md:p-6 border-t border-slate-100 dark:border-slate-800">
-                <form id="chatForm" class="flex items-center gap-3">
+                <form id="chatForm" class="flex items-center gap-3" enctype="multipart/form-data">
                     <input type="hidden" name="receiver_id" value="<?php echo $targetUser; ?>">
-                    <input type="text" id="messageInput" name="message" required autocomplete="off"
-                           placeholder="Ketik pesan di sini..." 
-                           class="flex-1 bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all">
+                    
+                    <button type="button" onclick="document.getElementById('fileAttachInput').click()" 
+                            class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-all active:scale-95">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+                    </button>
+                    <input type="file" id="fileAttachInput" name="attachment" class="hidden" onchange="handleFileSelect()">
+
+                    <div class="flex-1 relative">
+                        <input type="text" id="messageInput" name="message" autocomplete="off"
+                               placeholder="Ketik pesan..." 
+                               class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all">
+                        <div id="fileIndicator" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> FILE SIAP
+                        </div>
+                    </div>
+
                     <button type="submit" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
@@ -236,12 +250,30 @@ function fetchMessages() {
             } else {
                 data.forEach(msg => {
                     const isMe = msg.sender_id == <?php echo $currentUser; ?>;
+                    let attachmentHtml = '';
+                    if (msg.file_path) {
+                        const ext = msg.file_path.split('.').pop().toLowerCase();
+                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                            attachmentHtml = `<img src="uploads/chat/${msg.file_path}" class="rounded-xl max-w-full h-auto mb-2 cursor-pointer" onclick="window.open(this.src)">`;
+                        } else {
+                            attachmentHtml = `
+                                <a href="uploads/chat/${msg.file_path}" target="_blank" class="flex items-center gap-3 p-3 rounded-xl bg-black/5 dark:bg-white/5 mb-2 hover:bg-black/10 transition-all">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-500 text-white flex items-center justify-center">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><polyline points="13 2 13 9 20 9"/></svg>
+                                    </div>
+                                    <div class="text-[10px] font-bold truncate max-w-[120px] uppercase">${msg.file_path.split('_').slice(1).join('_')}</div>
+                                </a>
+                            `;
+                        }
+                    }
+
                     html += `
                         <div class="flex ${isMe ? 'justify-end' : 'justify-start'} group">
                             <div class="max-w-[75%] md:max-w-[60%] relative">
                                 ${isMe ? `<button onclick="deleteMessage(${msg.id})" class="absolute -left-8 top-2 p-1 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg></button>` : ''}
                                 <div class="p-4 rounded-3xl text-sm font-medium shadow-sm ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200 border border-slate-100 dark:border-slate-800 rounded-tl-none'}">
-                                    ${msg.message}
+                                    ${attachmentHtml}
+                                    ${msg.message ? `<div class="${attachmentHtml ? 'mt-2' : ''}">${msg.message}</div>` : ''}
                                 </div>
                                 <div class="mt-1.5 px-1 flex items-center gap-1 text-[9px] font-bold text-slate-400 uppercase tracking-tighter ${isMe ? 'justify-end' : 'justify-start'}">
                                     ${msg.time} 
@@ -283,16 +315,31 @@ function clearChat() {
     });
 }
 
+function handleFileSelect() {
+    const input = document.getElementById('fileAttachInput');
+    const indicator = document.getElementById('fileIndicator');
+    if (input.files.length > 0) {
+        indicator.classList.remove('hidden');
+    } else {
+        indicator.classList.add('hidden');
+    }
+}
+
 if (chatForm) {
     chatForm.onsubmit = function(e) {
         e.preventDefault();
         const msg = messageInput.value.trim();
-        if (!msg) return;
+        const fileInput = document.getElementById('fileAttachInput');
+        
+        if (!msg && fileInput.files.length === 0) return;
         
         const formData = new FormData(chatForm);
         formData.append('action', 'send');
         
+        // Reset UI immediately
         messageInput.value = '';
+        fileInput.value = '';
+        handleFileSelect();
         
         fetch('api_chat.php', {
             method: 'POST',
