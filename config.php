@@ -20,6 +20,9 @@ function route($page) {
         'settings' => 'settings',
         'profile' => 'profile',
         'reset-password' => 'reset-password',
+        'admin' => 'users',
+        'backup' => 'backup',
+        'cache' => 'cache',
         'logout' => 'logout'
     ];
     return baseUrl($map[$page] ?? $page);
