@@ -23,6 +23,7 @@ function route($page) {
         'admin' => 'pengguna',
         'backup' => 'backup',
         'cache' => 'cache',
+        'notif-harian' => 'notif-harian',
         'logout' => 'logout'
     ];
     return baseUrl($map[$page] ?? $page);
