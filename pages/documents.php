@@ -214,7 +214,7 @@ function docSvgIcon($type, $color) {
                         </div>
                         <!-- Actions -->
                         <div class="flex items-center gap-1 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="viewDocument('<?php echo htmlspecialchars($file_url ?? ''); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars($doc['name']); ?>')"
+                            <button onclick="viewDocument('<?php echo htmlspecialchars(str_replace('\\', '/', $doc['file_path'])); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars($doc['name']); ?>', '<?php echo htmlspecialchars($file_url ?? ''); ?>')"
                                     title="Preview"
                                     class="w-9 h-9 flex items-center justify-center rounded-xl transition-all hover:bg-indigo-50"
                                     style="color:#6366f1">
@@ -336,6 +336,8 @@ function docSvgIcon($type, $color) {
 </div>
 
 <script>
+const BASE_URL = '<?php echo baseUrl(); ?>';
+
 function updateFileName(input) {
     const label = document.getElementById('fileName');
     if (input.files && input.files[0]) {
@@ -344,7 +346,7 @@ function updateFileName(input) {
     }
 }
 
-function viewDocument(filePath, fileType, fileName) {
+function viewDocument(filePath, fileType, fileName, downloadUrl) {
     const modal  = document.getElementById('viewModal');
     const viewer = document.getElementById('documentViewer');
     const title  = document.getElementById('viewModalTitle');
@@ -353,13 +355,13 @@ function viewDocument(filePath, fileType, fileName) {
 
     title.textContent  = fileName || 'Pratinjau';
     typeEl.textContent = fileType;
-    dlBtn.href         = filePath;
+    dlBtn.href         = downloadUrl || filePath;
     dlBtn.setAttribute('download', fileName || '');
     viewer.innerHTML   = '';
     viewer.style.background = '#f8fafc';
 
-    const rawPath  = filePath.replace(/^\/[^/]+\//, '');
-    const serveUrl = '/taskflow/serve_file.php?file=' + encodeURIComponent(rawPath);
+    // filePath is 'uploads/X/file.jpg' or similar
+    const serveUrl = BASE_URL + 'serve_file.php?file=' + encodeURIComponent(filePath);
 
     if (fileType.startsWith('image/')) {
         viewer.innerHTML = `<img src="${serveUrl}" alt="Preview" style="max-width:100%;max-height:500px;object-fit:contain;border-radius:12px">`;
