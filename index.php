@@ -421,7 +421,7 @@ function updateChatBadge() {
 if (Notification.permission !== "granted" && Notification.permission !== "denied") {
     Notification.requestPermission();
 }
-setInterval(updateChatBadge, 10000); 
+setInterval(updateChatBadge, 3000); 
 updateChatBadge(); 
 </script>
 </body>
