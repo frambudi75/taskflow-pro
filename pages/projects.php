@@ -42,7 +42,7 @@ foreach ($all_todos as $t) {
 }
 ?>
 
-<div class="p-5 md:p-8 max-w-full">
+<div class="p-5 md:p-8 w-full">
     <!-- HERO HEADER -->
     <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"
          style="background: linear-gradient(135deg,#312e81 0%,#4338ca 50%,#6366f1 100%)">
@@ -146,7 +146,7 @@ function changeStatus(id, status) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.reload();
+            loadPage('index.php?page=projects', false);
         }
     });
 }

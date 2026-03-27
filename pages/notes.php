@@ -13,8 +13,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_note'])) {
             $note_id = $pdo->lastInsertId();
             logActivity("Membuat catatan baru: " . $title, "note", $note_id);
         }
-        header("Location: index.php?page=notes");
-        exit;
+        if (!isAjax()) {
+            header("Location: index.php?page=notes");
+            exit;
+        }
     }
 }
 
@@ -29,8 +31,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_note'])) {
             $stmt->execute([$title, $content, $note_id, $_SESSION['user_id']]);
             logActivity("Memperbarui catatan: " . $title, "note", $note_id);
         }
-        header("Location: index.php?page=notes");
-        exit;
+        if (!isAjax()) {
+            header("Location: index.php?page=notes");
+            exit;
+        }
     }
 }
 
@@ -41,8 +45,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_note'])) {
         $stmt = $pdo->prepare("DELETE FROM notes WHERE id = ? AND user_id = ?");
         $stmt->execute([$note_id, $_SESSION['user_id']]);
         logActivity("Menghapus sebuah catatan", "note", $note_id);
-        header("Location: index.php?page=notes");
-        exit;
+        if (!isAjax()) {
+            header("Location: index.php?page=notes");
+            exit;
+        }
     }
 }
 
@@ -69,7 +75,7 @@ $card_colors = [
 .modal-overlay { backdrop-filter: blur(8px); }
 </style>
 
-<div class="p-5 md:p-8 max-w-7xl mx-auto">
+<div class="p-5 md:p-8 w-full">
 
     <!-- ===== HERO HEADER ===== -->
     <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"

@@ -104,7 +104,6 @@ for ($i = 6; $i >= 0; $i--) {
 }
 ?>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
 .dash-stat {
     background: var(--bg-card); border: 1px solid var(--border-color);
@@ -154,7 +153,7 @@ for ($i = 6; $i >= 0; $i--) {
 .chart-container { position: relative; height: 300px; width: 100%; padding: 10px 20px 25px; }
 </style>
 
-<div class="p-5 md:p-8 max-w-7xl mx-auto">
+<div class="p-5 md:p-8 w-full">
 
     <!-- HERO HEADER -->
     <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"

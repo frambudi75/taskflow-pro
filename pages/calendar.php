@@ -35,8 +35,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_todo'])) {
                 }
             }
         }
-        header("Location: index.php?page=calendar&month=" . $current_month);
-        exit;
+        if (!isAjax()) {
+            header("Location: index.php?page=calendar&month=" . $current_month);
+            exit;
+        }
     }
 }
 
@@ -51,8 +53,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         $stmt->execute([$new_status, $is_completed, $todo_id, $_SESSION['user_id']]);
         
         logActivity("Mengubah status tugas menjadi " . strtoupper($new_status), "todo", $todo_id, ['new_status' => $new_status]);
-        header("Location: index.php?page=calendar&month=" . $current_month . ($selected_date ? "&date=".$selected_date : ""));
-        exit;
+        if (!isAjax()) {
+            header("Location: index.php?page=calendar&month=" . $current_month . ($selected_date ? "&date=".$selected_date : ""));
+            exit;
+        }
     }
 }
 
@@ -63,8 +67,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_todo'])) {
         $stmt = $pdo->prepare("DELETE FROM todos WHERE id = ? AND user_id = ?");
         $stmt->execute([$todo_id, $_SESSION['user_id']]);
         logActivity("Menghapus tugas", "todo", $todo_id, ['action' => 'delete']);
-        header("Location: index.php?page=calendar&month=" . $current_month);
-        exit;
+        if (!isAjax()) {
+            header("Location: index.php?page=calendar&month=" . $current_month);
+            exit;
+        }
     }
 }
 
@@ -81,7 +87,7 @@ $filtered_todos = $selected_date
     : [];
 ?>
 
-<div class="p-5 md:p-8 max-w-7xl mx-auto">
+<div class="p-5 md:p-8 w-full">
 
     <!-- ===== HERO HEADER ===== -->
     <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"

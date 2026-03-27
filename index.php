@@ -22,6 +22,37 @@ if (isset($_GET['logout'])) {
     header('Location: ' . route('login'));
     exit;
 }
+
+// AJAX Content Helper
+if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+    ob_clean();
+    // Return only the inner content for AJAX requests
+    switch($page) {
+        case 'dashboard': include 'pages/dashboard.php'; break;
+        case 'calendar': include 'pages/calendar.php'; break;
+        case 'notes': include 'pages/notes.php'; break;
+        case 'documents': include 'pages/documents.php'; break;
+        case 'projects': include 'pages/projects.php'; break;
+        case 'activities': include 'pages/activities.php'; break;
+        case 'chat': include 'pages/chat.php'; break;
+        case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
+        case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
+        case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
+        case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;
+        case 'profile': include 'pages/profile.php'; break;
+        case 'reset-password': include 'pages/reset-password.php'; break;
+        default: include 'pages/dashboard.php';
+    }
+    // Include the footer in the AJAX response so it stays at the bottom of the content
+    ?>
+    <footer class="bg-white border-t border-stone-200 py-4 px-6 mt-auto">
+        <div class="text-center">
+            <p class="text-stone-400 text-sm font-medium">© 2026 TaskFlow. Dibuat oleh Habib Frambudi</p>
+        </div>
+    </footer>
+    <?php
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="id">
@@ -31,6 +62,7 @@ if (isset($_GET['logout'])) {
     <title><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow Pro')); ?></title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -45,12 +77,13 @@ if (isset($_GET['logout'])) {
             --sidebar-icon-bg: rgba(255,255,255,0.06);
         }
 
-        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; }
+        body { font-family: 'Inter', sans-serif; background-color: #f1f5f9; color: #0f172a; overflow: hidden; height: 100vh; }
         .custom-scrollbar::-webkit-scrollbar { width: 5px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 10px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .sidebar-scrollbar::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
         
-        .main-content { background: var(--bg-main); min-height: 100vh; }
+        .main-content { background: var(--bg-main); }
 
         /* ===== SIDEBAR ===== */
         .sidebar-bg {
@@ -128,12 +161,25 @@ if (isset($_GET['logout'])) {
             transition: all 0.3s ease; opacity: 0; visibility: hidden;
         }
         .sidebar-overlay.active { opacity: 1; visibility: visible; }
+
+        /* Page Loader */
+        #pageLoader {
+            position: fixed; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #6366f1, #38bdf8);
+            z-index: 9999; transform: translateX(-100%); transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        #pageLoader.loading { transform: translateX(-30%); }
+        #pageLoader.finish { transform: translateX(0); }
+
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="bg-slate-50 overflow-hidden h-screen flex flex-col">
+    <div id="pageLoader"></div>
+
 
     <!-- Mobile Header -->
-    <header class="md:hidden flex items-center justify-between px-5 py-4 bg-[#0f172a] shadow-lg shadow-blue-900/10 sticky top-0 z-30">
+    <header class="md:hidden flex items-center justify-between px-5 py-4 bg-[#0f172a] shadow-lg shadow-blue-900/10 z-30 flex-shrink-0">
         <div class="flex items-center gap-3">
              <div class="w-8 h-8 rounded-xl bg-indigo-500 flex items-center justify-center text-white">
                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
@@ -149,10 +195,10 @@ if (isset($_GET['logout'])) {
     <!-- Overlay Backdrop -->
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 
-    <div class="flex min-h-screen">
+    <div class="flex flex-1 overflow-hidden">
         <!-- SIDEBAR -->
         <aside id="sidebar" 
-               class="sidebar-bg fixed inset-y-0 left-0 z-50 w-72 transform -translate-x-full transition-transform duration-300 md:static md:translate-x-0 md:inset-auto md:w-64 flex flex-col h-screen overflow-y-auto">
+               class="sidebar-bg fixed inset-y-0 left-0 z-50 w-72 transform -translate-x-full transition-transform duration-300 md:static md:translate-x-0 md:inset-auto md:w-64 flex flex-col h-full overflow-hidden flex-shrink-0">
 
             <!-- Brand -->
             <div class="px-5 pt-6 pb-4 flex items-center gap-3 relative z-20">
@@ -166,47 +212,47 @@ if (isset($_GET['logout'])) {
             </div>
 
             <!-- Navigation -->
-            <nav class="flex-1 overflow-y-auto custom-scrollbar pb-2 relative z-20">
+            <nav class="flex-1 overflow-y-auto sidebar-scrollbar pb-2 relative z-20">
 
                 <!-- Main -->
                 <div class="sidebar-section-label">Menu Utama</div>
 
-                <a href="<?php echo route('dashboard'); ?>" class="nav-item <?php echo $page==='dashboard'?'active':''; ?>">
+                <a href="<?php echo route('dashboard'); ?>" class="nav-item <?php echo $page==='dashboard'?'active':''; ?>" data-nav="dashboard">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                     </span>
                     Dashboard
                 </a>
 
-                <a href="<?php echo route('calendar'); ?>" class="nav-item <?php echo $page==='calendar'?'active':''; ?>">
+                <a href="<?php echo route('calendar'); ?>" class="nav-item <?php echo $page==='calendar'?'active':''; ?>" data-nav="calendar">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </span>
                     Kalender
                 </a>
 
-                <a href="<?php echo route('notes'); ?>" class="nav-item <?php echo $page==='notes'?'active':''; ?>">
+                <a href="<?php echo route('notes'); ?>" class="nav-item <?php echo $page==='notes'?'active':''; ?>" data-nav="notes">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     </span>
                     Catatan
                 </a>
 
-                <a href="<?php echo route('documents'); ?>" class="nav-item <?php echo $page==='documents'?'active':''; ?>">
+                <a href="<?php echo route('documents'); ?>" class="nav-item <?php echo $page==='documents'?'active':''; ?>" data-nav="documents">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                     </span>
                     Dokumen
                 </a>
 
-                <a href="<?php echo route('projects'); ?>" class="nav-item <?php echo $page==='projects'?'active':''; ?>">
+                <a href="<?php echo route('projects'); ?>" class="nav-item <?php echo $page==='projects'?'active':''; ?>" data-nav="projects">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
                     </span>
                     Proyek (Kanban)
                 </a>
 
-                <a href="<?php echo route('activities'); ?>" class="nav-item <?php echo $page==='activities'?'active':''; ?>">
+                <a href="<?php echo route('activities'); ?>" class="nav-item <?php echo $page==='activities'?'active':''; ?>" data-nav="activities">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </span>
@@ -214,7 +260,7 @@ if (isset($_GET['logout'])) {
                 </a>
 
                 <?php if (getSetting('enable_chat', '1') === '1'): ?>
-                <a href="<?php echo route('chat'); ?>" class="nav-item <?php echo $page==='chat'?'active':''; ?>">
+                <a href="<?php echo route('chat'); ?>" class="nav-item <?php echo $page==='chat'?'active':''; ?>" data-nav="chat">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
                     </span>
@@ -235,14 +281,14 @@ if (isset($_GET['logout'])) {
                 <!-- Account -->
                 <div class="sidebar-section-label">Akun Saya</div>
 
-                <a href="<?php echo route('profile'); ?>" class="nav-item <?php echo $page==='profile'?'active':''; ?>">
+                <a href="<?php echo route('profile'); ?>" class="nav-item <?php echo $page==='profile'?'active':''; ?>" data-nav="profile">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
                     Profil
                 </a>
 
-                <a href="<?php echo route('reset-password'); ?>" class="nav-item <?php echo $page==='reset-password'?'active':''; ?>">
+                <a href="<?php echo route('reset-password'); ?>" class="nav-item <?php echo $page==='reset-password'?'active':''; ?>" data-nav="reset-password">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </span>
@@ -253,28 +299,28 @@ if (isset($_GET['logout'])) {
                 <div class="sidebar-divider"></div>
                 <div class="sidebar-section-label">Administrasi</div>
 
-                <a href="<?php echo route('admin'); ?>" class="nav-item <?php echo $page==='admin'?'active':''; ?>">
+                <a href="<?php echo route('admin'); ?>" class="nav-item <?php echo $page==='admin'?'active':''; ?>" data-nav="admin">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </span>
                     Users
                 </a>
 
-                <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>">
+                <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>" data-nav="backup">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     </span>
                     Backup
                 </a>
 
-                <a href="<?php echo route('cache'); ?>" class="nav-item <?php echo $page==='cache'?'active':''; ?>">
+                <a href="<?php echo route('cache'); ?>" class="nav-item <?php echo $page==='cache'?'active':''; ?>" data-nav="cache">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                     </span>
                     Cache
                 </a>
 
-                <a href="<?php echo route('settings'); ?>" class="nav-item <?php echo $page==='settings'?'active':''; ?>">
+                <a href="<?php echo route('settings'); ?>" class="nav-item <?php echo $page==='settings'?'active':''; ?>" data-nav="settings">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </span>
@@ -291,7 +337,8 @@ if (isset($_GET['logout'])) {
                 ? 'uploads/avatars/' . $profilePhoto
                 : getAvatarDataUri($display_name, 40);
             ?>
-            <div class="relative z-20 pt-2 border-t border-white/10">
+            <div class="relative z-20 pt-2 border-t border-white/10 flex-shrink-0">
+
                 <div class="sidebar-user-card flex items-center gap-3">
                     <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-9 h-9 rounded-xl border border-white/20 object-cover flex-shrink-0" />
                     <div class="flex-1 min-w-0">
@@ -309,39 +356,164 @@ if (isset($_GET['logout'])) {
             </div>
         </aside>
 
-    <!-- Main Content -->
-    <main class="flex-1 overflow-auto bg-stone-50" style="min-width:0">
-        <?php
-        // Simple Page Router
-        switch($page) {
-            case 'dashboard': include 'pages/dashboard.php'; break;
-            case 'calendar': include 'pages/calendar.php'; break;
-            case 'notes': include 'pages/notes.php'; break;
-            case 'documents': include 'pages/documents.php'; break;
-            case 'projects': include 'pages/projects.php'; break;
-            case 'activities': include 'pages/activities.php'; break;
-            case 'chat': include 'pages/chat.php'; break;
-            case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
-            case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
-            case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
-            case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;
-            case 'profile': include 'pages/profile.php'; break;
-            case 'reset-password': include 'pages/reset-password.php'; break;
-            default: include 'pages/dashboard.php';
-        }
-        ?>
+    <!-- Main Content Area -->
+    <main class="flex-1 overflow-hidden flex flex-col" style="min-width:0">
+        <div id="ajaxContent" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+            <?php
+            // Simple Page Router
+            switch($page) {
+                case 'dashboard': include 'pages/dashboard.php'; break;
+                case 'calendar': include 'pages/calendar.php'; break;
+                case 'notes': include 'pages/notes.php'; break;
+                case 'documents': include 'pages/documents.php'; break;
+                case 'projects': include 'pages/projects.php'; break;
+                case 'activities': include 'pages/activities.php'; break;
+                case 'chat': include 'pages/chat.php'; break;
+                case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
+                case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
+                case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
+                case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;
+                case 'profile': include 'pages/profile.php'; break;
+                case 'reset-password': include 'pages/reset-password.php'; break;
+                default: include 'pages/dashboard.php';
+            }
+            ?>
+            <footer class="bg-white border-t border-stone-200 py-4 px-6 mt-auto">
+                <div class="text-center">
+                    <p class="text-stone-400 text-sm font-medium">© 2026 TaskFlow. Dibuat oleh Habib Frambudi</p>
+                </div>
+            </footer>
+        </div>
     </main>
 
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-stone-200 py-4 px-6">
-        <div class="text-center">
-            <p class="text-stone-400 text-sm font-medium">© 2026 TaskFlow. Dibuat oleh Habib Frambudi</p>
-        </div>
-    </footer>
-
 <script>
+// AJAX Navigation System
+function loadPage(url, pushState = true) {
+    const loader = document.getElementById('pageLoader');
+    const content = document.getElementById('ajaxContent');
+    
+    loader.classList.add('loading');
+    
+    fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => {
+        if (res.redirected) {
+            window.location.href = res.url;
+            return;
+        }
+        return res.text();
+    })
+    .then(html => {
+        if (!html) return;
+        const content = document.getElementById('ajaxContent');
+        content.innerHTML = html;
+        executeScripts(content);
+        content.scrollTop = 0;
+        
+        // Update URL
+        if (pushState) history.pushState({url: url}, '', url);
+        
+        // Update active menu
+        const urlObj = new URL(url, window.location.origin);
+        const page = urlObj.searchParams.get('page') || 'dashboard';
+        document.querySelectorAll('.nav-item').forEach(el => {
+            el.classList.toggle('active', el.getAttribute('data-nav') === page);
+        });
+
+        loader.classList.add('finish');
+        setTimeout(() => {
+            loader.classList.remove('loading', 'finish');
+        }, 300);
+    })
+    .catch(err => {
+        console.error('AJAX Load Error:', err);
+        loader.classList.remove('loading');
+    });
+}
+
+function executeScripts(container) {
+    const scripts = container.querySelectorAll('script');
+    scripts.forEach(oldScript => {
+        const newScript = document.createElement('script');
+        Array.from(oldScript.attributes).forEach(attr => {
+            newScript.setAttribute(attr.name, attr.value);
+        });
+        if (oldScript.src) {
+            // If it has a src, we need to load it synchronously or handle its load
+            newScript.src = oldScript.src;
+        } else {
+            newScript.textContent = oldScript.textContent;
+        }
+        oldScript.parentNode.replaceChild(newScript, oldScript);
+    });
+}
+
+// Intercept all internal links
+document.addEventListener('click', e => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.includes('logout')) return;
+    if (href.startsWith('http') && !href.includes(window.location.host)) return;
+    
+    // Check if it's an internal page link
+    if (href.includes('index.php?page=') || href === 'index.php') {
+        e.preventDefault();
+        loadPage(href);
+        if (window.innerWidth < 768) closeSidebar();
+    }
+});
+
+// Intercept all forms for AJAX
+document.addEventListener('submit', e => {
+    const form = e.target;
+    // Don't intercept if specified
+    if (form.getAttribute('data-no-ajax')) return;
+    
+    e.preventDefault();
+    const loader = document.getElementById('pageLoader');
+    const content = document.getElementById('ajaxContent');
+    loader.classList.add('loading');
+    
+    const formData = new FormData(form);
+    const url = form.getAttribute('action') || window.location.href;
+    const method = (form.getAttribute('method') || 'POST').toUpperCase();
+    
+    fetch(url, {
+        method: method,
+        body: method === 'POST' ? formData : null,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(res => res.text())
+    .then(html => {
+        if (!html) return;
+        const content = document.getElementById('ajaxContent');
+        content.innerHTML = html;
+        executeScripts(content);
+        content.scrollTop = 0;
+        loader.classList.add('finish');
+        setTimeout(() => {
+            loader.classList.remove('loading', 'finish');
+        }, 300);
+    })
+    .catch(err => {
+        console.error('Form AJAX Error:', err);
+        loader.classList.remove('loading');
+    });
+});
+
+window.addEventListener('popstate', e => {
+    if (e.state && e.state.url) {
+        loadPage(e.state.url, false);
+    } else {
+        location.reload();
+    }
+});
+
 function toggleSidebar() {
     var sidebar = document.getElementById('sidebar');
     var overlay = document.getElementById('sidebarOverlay');
@@ -368,48 +540,29 @@ function closeSidebar() {
     document.getElementById('iconMenu').style.display  = '';
     document.getElementById('iconClose').style.display = 'none';
 }
-// Auto-close when clicking a nav link on mobile
-document.querySelectorAll('#sidebar .nav-item').forEach(function(el) {
-    el.addEventListener('click', function() {
-        if (window.innerWidth < 768) closeSidebar();
-    });
-});
-</script>
 
-<!-- Notification Audio -->
-<audio id="notifSound" preload="auto">
-    <source src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZTU4LjI5LjEwMAAAAAAAAAAAAAAA//MUxAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUxAsAAANIAAAAAE1hZ2ljIFNvdW5kIC0gRGluZyAtIDEyOCBrYnBzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//MUxBsAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUxBsAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" type="audio/mp3">
-</audio>
-
-<script>
 <?php if (getSetting('enable_chat', '1') === '1'): ?>
 let lastUnreadCount = <?php echo countUnreadMessages($user_id); ?>;
-
 function updateChatBadge() {
-    fetch('api_chat.php?action=count_unread')
+    fetch('api_chat.php?action=count_unread', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(res => res.json())
         .then(data => {
             const badge = document.getElementById('unreadChatBadge');
             if (badge) {
-                // Play sound and show Desktop notification if new message arrives
                 if (data.unread_count > lastUnreadCount) {
-                    // Sound
                     const sound = document.getElementById('notifSound');
                     if (sound) sound.play().catch(e => console.log('Audio play blocked:', e));
-
-                    // Desktop Notification
                     if (Notification.permission === "granted") {
                         new Notification("TaskFlow Pro", {
                             body: "Pesan baru masuk! Klik untuk baca.",
                             icon: "favicon.ico"
                         }).onclick = function() {
                             window.focus();
-                            location.href = 'index.php?page=chat';
+                            loadPage('index.php?page=chat');
                         };
                     }
                 }
                 lastUnreadCount = data.unread_count;
-
                 if (data.unread_count > 0) {
                     badge.innerText = data.unread_count;
                     badge.style.display = 'flex';
@@ -419,8 +572,6 @@ function updateChatBadge() {
             }
         }).catch(e => console.log('Chat badge error:', e));
 }
-
-// Request Desktop Notification Permission
 if (Notification.permission !== "granted" && Notification.permission !== "denied") {
     Notification.requestPermission();
 }
@@ -428,5 +579,6 @@ setInterval(updateChatBadge, 15000);
 updateChatBadge(); 
 <?php endif; ?>
 </script>
+
 </body>
 </html>
