@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/admin.php
 $stmt = $pdo->query("SELECT * FROM users ORDER BY created_at DESC");
 $users = $stmt->fetchAll();

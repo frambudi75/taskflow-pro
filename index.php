@@ -1,6 +1,7 @@
 <?php
 // index.php
 require_once 'config.php';
+define('IN_APP', true);
 
 ob_start();
 
@@ -120,9 +121,6 @@ if (isset($_GET['logout'])) {
             transition: all 0.2s ease;
         }
         .sidebar-logout-btn:hover { background: rgba(239,68,68,0.2); color: #fff; }
-            background: rgba(239,68,68,0.2);
-            color: #fecaca;
-        }
         /* Mobile Overlaybackdrop */
         .sidebar-overlay {
             position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6);
@@ -376,6 +374,8 @@ document.querySelectorAll('#sidebar .nav-item').forEach(function(el) {
         if (window.innerWidth < 768) closeSidebar();
     });
 });
+</script>
+
 <!-- Notification Audio -->
 <audio id="notifSound" preload="auto">
     <source src="data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZTU4LjI5LjEwMAAAAAAAAAAAAAAA//MUxAAAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUxAsAAANIAAAAAE1hZ2ljIFNvdW5kIC0gRGluZyAtIDEyOCBrYnBzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//MUxBsAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV//MUxBsAAANIAAAAAExBTUUzLjEwMFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV" type="audio/mp3">
@@ -424,7 +424,7 @@ function updateChatBadge() {
 if (Notification.permission !== "granted" && Notification.permission !== "denied") {
     Notification.requestPermission();
 }
-setInterval(updateChatBadge, 3000); 
+setInterval(updateChatBadge, 15000); 
 updateChatBadge(); 
 <?php endif; ?>
 </script>

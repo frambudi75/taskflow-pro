@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/backup.php
 if (!isAdmin()) {
     die("Akses Ditolak");

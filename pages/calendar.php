@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/calendar.php
 $current_month = isset($_GET['month']) ? $_GET['month'] : date('Y-m');
 
@@ -11,7 +12,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_todo'])) {
             $stmt = $pdo->prepare("INSERT INTO todos (user_id, title, todo_date, completed, status) VALUES (?, ?, ?, 0, 'todo')");
             $stmt->execute([$_SESSION['user_id'], $title, $date]);
             $todo_id = $pdo->lastInsertId();
-            logActivity("Menambahkan tugas baru: " . $title, "todo", $todo_id);
+            
+            // Log Activity with Metadata
+            logActivity("Menambahkan tugas baru: " . $title, "todo", $todo_id, ['date' => $date]);
+            
+            // Push Notification Integration
+            $usrStmt = $pdo->prepare("SELECT email, telegram_chat_id, display_name FROM users WHERE id = ?");
+            $usrStmt->execute([$_SESSION['user_id']]);
+            $userDt = $usrStmt->fetch();
+            
+            if ($userDt) {
+                $msgBody = "Halo " . $userDt['display_name'] . ",\n\nTugas baru telah ditambahkan ke Kalender Kerja Anda:\n\n*Judul:* " . $title . "\n*Tanggal:* " . \date('d M Y', \strtotime($date)) . "\n\nTerus produktif!\nTaskFlow Pro";
+                
+                // Telegram Notification
+                if (!empty($userDt['telegram_chat_id'])) {
+                    sendTelegramNotif($userDt['telegram_chat_id'], nl2br($msgBody));
+                }
+                
+                // Email Notification
+                if (!empty($userDt['email'])) {
+                    sendEmailNotif($userDt['email'], "Tugas Baru: " . $title, nl2br($msgBody));
+                }
+            }
         }
         header("Location: index.php?page=calendar&month=" . $current_month);
         exit;
@@ -28,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         $stmt = $pdo->prepare("UPDATE todos SET status = ?, completed = ? WHERE id = ? AND user_id = ?");
         $stmt->execute([$new_status, $is_completed, $todo_id, $_SESSION['user_id']]);
         
-        logActivity("Mengubah status tugas menjadi " . strtoupper($new_status), "todo", $todo_id);
+        logActivity("Mengubah status tugas menjadi " . strtoupper($new_status), "todo", $todo_id, ['new_status' => $new_status]);
         header("Location: index.php?page=calendar&month=" . $current_month . ($selected_date ? "&date=".$selected_date : ""));
         exit;
     }
@@ -40,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_todo'])) {
         $todo_id = (int)$_POST['todo_id'];
         $stmt = $pdo->prepare("DELETE FROM todos WHERE id = ? AND user_id = ?");
         $stmt->execute([$todo_id, $_SESSION['user_id']]);
-        logActivity("Menghapus tugas", "todo", $todo_id);
+        logActivity("Menghapus tugas", "todo", $todo_id, ['action' => 'delete']);
         header("Location: index.php?page=calendar&month=" . $current_month);
         exit;
     }

@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/dashboard.php - Main Dashboard
 $user_id = $_SESSION['user_id'];
 

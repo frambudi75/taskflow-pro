@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/reset-password.php
 if (!isLoggedIn()) {
     header('Location: login.php');

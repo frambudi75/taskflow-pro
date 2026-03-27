@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/documents.php
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 

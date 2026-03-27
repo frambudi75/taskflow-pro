@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/chat.php
 if (!isLoggedIn()) exit;
 

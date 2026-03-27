@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/profile.php - Edit Profile
 if (!isLoggedIn()) {
     header('Location: login.php');

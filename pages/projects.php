@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/projects.php - Kanban Board
 $user_id = $_SESSION['user_id'];
 
@@ -12,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
         $stmt = $pdo->prepare("UPDATE todos SET status = ?, completed = ? WHERE id = ? AND user_id = ?");
         $stmt->execute([$new_status, $is_completed, $todo_id, $user_id]);
         
-        logActivity("Mengubah status tugas #" . $todo_id . " menjadi " . strtoupper($new_status), "todo", $todo_id);
+        logActivity("Mengubah status tugas #" . $todo_id . " menjadi " . strtoupper($new_status), "todo", $todo_id, ['new_status' => $new_status]);
         
         if (!isset($_SERVER['HTTP_X_REQUESTED_WITH'])) {
             header("Location: index.php?page=projects");

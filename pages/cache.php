@@ -1,4 +1,5 @@
 <?php
+if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/cache.php - Cache Management Panel
 
 if (!isAdmin()) {
