@@ -76,10 +76,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_doc'])) {
 
 // Helper: file-type icon & color
 function docIconInfo($mime) {
-    if (str_starts_with($mime, 'image/')) return ['color'=>'#0ea5e9','bg'=>'#e0f2fe','icon'=>'image'];
+    if (strncmp($mime, 'image/', 6) === 0) return ['color'=>'#0ea5e9','bg'=>'#e0f2fe','icon'=>'image'];
     if ($mime === 'application/pdf')       return ['color'=>'#ef4444','bg'=>'#fee2e2','icon'=>'pdf'];
-    if (str_contains($mime, 'word'))       return ['color'=>'#3b82f6','bg'=>'#dbeafe','icon'=>'doc'];
-    if (str_contains($mime, 'sheet') || str_contains($mime, 'excel')) return ['color'=>'#10b981','bg'=>'#dcfce7','icon'=>'sheet'];
+    if (strpos($mime, 'word') !== false)       return ['color'=>'#3b82f6','bg'=>'#dbeafe','icon'=>'doc'];
+    if (strpos($mime, 'sheet') !== false || strpos($mime, 'excel') !== false) return ['color'=>'#10b981','bg'=>'#dcfce7','icon'=>'sheet'];
     if ($mime === 'text/plain')            return ['color'=>'#64748b','bg'=>'#f1f5f9','icon'=>'text'];
     return ['color'=>'#8b5cf6','bg'=>'#ede9fe','icon'=>'file'];
 }

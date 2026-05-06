@@ -1,5 +1,18 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
+
+// PHP 8.0 Polyfills for backward compatibility (PHP 7.4)
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle) {
+        return (string)$needle !== '' && strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
+}
+if (!function_exists('str_contains')) {
+    function str_contains($haystack, $needle) {
+        return $needle !== '' && mb_strpos($haystack, $needle) !== false;
+    }
+}
+
 // config.php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
@@ -45,7 +58,7 @@ function route($page) {
         'backup' => 'index.php?page=backup',
         'cache' => 'index.php?page=cache',
         'notif-harian' => 'notif_harian.php',
-        'test-mail' => 'test_mail.php',
+
         'chat' => 'index.php?page=chat',
         'logout' => 'index.php?logout=1'
     ];

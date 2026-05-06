@@ -1,4 +1,4 @@
-FROM php:7.4-apache
+FROM php:8.2-apache
 
 # Install PDO MySQL extension
 RUN docker-php-ext-install pdo_mysql
@@ -12,8 +12,8 @@ WORKDIR /var/www/html
 # Copy application files
 COPY . /var/www/html/
 
-# Set permissions for uploads folder
-RUN chown -R www-data:www-data /var/www/html/uploads
+# Set permissions for required folders
+RUN chown -R www-data:www-data /var/www/html/uploads /var/www/html/cache /var/www/html/logs
 
 # Expose port 80
 EXPOSE 80
