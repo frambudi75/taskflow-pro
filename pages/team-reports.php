@@ -1881,9 +1881,3 @@ if ($print_view) {
     };
 })();
 </script>
-dal = document.getElementById('teamReportModal');
-        modal.classList.add('hidden');
-        modal.style.display = 'none';
-    };
-})();
-</script>
