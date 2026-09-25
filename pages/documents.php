@@ -551,7 +551,7 @@ function docSvgIcon($type, $color) {
         viewer.innerHTML   = '';
         viewer.style.background = '#f8fafc';
 
-        const serveUrl = BASE_URL + 'serve_file.php?file=' + encodeURIComponent(filePath);
+        const serveUrl = 'serve_file.php?file=' + encodeURIComponent(filePath);
 
         if (fileType.startsWith('image/')) {
             viewer.innerHTML = `<img src="${serveUrl}" alt="Preview ${escHtml(fileName)}" style="max-width:100%;max-height:500px;object-fit:contain;border-radius:12px">`;

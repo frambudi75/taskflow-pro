@@ -32,28 +32,10 @@ $basename = basename($abs_path);
 $isAllowed = false;
 $originalName = $basename;
 
-// 1. Check Document Ownership or Shared Access
-$stmt = $pdo->prepare("
-    SELECT d.id, d.name, d.file_type 
-    FROM documents d 
-    LEFT JOIN document_shares ds ON ds.document_id = d.id AND ds.shared_with_user_id = ?
-    WHERE (d.user_id = ? OR ds.id IS NOT NULL" . (isAdmin() ? " OR 1=1" : "") . ") 
-    AND d.file_path LIKE ?
-");
-$stmt->execute([$user_id, $user_id, '%' . $basename]);
-$doc = $stmt->fetch();
-
-if ($doc) {
+// 1. Public authenticated assets: Settings Logo, Avatars, and Daily Report Photos
+if (strpos($file, 'uploads/settings/') === 0 || strpos($file, 'uploads/avatars/') === 0) {
     $isAllowed = true;
-    if (!empty($doc['name'])) {
-        $ext = pathinfo($abs_path, PATHINFO_EXTENSION);
-        $originalName = $doc['name'];
-        if ($ext && !str_ends_with(strtolower($originalName), '.' . strtolower($ext))) {
-            $originalName .= '.' . $ext;
-        }
-    }
-} elseif (strpos($file, 'uploads/avatars/') === 0) {
-    // Avatars are accessible to logged in users
+} elseif (strpos($file, '/reports/') !== false || strpos($file, 'uploads/reports/') === 0) {
     $isAllowed = true;
 } elseif (strpos($file, 'uploads/chat/') === 0) {
     // Chat attachments accessible to sender, receiver, or admin
@@ -67,12 +49,34 @@ if ($doc) {
         $isAllowed = true;
     }
 } else {
-    // Check Daily Reports photo ownership
-    $repStmt = $pdo->prepare("SELECT id, title FROM daily_reports WHERE (user_id = ?" . (isAdmin() ? " OR 1=1" : "") . ") AND photo_path LIKE ?");
-    $repStmt->execute([$user_id, '%' . $basename]);
-    if ($rep = $repStmt->fetch()) {
+    // Check Document Ownership or Shared Access
+    $stmt = $pdo->prepare("
+        SELECT d.id, d.name, d.file_type 
+        FROM documents d 
+        LEFT JOIN document_shares ds ON ds.document_id = d.id AND ds.shared_with_user_id = ?
+        WHERE (d.user_id = ? OR ds.id IS NOT NULL" . (isAdmin() ? " OR 1=1" : "") . ") 
+        AND d.file_path LIKE ?
+    ");
+    $stmt->execute([$user_id, $user_id, '%' . $basename]);
+    $doc = $stmt->fetch();
+
+    if ($doc) {
         $isAllowed = true;
-        $originalName = $rep['title'];
+        if (!empty($doc['name'])) {
+            $ext = pathinfo($abs_path, PATHINFO_EXTENSION);
+            $originalName = $doc['name'];
+            if ($ext && !str_ends_with(strtolower($originalName), '.' . strtolower($ext))) {
+                $originalName .= '.' . $ext;
+            }
+        }
+    } else {
+        // Fallback: Check Daily Reports photo path
+        $repStmt = $pdo->prepare("SELECT id, title FROM daily_reports WHERE photo_path LIKE ?");
+        $repStmt->execute(['%' . $basename . '%']);
+        if ($rep = $repStmt->fetch()) {
+            $isAllowed = true;
+            $originalName = $rep['title'];
+        }
     }
 }
 

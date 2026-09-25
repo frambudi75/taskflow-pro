@@ -16,29 +16,50 @@ if (!function_exists('str_contains')) {
 // config.php
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
+// HTTPS Detection helper (supports reverse proxy, Cloudflare, Nginx SSL termination)
+function isHttps() {
+    if (!empty($_SERVER['HTTPS']) && strtolower($_SERVER['HTTPS']) !== 'off') {
+        return true;
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_PROTO']) && strtolower($_SERVER['HTTP_X_FORWARDED_PROTO']) === 'https') {
+        return true;
+    }
+    if (!empty($_SERVER['HTTP_X_FORWARDED_SSL']) && strtolower($_SERVER['HTTP_X_FORWARDED_SSL']) === 'on') {
+        return true;
+    }
+    if (!empty($_SERVER['HTTP_FRONT_END_HTTPS']) && strtolower($_SERVER['HTTP_FRONT_END_HTTPS']) !== 'off') {
+        return true;
+    }
+    if (!empty($_SERVER['SERVER_PORT']) && (int)$_SERVER['SERVER_PORT'] === 443) {
+        return true;
+    }
+    return false;
+}
+
 // Base URL and Routing Helper
 function baseUrl($path = '') {
     // 1. Try to get from database settings first
     $appUrl = getSetting('app_url');
     if (!empty($appUrl)) {
+        if (isHttps() && str_starts_with($appUrl, 'http://')) {
+            $appUrl = 'https://' . substr($appUrl, 7);
+        }
         return rtrim($appUrl, '/') . '/' . ltrim($path, '/');
     }
 
-    // 2. Fallback to auto-detection (Works for Web, might fail for CLI)
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "http://";
+    // 2. Fallback to auto-detection (Works for Web, reverse proxy & CLI)
+    $protocol = isHttps() ? "https://" : "http://";
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     
     // Determine the base folder (e.g., /taskflow/)
-    $script_dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+    $script_dir = rtrim(dirname($_SERVER['SCRIPT_NAME'] ?? ''), '/\\');
     
     // On CLI, SCRIPT_NAME might be absolute filesystem path. Try to cleanup.
     if (php_sapi_name() === 'cli' || empty($_SERVER['HTTP_HOST'])) {
-        // If it's a server path, we can't reliably guess the URL without a setting.
-        // We'll just return the relative path as a fallback.
         return '/' . ltrim($path, '/');
     }
     
-    return $protocol . $host . $script_dir . '/' . ltrim($path, '/');
+    return $protocol . $host . ($script_dir ? $script_dir : '') . '/' . ltrim($path, '/');
 }
 
 function route($page) {
