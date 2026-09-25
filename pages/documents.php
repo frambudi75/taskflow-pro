@@ -168,14 +168,25 @@ $system_users = $uStmt->fetchAll();
 // Active documents to display based on selected tab
 $documents = $tab === 'shared' ? $shared_documents : $my_documents;
 
-// Helper: file-type icon & color
-function docIconInfo($mime) {
-    if (strncmp($mime, 'image/', 6) === 0) return ['color'=>'#0ea5e9','bg'=>'#e0f2fe','icon'=>'image'];
-    if ($mime === 'application/pdf')       return ['color'=>'#ef4444','bg'=>'#fee2e2','icon'=>'pdf'];
-    if (strpos($mime, 'word') !== false)   return ['color'=>'#3b82f6','bg'=>'#dbeafe','icon'=>'doc'];
-    if (strpos($mime, 'sheet') !== false || strpos($mime, 'excel') !== false) return ['color'=>'#10b981','bg'=>'#dcfce7','icon'=>'sheet'];
-    if ($mime === 'text/plain')            return ['color'=>'#64748b','bg'=>'#f1f5f9','icon'=>'text'];
-    return ['color'=>'#8b5cf6','bg'=>'#ede9fe','icon'=>'file'];
+// Helper: file-type icon, badge & color
+function docIconInfo($mime, $filename = '') {
+    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+    if (strncmp($mime, 'image/', 6) === 0 || in_array($ext, ['jpg','jpeg','png','webp','gif','svg'])) {
+        return ['color'=>'#0284c7', 'bg'=>'#e0f2fe', 'badge_bg'=>'#0284c7', 'label'=> strtoupper($ext ?: 'IMG'), 'icon'=>'image'];
+    }
+    if ($mime === 'application/pdf' || $ext === 'pdf') {
+        return ['color'=>'#dc2626', 'bg'=>'#fee2e2', 'badge_bg'=>'#dc2626', 'label'=>'PDF', 'icon'=>'pdf'];
+    }
+    if (strpos($mime, 'word') !== false || in_array($ext, ['doc','docx'])) {
+        return ['color'=>'#2563eb', 'bg'=>'#dbeafe', 'badge_bg'=>'#2563eb', 'label'=>'DOC', 'icon'=>'doc'];
+    }
+    if (strpos($mime, 'sheet') !== false || strpos($mime, 'excel') !== false || in_array($ext, ['xls','xlsx','csv'])) {
+        return ['color'=>'#059669', 'bg'=>'#d1fae5', 'badge_bg'=>'#059669', 'label'=>'XLS', 'icon'=>'sheet'];
+    }
+    if ($mime === 'text/plain' || $ext === 'txt') {
+        return ['color'=>'#475569', 'bg'=>'#f1f5f9', 'badge_bg'=>'#475569', 'label'=>'TXT', 'icon'=>'text'];
+    }
+    return ['color'=>'#7c3aed', 'bg'=>'#ede9fe', 'badge_bg'=>'#7c3aed', 'label'=> strtoupper($ext ?: 'FILE'), 'icon'=>'file'];
 }
 
 function docSvgIcon($type, $color) {
@@ -266,13 +277,16 @@ function docSvgIcon($type, $color) {
         <!-- Document List Area (8 Columns) -->
         <div class="lg:col-span-8">
             <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+                <div class="px-6 py-4.5 bg-gradient-to-r from-slate-50/80 to-white border-b border-slate-100 flex items-center justify-between flex-wrap gap-2">
                     <div>
                         <h2 class="font-extrabold text-slate-900 text-base">
                             <?php echo $tab === 'shared' ? 'Dokumen Dibagikan ke Anda' : 'File Pribadi Anda'; ?>
                         </h2>
-                        <p class="text-xs text-slate-400"><?php echo count($documents); ?> file ditemukan</p>
+                        <p class="text-xs text-slate-400 font-medium">Berkas tersimpan aman dan terorganisir</p>
                     </div>
+                    <span class="px-3 py-1 rounded-full text-xs font-black bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-sm">
+                        <?php echo count($documents); ?> Berkas Tersedia
+                    </span>
                 </div>
 
                 <?php if (empty($documents)): ?>
@@ -288,72 +302,89 @@ function docSvgIcon($type, $color) {
                     </p>
                 </div>
                 <?php else: ?>
-                <div class="divide-y divide-slate-100">
+                <div class="p-4 sm:p-5 space-y-3">
                     <?php foreach($documents as $doc):
-                        $info    = docIconInfo($doc['file_type']);
-                        $iconSvg = docSvgIcon($info['icon'], $info['color']);
                         $clean_path = str_replace('\\', '/', $doc['file_path']);
+                        $info       = docIconInfo($doc['file_type'], $clean_path ?: $doc['name']);
+                        $iconSvg    = docSvgIcon($info['icon'], $info['color']);
                         $serve_view_url = 'serve_file.php?file=' . rawurlencode($clean_path);
                         $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
-                        $tags = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
-                        $is_owner = ((int)$doc['user_id'] === $user_id);
+                        $tags       = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
+                        $is_owner   = ((int)$doc['user_id'] === $user_id);
                     ?>
-                    <div class="group px-6 py-4.5 hover:bg-slate-50 transition-all flex items-center gap-4">
-                        <!-- Icon -->
-                        <div class="w-11 h-11 rounded-2xl flex items-center justify-center flex-shrink-0"
-                             style="background:<?php echo $info['bg']; ?>">
-                            <?php echo $iconSvg; ?>
-                        </div>
+                    <div class="group relative p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-500/5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        
+                        <!-- Left: File Icon & Metadata -->
+                        <div class="flex items-center gap-3.5 min-w-0 flex-1">
+                            <!-- Icon Box with Format Badge -->
+                            <div class="relative w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-sm border border-black/5"
+                                 style="background:<?php echo $info['bg']; ?>">
+                                <?php echo $iconSvg; ?>
+                                <span class="absolute -bottom-1 -right-1 text-[8px] font-black text-white px-1.5 py-0.5 rounded-md tracking-wider shadow-sm"
+                                      style="background:<?php echo $info['badge_bg']; ?>">
+                                    <?php echo $info['label']; ?>
+                                </span>
+                            </div>
 
-                        <!-- Info -->
-                        <div class="flex-1 min-w-0">
-                            <button type="button" onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                    class="text-left font-extrabold text-slate-900 text-sm hover:text-emerald-600 truncate block mb-1 transition-colors">
-                                <?php echo htmlspecialchars($doc['name']); ?>
-                            </button>
+                            <!-- Document Details -->
+                            <div class="min-w-0 flex-1">
+                                <button type="button" onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
+                                        class="text-left font-black text-slate-900 text-sm sm:text-[15px] group-hover:text-emerald-600 truncate block mb-1 transition-colors">
+                                    <?php echo htmlspecialchars($doc['name']); ?>
+                                </button>
 
-                            <div class="flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-400">
-                                <span><?php echo formatSize($doc['file_size']); ?></span>
-                                <span>·</span>
-                                <span><?php echo date('d M Y', strtotime($doc['upload_date'])); ?></span>
-                                
-                                <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
-                                <span>·</span>
-                                <span class="text-indigo-600 font-extrabold bg-indigo-50 px-1.5 py-0.5 rounded">Oleh: <?php echo htmlspecialchars($doc['owner_name']); ?></span>
-                                <?php endif; ?>
+                                <div class="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                                    <span class="inline-flex items-center gap-1 font-bold text-[11px] text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md">
+                                        <?php echo formatSize($doc['file_size']); ?>
+                                    </span>
+                                    <span class="text-slate-300">·</span>
+                                    <span class="text-[11px] font-medium text-slate-400">
+                                        <?php echo date('d M Y', strtotime($doc['upload_date'])); ?>
+                                    </span>
 
-                                <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
-                                <span>·</span>
-                                <span class="text-emerald-700 font-extrabold bg-emerald-50 px-1.5 py-0.5 rounded">Dibagikan ke <?php echo $doc['share_count']; ?> user</span>
-                                <?php endif; ?>
+                                    <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
+                                    <span class="text-slate-300">·</span>
+                                    <span class="text-indigo-700 font-extrabold bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md text-[10px]">
+                                        👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
+                                    </span>
+                                    <?php endif; ?>
 
-                                <?php foreach($tags as $tag): ?>
-                                <span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full text-emerald-800 bg-emerald-100">#<?php echo htmlspecialchars($tag); ?></span>
-                                <?php endforeach; ?>
+                                    <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
+                                    <span class="text-slate-300">·</span>
+                                    <span class="text-emerald-800 font-extrabold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md text-[10px]">
+                                        🔗 Dibagikan (<?php echo $doc['share_count']; ?>)
+                                    </span>
+                                    <?php endif; ?>
+
+                                    <?php foreach($tags as $tag): ?>
+                                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md text-emerald-800 bg-emerald-50 border border-emerald-200">#<?php echo htmlspecialchars($tag); ?></span>
+                                    <?php endforeach; ?>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Actions -->
-                        <div class="flex items-center gap-1">
+                        <!-- Right: Action Buttons (High-contrast, elegant) -->
+                        <div class="flex items-center gap-1.5 flex-shrink-0 self-end sm:self-center">
                             <!-- Preview Button -->
                             <button type="button" onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
                                     title="Lihat Pratinjau" aria-label="Preview dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                    class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    class="h-9 px-3 flex items-center gap-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-extrabold text-xs transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                <span>Lihat</span>
                             </button>
 
-                            <!-- Download Button (always delivers pristine uncorrupted file) -->
-                            <a href="<?php echo htmlspecialchars($serve_download_url); ?>" title="Download File" aria-label="Download dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                               class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                            <!-- Download Button -->
+                            <a href="<?php echo htmlspecialchars($serve_download_url); ?>" title="Unduh Berkas" aria-label="Download dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                               class="w-9 h-9 flex items-center justify-center rounded-xl bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                             </a>
 
                             <!-- Share Button (Only for Document Owner) -->
                             <?php if ($is_owner): ?>
                             <button type="button" onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>')"
-                                    title="Bagikan ke User Lain" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                    class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                    title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-50 hover:bg-sky-600 text-sky-700 hover:text-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                             </button>
                             <?php endif; ?>
 
@@ -361,8 +392,8 @@ function docSvgIcon($type, $color) {
                             <?php if ($is_owner || isAdmin()): ?>
                             <button type="button" onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
                                     title="Hapus Dokumen" aria-label="Hapus dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                    class="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors focus:outline-none focus:ring-2 focus:ring-rose-500">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    class="w-9 h-9 flex items-center justify-center rounded-xl bg-slate-100 hover:bg-rose-600 text-slate-400 hover:text-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>
                             <?php endif; ?>
                         </div>
