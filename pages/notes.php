@@ -57,71 +57,54 @@ $stmt->execute([$_SESSION['user_id']]);
 $notes = $stmt->fetchAll();
 
 $card_colors = [
-    ['bg' => '#fef9c3', 'accent' => '#ca8a04', 'border' => '#fde047'],
-    ['bg' => '#dbeafe', 'accent' => '#1d4ed8', 'border' => '#93c5fd'],
-    ['bg' => '#dcfce7', 'accent' => '#15803d', 'border' => '#86efac'],
-    ['bg' => '#fce7f3', 'accent' => '#be185d', 'border' => '#f9a8d4'],
-    ['bg' => '#ede9fe', 'accent' => '#6d28d9', 'border' => '#c4b5fd'],
-    ['bg' => '#ffedd5', 'accent' => '#c2410c', 'border' => '#fdba74'],
-    ['bg' => '#cffafe', 'accent' => '#0e7490', 'border' => '#67e8f9'],
+    ['bg' => '#fefce8', 'accent' => '#854d0e', 'border' => '#fde047'],
+    ['bg' => '#eff6ff', 'accent' => '#1e40af', 'border' => '#bfdbfe'],
     ['bg' => '#f0fdf4', 'accent' => '#166534', 'border' => '#bbf7d0'],
+    ['bg' => '#fdf2f8', 'accent' => '#9d174d', 'border' => '#fbcfe8'],
+    ['bg' => '#f5f3ff', 'accent' => '#5b21b6', 'border' => '#ddd6fe'],
+    ['bg' => '#fff7ed', 'accent' => '#9a3412', 'border' => '#fed7aa'],
+    ['bg' => '#ecfeff', 'accent' => '#155e75', 'border' => '#a5f3fc'],
+    ['bg' => '#f8fafc', 'accent' => '#334155', 'border' => '#cbd5e1'],
 ];
 ?>
 
 <style>
-.note-card { transition: all 0.3s cubic-bezier(.175,.885,.32,1.275); }
-.note-card:hover { transform: translateY(-6px) rotate(-0.5deg); box-shadow: 0 24px 48px rgba(0,0,0,0.12); }
-.note-card:nth-child(even):hover { transform: translateY(-6px) rotate(0.5deg); }
-.modal-overlay { backdrop-filter: blur(8px); }
+.note-card { transition: all 0.2s ease; }
+.note-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px rgba(0,0,0,0.08); }
+.modal-overlay { backdrop-filter: blur(4px); }
 </style>
 
 <div class="p-5 md:p-8 w-full">
 
-    <!-- ===== HERO HEADER ===== -->
-    <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"
-         style="background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 50%,#5b21b6 100%)">
-        <div class="absolute inset-0 pointer-events-none"
-             style="background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:40px 40px"></div>
-        <div class="absolute right-0 top-0 w-72 h-72 pointer-events-none"
-             style="background:radial-gradient(circle,rgba(167,139,250,0.25) 0%,transparent 70%);transform:translate(30%,-30%)"></div>
+    <div class="rounded-2xl p-7 md:p-9 mb-7 bg-indigo-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div class="relative z-10">
-            <div class="text-violet-300 text-[10px] font-black uppercase tracking-widest mb-2">Ide &amp; Inspirasi</div>
-            <h1 class="text-3xl md:text-4xl font-black text-white leading-tight mb-1">📝 Catatan &amp; Ide</h1>
-            <p class="text-violet-300 text-sm font-medium"><?php echo count($notes); ?> catatan tersimpan · Klik kartu untuk mengedit.</p>
+            <div class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-2">Dokumentasi &amp; Ide</div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Catatan dan Ide</h1>
+            <p class="text-indigo-200 text-sm font-medium"><?php echo count($notes); ?> catatan tersimpan · Klik kartu untuk mengedit.</p>
         </div>
         <div class="relative z-10 flex items-center gap-3 flex-shrink-0">
-            <!-- Search -->
             <div class="relative hidden md:block">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" id="searchNotes" placeholder="Cari catatan..." oninput="filterNotes(this.value)"
-                       class="pl-9 pr-4 py-2.5 text-sm font-medium w-48 rounded-2xl transition-all text-white"
-                       style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);outline:none"
-                       onfocus="this.style.background='rgba(255,255,255,0.18)'"
-                       onblur="this.style.background='rgba(255,255,255,0.1)'"
-                       placeholder="Cari catatan...">
+                       class="pl-9 pr-4 py-2.5 text-sm font-medium w-48 rounded-xl transition-all text-white bg-white/10 border border-white/20 focus:bg-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400">
             </div>
-            <!-- Add button -->
             <button onclick="openAddModal()"
-                    class="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all active:scale-95 text-white"
-                    style="background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.2)">
+                    class="min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm transition-all active:scale-95 text-white bg-indigo-600 hover:bg-indigo-700">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Catatan Baru
             </button>
         </div>
     </div>
 
-    <!-- ===== NOTES GRID ===== -->
     <?php if (empty($notes)): ?>
-        <div class="flex flex-col items-center justify-center py-32 text-center">
-            <div class="w-24 h-24 rounded-3xl flex items-center justify-center mb-6"
-                 style="background:linear-gradient(135deg,#ede9fe,#dbeafe)">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#a5b4fc" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <div class="flex flex-col items-center justify-center py-24 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-indigo-50 flex items-center justify-center mb-4">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h3 class="text-2xl font-black text-slate-900 mb-2">Halaman masih kosong</h3>
-            <p class="text-slate-400 mb-8">Mulai tulis ide pertama Anda!</p>
+            <h3 class="text-xl font-bold text-slate-900 mb-1">Belum ada catatan</h3>
+            <p class="text-slate-500 text-sm mb-6">Mulai tulis catatan atau draft ide pertama Anda.</p>
             <button onclick="openAddModal()"
-                    class="px-8 py-4 rounded-2xl font-bold text-white transition-all active:scale-95"
-                    style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 8px 24px rgba(99,102,241,0.35)">
+                    class="min-h-[44px] px-6 py-3 rounded-xl font-bold text-white text-sm bg-indigo-600 hover:bg-indigo-700 transition-colors">
                 + Buat Catatan Pertama
             </button>
         </div>
@@ -131,28 +114,28 @@ $card_colors = [
                 $color   = $card_colors[$idx % count($card_colors)];
                 $preview = strlen($note['content']) > 200 ? substr($note['content'], 0, 200) . '…' : $note['content'];
             ?>
-                <div class="note-card break-inside-avoid mb-6 rounded-3xl p-7 border cursor-pointer relative"
+                <div class="note-card break-inside-avoid mb-6 rounded-2xl p-6 border cursor-pointer relative"
                      style="background:<?php echo $color['bg']; ?>; border-color:<?php echo $color['border']; ?>;"
                      data-title="<?php echo strtolower(htmlspecialchars($note['title'])); ?>"
                      data-content="<?php echo strtolower(htmlspecialchars($note['content'])); ?>"
                      onclick="openEditModal(<?php echo $note['id']; ?>, <?php echo htmlspecialchars(json_encode($note['title'])); ?>, <?php echo htmlspecialchars(json_encode($note['content'])); ?>)">
-                    <div class="text-[9px] font-black uppercase tracking-[0.2em] mb-3"
-                         style="color:<?php echo $color['accent']; ?>; opacity:0.7">
+                    <div class="text-[10px] font-bold uppercase tracking-wider mb-2"
+                         style="color:<?php echo $color['accent']; ?>;">
                         <?php echo date('d M Y · H:i', strtotime($note['updated_at'])); ?>
                     </div>
-                    <h4 class="text-lg font-black text-slate-900 mb-3 leading-tight">
+                    <h4 class="text-base font-bold text-slate-900 mb-2 leading-snug">
                         <?php echo htmlspecialchars($note['title']); ?>
                     </h4>
-                    <p class="text-sm text-slate-700 leading-relaxed opacity-80">
+                    <p class="text-sm text-slate-800 leading-relaxed">
                         <?php echo nl2br(htmlspecialchars($preview)); ?>
                     </p>
-                    <div class="mt-5 pt-4 border-t flex items-center justify-between"
+                    <div class="mt-4 pt-3 border-t flex items-center justify-between"
                          style="border-color:<?php echo $color['border']; ?>">
-                        <span class="text-[9px] font-black uppercase tracking-widest"
+                        <span class="text-xs font-semibold"
                               style="color:<?php echo $color['accent']; ?>">Klik untuk edit</span>
-                        <div class="w-7 h-7 rounded-xl flex items-center justify-center"
+                        <div class="w-6 h-6 rounded-md flex items-center justify-center"
                              style="background:<?php echo $color['border']; ?>">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="<?php echo $color['accent']; ?>" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="<?php echo $color['accent']; ?>" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                         </div>
                     </div>
                 </div>
@@ -161,40 +144,37 @@ $card_colors = [
     <?php endif; ?>
 </div>
 
-<!-- ===== ADD NOTE MODAL ===== -->
 <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay bg-slate-900/50">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg p-8 md:p-10" onclick="event.stopPropagation()">
-        <div class="flex items-center justify-between mb-8">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-7 md:p-8" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="text-2xl font-black text-slate-900">Catatan Baru</h3>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Draft Cepat</p>
+                <h3 class="text-xl font-bold text-slate-900">Catatan Baru</h3>
+                <p class="text-slate-500 text-xs font-semibold mt-0.5">Tulis draf atau ide baru</p>
             </div>
-            <button onclick="closeAddModal()" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button onclick="closeAddModal()" aria-label="Tutup modal catatan baru" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <form method="POST" class="space-y-5">
+        <form method="POST" class="space-y-4">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="add_note" value="1">
             <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Judul</label>
-                <input type="text" name="title" required placeholder="Judul yang menarik..."
-                       class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                       style="focus:border-color:#6366f1">
+                <label for="newNoteTitle" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Judul</label>
+                <input type="text" name="title" id="newNoteTitle" required placeholder="Judul catatan..."
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
             </div>
             <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Konten</label>
-                <textarea name="content" placeholder="Tuangkan pikiran Anda di sini..." rows="8"
-                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-medium text-slate-700 focus:outline-none transition-all resize-none"></textarea>
+                <label for="newNoteContent" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Konten</label>
+                <textarea name="content" id="newNoteContent" placeholder="Tulis isi catatan di sini..." rows="7"
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-normal text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"></textarea>
             </div>
             <div class="flex gap-3 pt-2">
                 <button type="button" onclick="closeAddModal()"
-                        class="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">
+                        class="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all text-sm">
                     Batal
                 </button>
                 <button type="submit"
-                        class="flex-1 py-4 rounded-2xl font-bold text-white transition-all active:scale-95"
-                        style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 8px 20px rgba(99,102,241,0.3)">
+                        class="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all text-sm">
                     Simpan Catatan
                 </button>
             </div>
@@ -202,49 +182,47 @@ $card_colors = [
     </div>
 </div>
 
-<!-- ===== EDIT NOTE MODAL ===== -->
 <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-overlay bg-slate-900/50">
-    <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-lg p-8 md:p-10" onclick="event.stopPropagation()">
-        <div class="flex items-center justify-between mb-8">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg p-7 md:p-8" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between mb-6">
             <div>
-                <h3 class="text-2xl font-black text-slate-900">Edit Catatan</h3>
-                <p class="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">Perbarui ide Anda</p>
+                <h3 class="text-xl font-bold text-slate-900">Edit Catatan</h3>
+                <p class="text-slate-500 text-xs font-semibold mt-0.5">Perbarui isi catatan Anda</p>
             </div>
-            <button onclick="closeEditModal()" class="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <button onclick="closeEditModal()" aria-label="Tutup modal edit catatan" class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition-all">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-        <form method="POST" id="editNoteForm" class="space-y-5">
+        <form method="POST" id="editNoteForm" class="space-y-4">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="edit_note" value="1">
             <input type="hidden" name="note_id" id="editNoteId">
             <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Judul</label>
+                <label for="editNoteTitle" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Judul</label>
                 <input type="text" name="title" id="editNoteTitle" required
-                       class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-bold text-slate-900 focus:outline-none transition-all">
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all">
             </div>
             <div>
-                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Konten</label>
-                <textarea name="content" id="editNoteContent" rows="8"
-                          class="w-full bg-slate-50 border border-slate-200 rounded-2xl px-5 py-4 text-sm font-medium text-slate-700 focus:outline-none transition-all resize-none"></textarea>
+                <label for="editNoteContent" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Konten</label>
+                <textarea name="content" id="editNoteContent" rows="7"
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm font-normal text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none"></textarea>
             </div>
             <div class="flex gap-3 pt-2">
                 <form method="POST" id="deleteNoteForm" class="flex-none" onsubmit="return confirm('Hapus catatan ini?')">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="delete_note" value="1">
                     <input type="hidden" name="note_id" id="deleteNoteId">
-                    <button type="submit" class="px-5 py-4 rounded-2xl border border-red-100 text-red-500 font-bold hover:bg-red-50 transition-all">
+                    <button type="submit" aria-label="Hapus catatan" class="px-4 py-3 rounded-xl border border-red-200 text-red-600 font-bold hover:bg-red-50 transition-all">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
                     </button>
                 </form>
                 <button type="button" onclick="closeEditModal()"
-                        class="flex-1 py-4 rounded-2xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-50 transition-all">
+                        class="flex-1 py-3 rounded-xl border border-slate-200 text-slate-700 font-semibold hover:bg-slate-50 transition-all text-sm">
                     Batal
                 </button>
                 <button type="submit"
-                        class="flex-1 py-4 rounded-2xl font-bold text-white transition-all active:scale-95"
-                        style="background:linear-gradient(135deg,#6366f1,#4f46e5);box-shadow:0 8px 20px rgba(99,102,241,0.3)">
-                    Simpan
+                        class="flex-1 py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all text-sm">
+                    Simpan Perubahan
                 </button>
             </div>
         </form>

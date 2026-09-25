@@ -112,29 +112,22 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
 
 <div class="p-5 md:p-8 max-w-5xl mx-auto">
 
-    <!-- ===== HERO HEADER ===== -->
-    <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"
-         style="background:linear-gradient(135deg,#0f172a 0%,#1e3a5f 50%,#0369a1 100%)">
-        <div class="absolute inset-0 pointer-events-none"
-             style="background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:40px 40px"></div>
-        <div class="absolute right-0 top-0 w-72 h-72 pointer-events-none"
-             style="background:radial-gradient(circle,rgba(56,189,248,0.2) 0%,transparent 70%);transform:translate(30%,-30%)"></div>
+    <!-- Hero Header -->
+    <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950">
         <div class="relative z-10 flex items-center gap-5">
             <!-- Avatar preview in hero -->
-            <div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2"
-                 style="border-color:rgba(255,255,255,0.2);box-shadow:0 8px 24px rgba(0,0,0,0.3)">
+            <div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-sm">
                 <img id="avatarPreview" src="<?php echo $avatarUrl; ?>" alt="Avatar" class="w-full h-full object-cover">
             </div>
             <div>
                 <div class="text-sky-300 text-[10px] font-black uppercase tracking-widest mb-1">Akun Saya</div>
-                <h1 class="text-2xl md:text-3xl font-black text-white leading-tight">👤 Profil Pengguna</h1>
-                <p class="text-sky-300 text-sm font-medium mt-1"><?php echo htmlspecialchars($user['email']); ?></p>
+                <h1 class="text-2xl md:text-3xl font-black text-white leading-tight">Profil Pengguna</h1>
+                <p class="text-sky-200 text-sm font-medium mt-1"><?php echo htmlspecialchars($user['email']); ?></p>
             </div>
         </div>
         <div class="relative z-10 flex-shrink-0">
             <a href="?page=reset-password"
-               class="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white transition-all"
-               style="background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18)">
+               class="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white transition-all bg-white/10 hover:bg-white/15 border border-white/20 focus:outline-none focus:ring-2 focus:ring-sky-400">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Ubah Password
             </a>
@@ -144,15 +137,15 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
     <!-- Alerts -->
     <?php if ($error): ?>
     <div class="mb-5 flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl px-5 py-4">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p class="text-red-600 text-sm font-bold"><?php echo htmlspecialchars($error); ?></p>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b91c1c" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <p class="text-red-700 text-sm font-bold"><?php echo htmlspecialchars($error); ?></p>
     </div>
     <?php endif; ?>
 
     <?php if ($success): ?>
     <div class="mb-5 flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-2xl px-5 py-4">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-        <p class="text-emerald-700 text-sm font-bold"><?php echo htmlspecialchars($success); ?></p>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        <p class="text-emerald-800 text-sm font-bold"><?php echo htmlspecialchars($success); ?></p>
     </div>
     <?php endif; ?>
 
@@ -245,51 +238,47 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                             </span>
                             <input type="text" name="display_name"
-                                   value="<?php echo htmlspecialchars($user['display_name']); ?>" required
-                                   class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                                   style="font-family:inherit">
+                                    value="<?php echo htmlspecialchars($user['display_name']); ?>" required
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all">
                         </div>
                     </div>
 
                     <!-- Email -->
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Email</label>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">Email</label>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                             </span>
                             <input type="email" name="email"
-                                   value="<?php echo htmlspecialchars($user['email']); ?>" required
-                                   class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                                   style="font-family:inherit">
+                                    value="<?php echo htmlspecialchars($user['email']); ?>" required
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all">
                         </div>
                     </div>
 
                     <!-- Telegram Chat ID -->
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Telegram Chat ID</label>
-                            <a href="https://t.me/userinfobot" target="_blank" class="text-[9px] font-bold text-sky-500 hover:underline">Dapatkan ID Anda ↗</a>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Telegram Chat ID</label>
+                            <a href="https://t.me/userinfobot" target="_blank" class="text-[9px] font-bold text-sky-600 hover:underline">Dapatkan ID Anda ↗</a>
                         </div>
                         <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
+                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
                             </span>
                             <input type="text" name="telegram_chat_id"
-                                   value="<?php echo htmlspecialchars($user['telegram_chat_id'] ?? ''); ?>"
-                                   placeholder="Contoh: 12345678"
-                                   class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none transition-all"
-                                   style="font-family:inherit">
+                                    value="<?php echo htmlspecialchars($user['telegram_chat_id'] ?? ''); ?>"
+                                    placeholder="Contoh: 12345678"
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all">
                         </div>
-                        <p class="text-[10px] text-slate-400 mt-2">Untuk menerima notifikasi sistem di Telegram secara langsung.</p>
+                        <p class="text-[10px] text-slate-500 mt-2">Untuk menerima notifikasi sistem di Telegram secara langsung.</p>
                     </div>
                     <button type="submit"
-                            class="w-full py-4 rounded-2xl font-bold text-white transition-all active:scale-95 flex items-center justify-center gap-2"
-                            style="background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 8px 20px rgba(14,165,233,0.3)">
+                            class="w-full py-4 rounded-2xl font-bold text-white transition-all active:scale-95 flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                         Simpan Perubahan
                     </button>

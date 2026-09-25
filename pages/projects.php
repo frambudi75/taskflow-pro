@@ -30,9 +30,9 @@ $stmt->execute([$user_id]);
 $all_todos = $stmt->fetchAll();
 
 $columns = [
-    'todo'        => ['title' => '📋 Belum Mulai', 'bg' => 'bg-slate-100', 'border' => 'border-slate-200'],
-    'in_progress' => ['title' => '⚡ Sedang Dikerjakan', 'bg' => 'bg-blue-50', 'border' => 'border-blue-100'],
-    'done'        => ['title' => '✅ Selesai', 'bg' => 'bg-emerald-50', 'border' => 'border-emerald-100']
+    'todo'        => ['title' => 'Belum Mulai', 'bg' => 'bg-slate-100', 'border' => 'border-slate-200'],
+    'in_progress' => ['title' => 'Sedang Dikerjakan', 'bg' => 'bg-blue-50', 'border' => 'border-blue-100'],
+    'done'        => ['title' => 'Selesai', 'bg' => 'bg-emerald-50', 'border' => 'border-emerald-100']
 ];
 
 $grouped = ['todo' => [], 'in_progress' => [], 'done' => []];
@@ -43,62 +43,58 @@ foreach ($all_todos as $t) {
 ?>
 
 <div class="p-5 md:p-8 w-full">
-    <!-- HERO HEADER -->
-    <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5"
-         style="background: linear-gradient(135deg,#312e81 0%,#4338ca 50%,#6366f1 100%)">
-        <div class="absolute inset-0 pointer-events-none"
-             style="background-image:linear-gradient(rgba(255,255,255,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.04) 1px,transparent 1px);background-size:40px 40px"></div>
+    <div class="rounded-2xl p-7 md:p-9 mb-7 bg-indigo-950 text-white flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div class="relative z-10">
-            <div class="text-indigo-200 text-[10px] font-black uppercase tracking-widest mb-2">Projects & Tracking</div>
-            <h1 class="text-3xl md:text-4xl font-black text-white leading-tight mb-1">📋 Papan Kanban</h1>
-            <p class="text-indigo-200 text-sm font-medium">Visualisasikan progres tugas Anda dengan mudah.</p>
+            <div class="text-indigo-300 text-xs font-bold uppercase tracking-wider mb-2">Projects & Tracking</div>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Papan Kanban</h1>
+            <p class="text-indigo-200 text-sm font-medium">Visualisasikan kemajuan penyelesaian tugas tim.</p>
         </div>
         <div class="relative z-10">
-            <a href="?page=calendar" class="px-5 py-3 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold text-sm transition-all flex items-center gap-2">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <a href="?page=calendar" class="min-h-[44px] px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm transition-all flex items-center gap-2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Tambah Tugas
             </a>
         </div>
     </div>
 
-    <!-- KANBAN GRID -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <?php foreach ($columns as $cid => $cdata): ?>
-        <div class="kanban-column bg-slate-50/50 rounded-[2rem] border border-slate-100 p-5 min-h-[500px]"
+        <div class="kanban-column bg-slate-50/70 rounded-2xl border border-slate-200 p-5 min-h-[480px]"
              id="col-<?php echo $cid; ?>" ondragover="allowDrop(event)" ondrop="drop(event, '<?php echo $cid; ?>')">
             
-            <div class="flex items-center justify-between mb-5 px-2">
-                <h3 class="font-black text-slate-900 text-sm uppercase tracking-wider"><?php echo $cdata['title']; ?></h3>
-                <span class="px-2.5 py-1 rounded-lg bg-white border border-slate-100 text-[10px] font-black text-slate-400">
+            <div class="flex items-center justify-between mb-4 px-1">
+                <h3 class="font-bold text-slate-900 text-sm tracking-tight"><?php echo $cdata['title']; ?></h3>
+                <span class="px-2.5 py-0.5 rounded-md bg-white border border-slate-200 text-xs font-bold text-slate-600">
                     <?php echo count($grouped[$cid]); ?>
                 </span>
             </div>
 
-            <div class="flex flex-col gap-4">
+            <div class="flex flex-col gap-3">
                 <?php foreach ($grouped[$cid] as $todo): 
                     $date = date('d M', strtotime($todo['todo_date']));
                     $isLate = strtotime($todo['todo_date']) < strtotime('today') && $cid !== 'done';
                 ?>
-                <div class="kanban-card bg-white rounded-2xl p-4 border border-slate-100 shadow-sm transition-all hover:shadow-md cursor-grab active:cursor-grabbing"
+                <div class="kanban-card bg-white rounded-xl p-4 border border-slate-200 shadow-sm transition-all hover:shadow cursor-grab active:cursor-grabbing"
                      draggable="true" ondragstart="drag(event, <?php echo $todo['id']; ?>)" id="todo-<?php echo $todo['id']; ?>">
                     
                     <div class="mb-3">
                         <h4 class="font-bold text-slate-900 text-sm mb-1"><?php echo htmlspecialchars($todo['title']); ?></h4>
                         <?php if (isset($todo['description']) && $todo['description']): ?>
-                            <p class="text-[11px] text-slate-400 line-clamp-2 leading-relaxed"><?php echo htmlspecialchars($todo['description']); ?></p>
+                            <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed"><?php echo htmlspecialchars($todo['description']); ?></p>
                         <?php endif; ?>
                     </div>
 
-                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-50">
-                        <div class="flex items-center gap-1.5 <?php echo $isLate ? 'text-red-500' : 'text-slate-400'; ?>">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                            <span class="text-[10px] font-bold"><?php echo $date; ?></span>
+                    <div class="flex items-center justify-between mt-auto pt-3 border-t border-slate-100">
+                        <div class="flex items-center gap-1.5 <?php echo $isLate ? 'text-red-600 font-bold' : 'text-slate-500'; ?>">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span class="text-xs"><?php echo $date; ?></span>
                         </div>
                         
                         <div class="flex items-center gap-1">
                             <button onclick="changeStatus(<?php echo $todo['id']; ?>, '<?php echo ($cid === 'todo' ? 'in_progress' : ($cid === 'in_progress' ? 'done' : 'todo')); ?>')"
-                                    class="p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                                    aria-label="Pindahkan status tugas"
+                                    class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                             </button>
                         </div>
                     </div>
@@ -106,8 +102,9 @@ foreach ($all_todos as $t) {
                 <?php endforeach; ?>
 
                 <?php if (empty($grouped[$cid])): ?>
-                <div class="py-10 text-center border-2 border-dashed border-slate-100 rounded-2xl">
-                    <p class="text-[11px] font-bold text-slate-300 uppercase tracking-widest">Kosong</p>
+                <div class="py-10 px-4 text-center border-2 border-dashed border-slate-200 rounded-xl">
+                    <p class="text-xs font-semibold text-slate-500">Belum ada tugas di kolom ini.</p>
+                    <p class="text-[11px] text-slate-400 mt-1">Tarik kartu tugas ke sini untuk memindahkan status.</p>
                 </div>
                 <?php endif; ?>
             </div>

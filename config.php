@@ -50,6 +50,7 @@ function route($page) {
         'notes' => 'index.php?page=notes',
         'documents' => 'index.php?page=documents',
         'projects' => 'index.php?page=projects',
+        'reports' => 'index.php?page=reports',
         'activities' => 'index.php?page=activities',
         'settings' => 'index.php?page=settings',
         'profile' => 'index.php?page=profile',
@@ -116,6 +117,178 @@ function isAjax() {
     return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 }
 
+// Ensure database tables exist
+try {
+    $pdo->exec("CREATE TABLE IF NOT EXISTS document_shares (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        document_id INT NOT NULL,
+        shared_with_user_id INT NOT NULL,
+        shared_by_user_id INT NOT NULL,
+        permission VARCHAR(20) DEFAULT 'view',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+        FOREIGN KEY (shared_with_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (shared_by_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        UNIQUE KEY unique_doc_share (document_id, shared_with_user_id)
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        name VARCHAR(255) NOT NULL,
+        description TEXT NULL,
+        status VARCHAR(50) DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_projects (user_id)
+    )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS daily_reports (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        user_id INT NOT NULL,
+        report_date DATE NOT NULL,
+        category VARCHAR(50) DEFAULT 'Umum',
+        start_time TIME NULL,
+        end_time TIME NULL,
+        supervisor_name VARCHAR(100) NULL,
+        project_id INT NULL,
+        title VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        photo_path TEXT DEFAULT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_user_report_date (user_id, report_date)
+    )");
+
+    // Ensure photo_path is TEXT and new columns exist
+    try {
+        $pdo->exec("ALTER TABLE daily_reports MODIFY COLUMN photo_path TEXT NULL");
+    } catch (\Throwable $e) {}
+    try {
+        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN category VARCHAR(50) DEFAULT 'Umum' AFTER report_date");
+    } catch (\Throwable $e) {}
+    try {
+        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN start_time TIME NULL AFTER category");
+    } catch (\Throwable $e) {}
+    try {
+        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN end_time TIME NULL AFTER start_time");
+    } catch (\Throwable $e) {}
+    try {
+        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN supervisor_name VARCHAR(100) NULL AFTER end_time");
+    } catch (\Throwable $e) {}
+    try {
+        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN project_id INT NULL AFTER supervisor_name");
+    } catch (\Throwable $e) {}
+} catch (\Throwable $e) {}
+
+/**
+ * Compresses and saves uploaded files without quality loss.
+ * Images (JPEG, PNG, WebP) are optimized via GD if available.
+ * Documents (PDF, DOCX, XLSX, TXT, ZIP) are securely copied in binary mode.
+ */
+function optimizeAndSaveFile($tmpPath, $targetPath, $mimeType, $maxDimension = 2560, $jpegQuality = 88) {
+    $dir = dirname($targetPath);
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0755, true);
+    }
+
+    $saved = false;
+
+    // Check if image and GD available
+    if (extension_loaded('gd') && function_exists('imagecreatefromstring')) {
+        $imageMimes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
+        if (in_array(strtolower($mimeType), $imageMimes, true)) {
+            $rawContent = @file_get_contents($tmpPath);
+            if ($rawContent !== false) {
+                $srcImg = @imagecreatefromstring($rawContent);
+                if ($srcImg !== false) {
+                    $origWidth = imagesx($srcImg);
+                    $origHeight = imagesy($srcImg);
+
+                    // Fix EXIF orientation for JPEGs
+                    if (function_exists('exif_read_data') && in_array(strtolower($mimeType), ['image/jpeg', 'image/jpg'])) {
+                        try {
+                            $exif = @exif_read_data($tmpPath);
+                            if (!empty($exif['Orientation'])) {
+                                switch ($exif['Orientation']) {
+                                    case 3:
+                                        $srcImg = imagerotate($srcImg, 180, 0);
+                                        break;
+                                    case 6:
+                                        $srcImg = imagerotate($srcImg, -90, 0);
+                                        break;
+                                    case 8:
+                                        $srcImg = imagerotate($srcImg, 90, 0);
+                                        break;
+                                }
+                                $origWidth = imagesx($srcImg);
+                                $origHeight = imagesy($srcImg);
+                            }
+                        } catch (\Throwable $e) {}
+                    }
+
+                    // Resize if larger than maxDimension while preserving aspect ratio
+                    if ($origWidth > $maxDimension || $origHeight > $maxDimension) {
+                        $ratio = min($maxDimension / $origWidth, $maxDimension / $origHeight);
+                        $newWidth = (int)round($origWidth * $ratio);
+                        $newHeight = (int)round($origHeight * $ratio);
+
+                        $destImg = imagecreatetruecolor($newWidth, $newHeight);
+                        if (in_array(strtolower($mimeType), ['image/png', 'image/webp', 'image/gif'])) {
+                            imagealphablending($destImg, false);
+                            imagesavealpha($destImg, true);
+                            $transparent = imagecolorallocatealpha($destImg, 255, 255, 255, 127);
+                            imagefilledrectangle($destImg, 0, 0, $newWidth, $newHeight, $transparent);
+                        }
+                        imagecopyresampled($destImg, $srcImg, 0, 0, 0, 0, $newWidth, $newHeight, $origWidth, $origHeight);
+                        imagedestroy($srcImg);
+                        $srcImg = $destImg;
+                    }
+
+                    // Save optimized format
+                    if (in_array(strtolower($mimeType), ['image/jpeg', 'image/jpg'])) {
+                        $saved = @imagejpeg($srcImg, $targetPath, $jpegQuality);
+                    } elseif (strtolower($mimeType) === 'image/png') {
+                        imagealphablending($srcImg, false);
+                        imagesavealpha($srcImg, true);
+                        $saved = @imagepng($srcImg, $targetPath, 8);
+                    } elseif (strtolower($mimeType) === 'image/webp' && function_exists('imagewebp')) {
+                        imagealphablending($srcImg, false);
+                        imagesavealpha($srcImg, true);
+                        $saved = @imagewebp($srcImg, $targetPath, 85);
+                    } elseif (strtolower($mimeType) === 'image/gif') {
+                        $saved = @imagegif($srcImg, $targetPath);
+                    }
+
+                    imagedestroy($srcImg);
+                }
+            }
+        }
+    }
+
+    // Fallback if not an image, GD not available, or processing failed
+    if (!$saved) {
+        if (is_uploaded_file($tmpPath)) {
+            $saved = @move_uploaded_file($tmpPath, $targetPath);
+        } else {
+            $saved = @copy($tmpPath, $targetPath);
+        }
+    }
+
+    if ($saved && file_exists($targetPath)) {
+        return [
+            'success' => true,
+            'path'    => $targetPath,
+            'size'    => filesize($targetPath),
+            'mime'    => $mimeType
+        ];
+    }
+
+    return ['success' => false, 'path' => null, 'size' => 0, 'mime' => $mimeType];
+}
+
 // CSRF Protection
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
@@ -133,9 +306,7 @@ function validateCSRF($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// ============ CACHING SYSTEM ============
-// Simple file-based caching with TTL support
-
+// File-based caching with TTL support
 define('CACHE_DIR', __DIR__ . '/cache');
 define('CACHE_ENABLED', true);
 define('CACHE_TTL_DEFAULT', 3600); // 1 hour default
@@ -197,14 +368,12 @@ function clearCache($key = null) {
     if (!CACHE_ENABLED || !is_dir(CACHE_DIR)) return false;
     
     if ($key === null) {
-        // Clear all cache
         $files = glob(CACHE_DIR . '/*.cache');
         foreach ($files as $file) {
             @unlink($file);
         }
         return true;
     } else {
-        // Clear specific key
         $cache_file = CACHE_DIR . '/' . md5($key) . '.cache';
         return @unlink($cache_file);
     }
@@ -230,8 +399,6 @@ function clearCacheByPattern($prefix) {
     
     return $cleared;
 }
-
-// ============ END CACHING SYSTEM ============
 
 /**
  * Generate a lightweight SVG avatar as a data URI.

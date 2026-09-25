@@ -45,7 +45,7 @@ if ($targetUser > 0) {
 }
 ?>
 
-<div class="h-[calc(100vh-140px)] flex flex-col md:flex-row bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] overflow-hidden shadow-sm m-4 md:m-6">
+<div class="h-[calc(100dvh-140px)] min-h-[500px] flex flex-col md:flex-row bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2rem] overflow-hidden shadow-sm m-4 md:m-6">
     
     <!-- User List (Sidebar) -->
     <div class="w-full md:w-80 flex-shrink-0 border-r border-slate-100 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-800/10">
@@ -54,7 +54,7 @@ if ($targetUser > 0) {
                 <h3 class="text-lg font-black text-slate-900 dark:text-white mb-1">Pesan</h3>
                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Kontak Aktif</p>
             </div>
-            <button onclick="openNewChatModal()" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-600/20 active:scale-95" title="Mulai Chat Baru">
+            <button onclick="openNewChatModal()" aria-label="Mulai Chat Baru" class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center hover:bg-indigo-700 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 active:scale-95" title="Mulai Chat Baru">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
         </div>
@@ -68,7 +68,7 @@ if ($targetUser > 0) {
             
             <?php foreach ($activeConversations as $u): ?>
                 <a href="index.php?page=chat&user_id=<?php echo $u['id']; ?>" 
-                   class="flex items-center gap-3 p-3 rounded-2xl transition-all <?php echo $targetUser === $u['id'] ? 'bg-indigo-600 shadow-lg shadow-indigo-600/20 text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'; ?>">
+                   class="flex items-center gap-3 p-3 rounded-2xl transition-all <?php echo $targetUser === $u['id'] ? 'bg-indigo-600 text-white' : 'hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'; ?>">
                     <div class="w-12 h-12 rounded-xl bg-slate-200 dark:bg-slate-700 flex items-center justify-center flex-shrink-0 overflow-hidden font-bold">
                         <?php if($u['profile_photo']): ?>
                             <img src="uploads/avatars/<?php echo $u['profile_photo']; ?>" class="w-full h-full object-cover">
@@ -86,7 +86,7 @@ if ($targetUser > 0) {
                                 <?php echo htmlspecialchars($u['last_msg']); ?>
                             </div>
                             <?php if ($u['unread_from_user'] > 0): ?>
-                                <span class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[9px] font-black shadow-lg shadow-emerald-500/20">
+                                <span class="w-5 h-5 bg-emerald-500 text-white rounded-full flex items-center justify-center text-[9px] font-black">
                                     <?php echo $u['unread_from_user']; ?>
                                 </span>
                             <?php endif; ?>
@@ -119,18 +119,17 @@ if ($targetUser > 0) {
                     </div>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="clearChat()" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all active:scale-90" title="Bersihkan Riwayat Chat">
+                    <button type="button" onclick="clearChat()" aria-label="Bersihkan Riwayat Chat" class="w-10 h-10 rounded-xl bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-500 hover:text-white transition-all active:scale-90 focus:outline-none focus:ring-2 focus:ring-red-500" title="Bersihkan Riwayat Chat">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                     </button>
-                    <a href="index.php?page=chat" class="md:hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500">
+                    <a href="index.php?page=chat" aria-label="Tutup Obrolan" class="md:hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-800">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                     </a>
                 </div>
             </div>
 
-            <!-- Messages Area with Wallpaper -->
-            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar relative bg-[#f0f2f5] dark:bg-[#0b141a]"
-                 style="background-image: url('data:image/svg+xml,%3Csvg width=\"100\" height=\"100\" viewBox=\"0 0 100 100\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cpath d=\"M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 35c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm60-17c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM66 46c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM25 76c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM7 39c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM90 71c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM21 34c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM45 44c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM80 80c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 20c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-6 48c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm35-19c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM24 5c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm57 4c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-15 1c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm-2 90c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm35-24c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zM5 69c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm25 1c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm37 7c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1zm13 17c.552 0 1-.448 1-1s-.448-1-1-1-1 .448-1 1 .448 1 1 1z\" fill=\"%236366f1\" fill-opacity=\"0.05\" fill-rule=\"evenodd\"/%3E%3C/svg%3E'); font-family: 'Inter', sans-serif;">
+            <!-- Messages Area -->
+            <div id="chatMessages" class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar relative bg-slate-50 dark:bg-slate-950">
                 <!-- Loaded via AJAX -->
                 <div class="flex justify-center py-10 opacity-50">
                     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600"></div>
@@ -142,22 +141,22 @@ if ($targetUser > 0) {
                 <form id="chatForm" class="flex items-center gap-3" enctype="multipart/form-data">
                     <input type="hidden" name="receiver_id" value="<?php echo $targetUser; ?>">
                     
-                    <button type="button" onclick="document.getElementById('fileAttachInput').click()" 
-                            class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-all active:scale-95">
+                    <button type="button" onclick="document.getElementById('fileAttachInput').click()" aria-label="Lampirkan File"
+                            class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 hover:text-indigo-600 flex items-center justify-center transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
                     </button>
                     <input type="file" id="fileAttachInput" name="attachment" class="hidden" onchange="handleFileSelect()">
 
                     <div class="flex-1 relative">
-                        <input type="text" id="messageInput" name="message" autocomplete="off"
+                        <input type="text" id="messageInput" name="message" autocomplete="off" aria-label="Ketik pesan"
                                placeholder="Ketik pesan..." 
-                               class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all">
+                               class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                         <div id="fileIndicator" class="hidden absolute right-3 top-1/2 -translate-y-1/2 bg-emerald-500 text-white px-2 py-0.5 rounded-lg text-[8px] font-black uppercase flex items-center gap-1">
                             <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> FILE SIAP
                         </div>
                     </div>
 
-                    <button type="submit" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-600/20 transition-all active:scale-95">
+                    <button type="submit" aria-label="Kirim Pesan" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl flex items-center justify-center shadow-sm transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
                     </button>
                 </form>
@@ -181,9 +180,9 @@ if ($targetUser > 0) {
         <div class="p-8 border-b border-slate-100 dark:border-slate-800">
             <h3 class="text-xl font-black text-slate-900 dark:text-white mb-2">Mulai Chat Baru</h3>
             <div class="relative mt-4">
-                <input type="text" id="userSearchInput" onkeyup="filterUsers()" 
+                <input type="text" id="userSearchInput" onkeyup="filterUsers()" aria-label="Cari nama kolega"
                        placeholder="Cari nama kolega..." 
-                       class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500/20 outline-none transition-all pl-12">
+                       class="w-full bg-slate-100 dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-sm font-medium text-slate-800 dark:text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all pl-12">
                 <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
                 </div>
