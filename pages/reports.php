@@ -27,7 +27,7 @@ if (!empty($company_logo)) {
     }
 }
 
-// Fetch user's active projects (Feature #2 - Project Linkage)
+// Fetch projects (Feature #2 - Project Linkage)
 $projects_list = [];
 try {
     $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
@@ -41,11 +41,27 @@ try {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         INDEX idx_user_projects (user_id)
     )");
-    $stmtProj = $pdo->prepare("SELECT id, name FROM projects WHERE user_id = ? ORDER BY name ASC");
-    $stmtProj->execute([$user_id]);
-    $projects_list = $stmtProj->fetchAll() ?: [];
+    if (isAdmin()) {
+        $stmtProj = $pdo->query("SELECT p.id, p.name, u.display_name AS owner_name FROM projects p LEFT JOIN users u ON u.id = p.user_id ORDER BY p.name ASC");
+        $projects_list = $stmtProj->fetchAll() ?: [];
+    } else {
+        $stmtProj = $pdo->prepare("SELECT id, name FROM projects WHERE user_id = ? ORDER BY name ASC");
+        $stmtProj->execute([$user_id]);
+        $projects_list = $stmtProj->fetchAll() ?: [];
+    }
 } catch (\Throwable $e) {
     $projects_list = [];
+}
+
+// Fetch all team users for Administrator Filter
+$all_team_users = [];
+if (isAdmin()) {
+    try {
+        $uStmt = $pdo->query("SELECT id, display_name, email, role, profile_photo FROM users ORDER BY display_name ASC");
+        $all_team_users = $uStmt->fetchAll() ?: [];
+    } catch (\Throwable $e) {
+        $all_team_users = [];
+    }
 }
 
 // Categories definition
@@ -95,6 +111,7 @@ $end_date   = isset($_GET['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_
 $filter_date = isset($_GET['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['date']) ? $_GET['date'] : null;
 $filter_category = isset($_GET['category']) && $_GET['category'] !== '' ? trim($_GET['category']) : null;
 $filter_project  = isset($_GET['project_id']) && (int)$_GET['project_id'] > 0 ? (int)$_GET['project_id'] : null;
+$filter_user     = isset($_GET['user_id']) && (int)$_GET['user_id'] > 0 ? (int)$_GET['user_id'] : null;
 $search = isset($_GET['search']) ? trim($_GET['search']) : '';
 $print_view = isset($_GET['print_view']) && $_GET['print_view'] === '1';
 $print_layout = $_GET['layout'] ?? 'card'; // 'card' or 'table'
@@ -164,7 +181,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_report'])) {
                 'start_date' => $start_date,
                 'end_date'   => $end_date,
                 'category'   => $filter_category,
-                'project_id' => $filter_project
+                'project_id' => $filter_project,
+                'user_id'    => $filter_user
             ]));
             header("Location: index.php?" . $redirect_query);
             exit;
@@ -172,7 +190,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_report'])) {
     }
 }
 
-// Handle Edit Report
+// Handle Edit Report (Administrator can edit any report)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_report'])) {
     if (validateCSRF($_POST['csrf_token'])) {
         $report_id       = (int)$_POST['report_id'];
@@ -185,11 +203,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_report'])) {
         $title           = trim($_POST['title']);
         $description     = trim($_POST['description']);
 
-        $chk = $pdo->prepare("SELECT photo_path FROM daily_reports WHERE id = ? AND user_id = ?");
-        $chk->execute([$report_id, $user_id]);
+        if (isAdmin()) {
+            $chk = $pdo->prepare("SELECT user_id, photo_path FROM daily_reports WHERE id = ?");
+            $chk->execute([$report_id]);
+        } else {
+            $chk = $pdo->prepare("SELECT user_id, photo_path FROM daily_reports WHERE id = ? AND user_id = ?");
+            $chk->execute([$report_id, $user_id]);
+        }
         $existing = $chk->fetch();
 
         if ($existing && $title && $description) {
+            $target_report_user_id = (int)$existing['user_id'];
             $existing_photos = getReportPhotos($existing['photo_path']);
             $keep_photos = isset($_POST['keep_photos']) && is_array($_POST['keep_photos']) ? $_POST['keep_photos'] : [];
 
@@ -207,7 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_report'])) {
             // Upload newly selected photos
             if (!empty($_FILES['photos']['name']) && is_array($_FILES['photos']['name'])) {
                 $count = count($_FILES['photos']['name']);
-                $upload_dir = 'uploads/' . $user_id . '/reports/';
+                $upload_dir = 'uploads/' . $target_report_user_id . '/reports/';
                 for ($i = 0; $i < $count; $i++) {
                     if ($_FILES['photos']['error'][$i] === UPLOAD_ERR_OK) {
                         $tmp_name = $_FILES['photos']['tmp_name'][$i];
@@ -227,8 +251,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_report'])) {
 
             $photo_json = !empty($final_photos) ? json_encode($final_photos) : null;
 
-            $stmt = $pdo->prepare("UPDATE daily_reports SET report_date = ?, category = ?, project_id = ?, start_time = ?, end_time = ?, supervisor_name = ?, title = ?, description = ?, photo_path = ? WHERE id = ? AND user_id = ?");
-            $stmt->execute([$report_date, $category, $project_id, $start_time, $end_time, $supervisor_name, $title, $description, $photo_json, $report_id, $user_id]);
+            if (isAdmin()) {
+                $stmt = $pdo->prepare("UPDATE daily_reports SET report_date = ?, category = ?, project_id = ?, start_time = ?, end_time = ?, supervisor_name = ?, title = ?, description = ?, photo_path = ? WHERE id = ?");
+                $stmt->execute([$report_date, $category, $project_id, $start_time, $end_time, $supervisor_name, $title, $description, $photo_json, $report_id]);
+            } else {
+                $stmt = $pdo->prepare("UPDATE daily_reports SET report_date = ?, category = ?, project_id = ?, start_time = ?, end_time = ?, supervisor_name = ?, title = ?, description = ?, photo_path = ? WHERE id = ? AND user_id = ?");
+                $stmt->execute([$report_date, $category, $project_id, $start_time, $end_time, $supervisor_name, $title, $description, $photo_json, $report_id, $user_id]);
+            }
             logActivity("Memperbarui laporan harian: " . $title, "report", $report_id);
 
             $redirect_query = http_build_query(array_filter([
@@ -238,7 +267,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_report'])) {
                 'start_date' => $start_date,
                 'end_date'   => $end_date,
                 'category'   => $filter_category,
-                'project_id' => $filter_project
+                'project_id' => $filter_project,
+                'user_id'    => $filter_user
             ]));
             header("Location: index.php?" . $redirect_query);
             exit;
@@ -246,13 +276,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_report'])) {
     }
 }
 
-// Handle Delete Report
+// Handle Delete Report (Administrator can delete any report)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_report'])) {
     if (validateCSRF($_POST['csrf_token'])) {
         $report_id = (int)$_POST['report_id'];
 
-        $chk = $pdo->prepare("SELECT title, photo_path FROM daily_reports WHERE id = ? AND (user_id = ?" . (isAdmin() ? " OR 1=1" : "") . ")");
-        $chk->execute([$report_id, $user_id]);
+        if (isAdmin()) {
+            $chk = $pdo->prepare("SELECT title, photo_path FROM daily_reports WHERE id = ?");
+            $chk->execute([$report_id]);
+        } else {
+            $chk = $pdo->prepare("SELECT title, photo_path FROM daily_reports WHERE id = ? AND user_id = ?");
+            $chk->execute([$report_id, $user_id]);
+        }
         $report = $chk->fetch();
 
         if ($report) {
@@ -273,7 +308,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_report'])) {
                 'start_date' => $start_date,
                 'end_date'   => $end_date,
                 'category'   => $filter_category,
-                'project_id' => $filter_project
+                'project_id' => $filter_project,
+                'user_id'    => $filter_user
             ]));
             header("Location: index.php?" . $redirect_query);
             exit;
@@ -281,12 +317,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_report'])) {
     }
 }
 
-// Build SQL Query with Project Join
-$sql = "SELECT r.*, p.name AS project_name 
+// Build SQL Query with Project Join & User/Author Join
+$sql = "SELECT r.*, p.name AS project_name, u.display_name AS author_name, u.role AS author_role, u.profile_photo AS author_photo, u.email AS author_email
         FROM daily_reports r 
         LEFT JOIN projects p ON p.id = r.project_id 
-        WHERE r.user_id = ?";
-$params = [$user_id];
+        LEFT JOIN users u ON u.id = r.user_id 
+        WHERE 1=1";
+$params = [];
+
+if (!isAdmin()) {
+    $sql .= " AND r.user_id = ?";
+    $params[] = $user_id;
+} elseif ($filter_user) {
+    $sql .= " AND r.user_id = ?";
+    $params[] = $filter_user;
+}
 
 if ($start_date && $end_date) {
     $sql .= " AND r.report_date BETWEEN ? AND ?";
@@ -311,7 +356,8 @@ if ($filter_project) {
 }
 
 if ($search) {
-    $sql .= " AND (r.title LIKE ? OR r.description LIKE ? OR r.supervisor_name LIKE ? OR p.name LIKE ?)";
+    $sql .= " AND (r.title LIKE ? OR r.description LIKE ? OR r.supervisor_name LIKE ? OR p.name LIKE ? OR u.display_name LIKE ?)";
+    $params[] = '%' . $search . '%';
     $params[] = '%' . $search . '%';
     $params[] = '%' . $search . '%';
     $params[] = '%' . $search . '%';
@@ -325,7 +371,21 @@ $reports = $stmt->fetchAll();
 
 // Handle CSV / Excel Export
 if (isset($_GET['export']) && $_GET['export'] === 'csv') {
-    $filename = "Laporan_Kerja_" . preg_replace('/[^a-zA-Z0-9_-]/', '_', $display_name) . "_" . ($start_date ? $start_date : 'All') . ($end_date && $end_date !== $start_date ? "_sd_" . $end_date : "") . ".csv";
+    $export_user_label = $display_name;
+    if (isAdmin()) {
+        if ($filter_user) {
+            foreach ($all_team_users as $tu) {
+                if ((int)$tu['id'] === $filter_user) {
+                    $export_user_label = $tu['display_name'] ?: 'User_' . $filter_user;
+                    break;
+                }
+            }
+        } else {
+            $export_user_label = "Semua_Anggota_Tim";
+        }
+    }
+
+    $filename = "Laporan_Kerja_" . preg_replace('/[^a-zA-Z0-9_-]/', '_', $export_user_label) . "_" . ($start_date ? $start_date : 'All') . ($end_date && $end_date !== $start_date ? "_sd_" . $end_date : "") . ".csv";
     
     header('Content-Type: text/csv; charset=UTF-8');
     header('Content-Disposition: attachment; filename="' . $filename . '"');
@@ -335,8 +395,9 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     $output = fopen('php://output', 'w');
     fputs($output, "\xEF\xBB\xBF"); // UTF-8 BOM
 
-    fputcsv($output, [
+    $csv_headers = [
         'No',
+        'Anggota Tim (Pelapor)',
         'Tanggal',
         'Kategori',
         'Proyek Terkait',
@@ -348,7 +409,8 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         'Jumlah Foto Dokumentasi',
         'Atasan / Supervisor',
         'Waktu Pencatatan'
-    ]);
+    ];
+    fputcsv($output, $csv_headers);
 
     $no = 1;
     foreach ($reports as $r) {
@@ -356,9 +418,14 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
         $durText = calculateDurationText($r['start_time'], $r['end_time']) ?: '-';
         $startTime = !empty($r['start_time']) ? date('H:i', strtotime($r['start_time'])) : '-';
         $endTime = !empty($r['end_time']) ? date('H:i', strtotime($r['end_time'])) : '-';
+        $author_name = $r['author_name'] ?: ($r['author_email'] ?: 'User #' . $r['user_id']);
+        if (!empty($r['author_role'])) {
+            $author_name .= ' (' . ucfirst($r['author_role']) . ')';
+        }
 
         fputcsv($output, [
             $no++,
+            $author_name,
             $r['report_date'],
             $r['category'] ?: 'Umum',
             $r['project_name'] ?: '-',
@@ -805,8 +872,25 @@ if ($print_view) {
             <!-- Metadata Table -->
             <table class="meta-table">
                 <tr>
-                    <td class="label">Nama Pelaksana</td>
-                    <td style="width: 30%; font-weight: bold;"><?php echo htmlspecialchars($display_name); ?></td>
+                    <td class="label"><?php echo (isAdmin() && !$filter_user) ? 'Pelaksana / Tim' : 'Nama Pelaksana'; ?></td>
+                    <td style="width: 30%; font-weight: bold;">
+                        <?php 
+                        $selected_user_display = $display_name;
+                        if (isAdmin() && !$filter_user) {
+                            echo "Seluruh Anggota Tim (" . count($all_team_users) . " Orang)";
+                        } elseif ($filter_user) {
+                            foreach ($all_team_users as $tu) {
+                                if ((int)$tu['id'] === $filter_user) {
+                                    $selected_user_display = $tu['display_name'] ?: 'User #' . $filter_user;
+                                    break;
+                                }
+                            }
+                            echo htmlspecialchars($selected_user_display);
+                        } else {
+                            echo htmlspecialchars($display_name);
+                        }
+                        ?>
+                    </td>
                     <td class="label">Total Kegiatan</td>
                     <td style="width: 26%; font-weight: bold;"><?php echo $total_reports; ?> Kegiatan Tercatat</td>
                 </tr>
@@ -858,6 +942,9 @@ if ($print_view) {
                                 <div>
                                     <!-- Info Badges -->
                                     <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; font-size: 9px;">
+                                        <span style="padding: 2px 8px; background: #0f172a; color: #ffffff; font-weight: bold; border-radius: 4px;">
+                                            👤 Oleh: <?php echo htmlspecialchars($r['author_name'] ?: 'User #' . $r['user_id']); ?><?php echo !empty($r['author_role']) ? ' (' . ucfirst($r['author_role']) . ')' : ''; ?>
+                                        </span>
                                         <span style="padding: 2px 8px; background: #e0e7ff; color: #3730a3; font-weight: bold; border-radius: 4px; border: 1px solid #c7d2fe;">
                                             🏷️ Kategori: <?php echo htmlspecialchars($r['category'] ?: 'Umum'); ?>
                                         </span>
@@ -907,7 +994,7 @@ if ($print_view) {
                         <thead>
                             <tr>
                                 <th style="width: 25px; text-align: center;">No</th>
-                                <th style="width: 75px;">Tanggal &amp; Jam</th>
+                                <th style="width: 85px;">Tanggal &amp; Pelapor</th>
                                 <th style="width: 95px;">Kategori &amp; Proyek</th>
                                 <th>Uraian &amp; Hasil Pekerjaan</th>
                                 <th style="width: <?php echo $is_landscape ? '320px' : '220px'; ?>;">Foto Dokumentasi</th>
@@ -925,6 +1012,7 @@ if ($print_view) {
                                 <td>
                                     <div style="font-weight: 700;"><?php echo date('d/m/Y', strtotime($tr['report_date'])); ?></div>
                                     <div style="font-size: 9px; color: #64748b;"><?php echo $tTimeStr; ?></div>
+                                    <div style="font-size: 8.5px; color: #4338ca; font-weight: 800; margin-top: 3px;">👤 <?php echo htmlspecialchars($tr['author_name'] ?: 'User #' . $tr['user_id']); ?></div>
                                 </td>
                                 <td>
                                     <div style="font-weight: 700; color: #0f172a;"><?php echo htmlspecialchars($tr['category'] ?: 'Umum'); ?></div>
@@ -967,7 +1055,17 @@ if ($print_view) {
             <div class="signatures">
                 <div class="sign-box">
                     <div>Dibuat &amp; Dilaporkan Oleh,</div>
-                    <div class="sign-space"><?php echo htmlspecialchars($display_name); ?></div>
+                    <div class="sign-space">
+                        <?php 
+                        if (isAdmin() && !$filter_user) {
+                            echo "Seluruh Tim Pelaksana";
+                        } elseif ($filter_user) {
+                            echo htmlspecialchars($selected_user_display ?? $display_name);
+                        } else {
+                            echo htmlspecialchars($display_name);
+                        }
+                        ?>
+                    </div>
                     <div style="font-size: 9.5px; color: #64748b; margin-top: 2px;">Pelaksana Pekerjaan</div>
                 </div>
 
@@ -994,8 +1092,19 @@ if ($print_view) {
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                 Dokumentasi, Durasi &amp; Rekap Kerja
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Laporan Harian Kerja</h1>
-            <p class="text-slate-300 text-sm max-w-2xl leading-relaxed">Catat kegiatan harian, kategori tugas, tautan proyek, durasi pengerjaan, foto dokumentasi utuh, serta cetak lembar kerja resmi.</p>
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">
+                Laporan Harian Kerja
+                <?php if (isAdmin()): ?>
+                    <span class="text-xs font-black bg-indigo-500/30 text-indigo-300 border border-indigo-400/30 px-2.5 py-1 rounded-full align-middle ml-2">Mode Admin: Monitoring Tim</span>
+                <?php endif; ?>
+            </h1>
+            <p class="text-slate-300 text-sm max-w-2xl leading-relaxed">
+                <?php if (isAdmin()): ?>
+                    Pantau dan rekap seluruh aktivitas harian anggota tim, periksa rincian pekerjaan, durasi, dan foto dokumentasi lapangan.
+                <?php else: ?>
+                    Catat kegiatan harian, kategori tugas, tautan proyek, durasi pengerjaan, foto dokumentasi utuh, serta cetak lembar kerja resmi.
+                <?php endif; ?>
+            </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-2.5 flex-shrink-0">
@@ -1096,26 +1205,31 @@ if ($print_view) {
     <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
         
         <!-- Period Preset Pills -->
+        <?php 
+            $user_qs = $filter_user ? '&user_id=' . $filter_user : ''; 
+            $cat_qs = $filter_category ? '&category=' . urlencode($filter_category) : '';
+            $prj_qs = $filter_project ? '&project_id=' . $filter_project : '';
+        ?>
         <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
             <div class="flex flex-wrap items-center gap-2">
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Periode:</span>
                 
-                <a href="?page=reports&period=all<?php echo $filter_category ? '&category=' . urlencode($filter_category) : ''; ?><?php echo $filter_project ? '&project_id=' . $filter_project : ''; ?>"
+                <a href="?page=reports&period=all<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'all' && !$filter_date && !$start_date ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                     Semua
                 </a>
 
-                <a href="?page=reports&period=today<?php echo $filter_category ? '&category=' . urlencode($filter_category) : ''; ?><?php echo $filter_project ? '&project_id=' . $filter_project : ''; ?>"
+                <a href="?page=reports&period=today<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'today' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                     Hari Ini
                 </a>
 
-                <a href="?page=reports&period=this_week<?php echo $filter_category ? '&category=' . urlencode($filter_category) : ''; ?><?php echo $filter_project ? '&project_id=' . $filter_project : ''; ?>"
+                <a href="?page=reports&period=this_week<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'this_week' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                     Minggu Ini
                 </a>
 
-                <a href="?page=reports&period=this_month<?php echo $filter_category ? '&category=' . urlencode($filter_category) : ''; ?><?php echo $filter_project ? '&project_id=' . $filter_project : ''; ?>"
+                <a href="?page=reports&period=this_month<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'this_month' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
                     Bulan Ini
                 </a>
@@ -1126,8 +1240,8 @@ if ($print_view) {
             </div>
         </div>
 
-        <!-- Custom Date Range, Project & Search Form -->
-        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-3 items-end">
+        <!-- Custom Date Range, User, Category, Project & Search Form -->
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 <?php echo isAdmin() ? 'lg:grid-cols-7' : 'lg:grid-cols-6'; ?> gap-3 items-end">
             <input type="hidden" name="page" value="reports">
             <input type="hidden" name="period" value="custom">
 
@@ -1144,6 +1258,21 @@ if ($print_view) {
                 <input type="date" id="endDateInput" name="end_date" value="<?php echo htmlspecialchars($end_date ?? ''); ?>"
                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
             </div>
+
+            <?php if (isAdmin()): ?>
+            <!-- Team Member Filter for Admin -->
+            <div>
+                <label for="userFilterInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1">👤 Anggota Tim</label>
+                <select id="userFilterInput" name="user_id" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <option value="">👥 Semua Anggota (<?php echo count($all_team_users); ?>)</option>
+                    <?php foreach ($all_team_users as $u): ?>
+                    <option value="<?php echo $u['id']; ?>" <?php echo $filter_user === (int)$u['id'] ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($u['display_name'] ?: $u['email']); ?> (<?php echo htmlspecialchars(ucfirst($u['role'])); ?>)
+                    </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            <?php endif; ?>
 
             <!-- Category Filter -->
             <div>
@@ -1165,7 +1294,7 @@ if ($print_view) {
                     <option value="">Semua Proyek</option>
                     <?php foreach ($projects_list as $prj): ?>
                     <option value="<?php echo $prj['id']; ?>" <?php echo $filter_project === (int)$prj['id'] ? 'selected' : ''; ?>>
-                        📁 <?php echo htmlspecialchars($prj['name']); ?>
+                        📁 <?php echo htmlspecialchars($prj['name']); ?><?php echo !empty($prj['owner_name']) ? ' (' . htmlspecialchars($prj['owner_name']) . ')' : ''; ?>
                     </option>
                     <?php endforeach; ?>
                 </select>
@@ -1174,7 +1303,7 @@ if ($print_view) {
             <!-- Keyword Search -->
             <div>
                 <label for="searchInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1">Cari Kata Kunci</label>
-                <input type="text" id="searchInput" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Judul, uraian, proyek..."
+                <input type="text" id="searchInput" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Judul, uraian, pelapor..."
                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-400">
             </div>
 
@@ -1183,7 +1312,7 @@ if ($print_view) {
                 <button type="submit" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold text-white bg-slate-800 hover:bg-slate-700 transition-colors text-center shadow-sm">
                     Terapkan
                 </button>
-                <?php if ($start_date || $end_date || $filter_category || $filter_project || $search): ?>
+                <?php if ($start_date || $end_date || $filter_category || $filter_project || $filter_user || $search): ?>
                     <a href="?page=reports" class="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors" title="Reset Filter">
                         Reset
                     </a>
@@ -1199,7 +1328,7 @@ if ($print_view) {
                 📝
             </div>
             <h3 class="text-slate-800 font-extrabold text-base mb-1">Tidak Ada Laporan yang Ditemukan</h3>
-            <p class="text-slate-400 text-xs max-w-sm mx-auto mb-6">Belum ada kegiatan pada kriteria filter ini atau Anda belum membuat laporan kerja.</p>
+            <p class="text-slate-400 text-xs max-w-sm mx-auto mb-6">Belum ada kegiatan pada kriteria filter ini atau belum ada laporan kerja yang dimasukkan.</p>
             <button type="button" onclick="openAddReportModal()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-transform active:scale-95 shadow-sm inline-flex items-center gap-2">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Tulis Laporan Sekarang
@@ -1260,10 +1389,19 @@ if ($print_view) {
                     ?>
                     <div class="p-6 hover:bg-slate-50/40 transition-colors flex flex-col gap-4">
                         
-                        <!-- Top Row: Title, Category Badge, Time Badge & Actions -->
+                        <!-- Top Row: Title, Author, Category Badge, Time Badge & Actions -->
                         <div class="flex items-start justify-between gap-4">
                             <div class="space-y-1.5">
                                 <div class="flex flex-wrap items-center gap-2">
+                                    <!-- Author Badge (For Team Transparency) -->
+                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-900 text-white shadow-sm">
+                                        <span>👤</span>
+                                        <span><?php echo htmlspecialchars($item['author_name'] ?: ($item['author_email'] ?: 'User #' . $item['user_id'])); ?></span>
+                                        <?php if (!empty($item['author_role'])): ?>
+                                        <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.2 rounded bg-white/20 text-slate-200 font-extrabold"><?php echo htmlspecialchars($item['author_role']); ?></span>
+                                        <?php endif; ?>
+                                    </span>
+
                                     <!-- Category Badge -->
                                     <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border <?php echo $cat_style['color']; ?>">
                                         <span><?php echo $cat_style['icon']; ?></span>
