@@ -604,8 +604,8 @@ document.addEventListener('click', e => {
 // Intercept all forms for AJAX
 document.addEventListener('submit', e => {
     const form = e.target;
-    // Don't intercept if specified
-    if (form.getAttribute('data-no-ajax')) return;
+    // Don't intercept if specified or if it's multipart file upload
+    if (form.getAttribute('data-no-ajax') || form.getAttribute('enctype') === 'multipart/form-data') return;
     
     e.preventDefault();
     const loader = document.getElementById('pageLoader');

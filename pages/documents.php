@@ -393,7 +393,7 @@ function docSvgIcon($type, $color) {
                     </div>
                 </div>
 
-                <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                <form method="POST" enctype="multipart/form-data" data-no-ajax="true" class="space-y-4">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="add_doc" value="1">
 

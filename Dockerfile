@@ -40,6 +40,13 @@ RUN mkdir -p /var/www/html/uploads/settings \
     && chown -R www-data:www-data /var/www/html/uploads /var/www/html/cache /var/www/html/logs \
     && chmod -R 775 /var/www/html/uploads /var/www/html/cache /var/www/html/logs
 
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
+
+ENTRYPOINT ["docker-entrypoint.sh"]
+
 

@@ -1388,7 +1388,7 @@ if ($print_view) {
         </div>
 
         <div class="p-6 overflow-y-auto custom-scrollbar flex-1">
-            <form method="POST" enctype="multipart/form-data" id="reportForm" class="space-y-4">
+            <form method="POST" enctype="multipart/form-data" id="reportForm" data-no-ajax="true" class="space-y-4">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <input type="hidden" name="add_report" id="formActionInput" value="1">
                 <input type="hidden" name="report_id" id="reportIdInput" value="">

@@ -189,9 +189,16 @@ try {
  * Documents (PDF, DOCX, XLSX, TXT, ZIP) are securely copied in binary mode.
  */
 function optimizeAndSaveFile($tmpPath, $targetPath, $mimeType, $maxDimension = 2560, $jpegQuality = 88) {
-    $dir = dirname($targetPath);
+    // Normalize targetPath for DB (relative) vs Disk (absolute)
+    $cleanRelPath = str_replace('\\', '/', ltrim($targetPath, '/\\'));
+    $absTarget = (str_starts_with($targetPath, '/') || preg_match('/^[a-zA-Z]:[\\\\\/]/', $targetPath))
+        ? $targetPath
+        : __DIR__ . '/' . $cleanRelPath;
+
+    $dir = dirname($absTarget);
     if (!is_dir($dir)) {
-        @mkdir($dir, 0755, true);
+        @mkdir($dir, 0777, true);
+        @chmod($dir, 0777);
     }
 
     $saved = false;
@@ -249,17 +256,17 @@ function optimizeAndSaveFile($tmpPath, $targetPath, $mimeType, $maxDimension = 2
 
                     // Save optimized format
                     if (in_array(strtolower($mimeType), ['image/jpeg', 'image/jpg'])) {
-                        $saved = @imagejpeg($srcImg, $targetPath, $jpegQuality);
+                        $saved = @imagejpeg($srcImg, $absTarget, $jpegQuality);
                     } elseif (strtolower($mimeType) === 'image/png') {
                         imagealphablending($srcImg, false);
                         imagesavealpha($srcImg, true);
-                        $saved = @imagepng($srcImg, $targetPath, 8);
+                        $saved = @imagepng($srcImg, $absTarget, 8);
                     } elseif (strtolower($mimeType) === 'image/webp' && function_exists('imagewebp')) {
                         imagealphablending($srcImg, false);
                         imagesavealpha($srcImg, true);
-                        $saved = @imagewebp($srcImg, $targetPath, 85);
+                        $saved = @imagewebp($srcImg, $absTarget, 85);
                     } elseif (strtolower($mimeType) === 'image/gif') {
-                        $saved = @imagegif($srcImg, $targetPath);
+                        $saved = @imagegif($srcImg, $absTarget);
                     }
 
                     imagedestroy($srcImg);
@@ -271,17 +278,18 @@ function optimizeAndSaveFile($tmpPath, $targetPath, $mimeType, $maxDimension = 2
     // Fallback if not an image, GD not available, or processing failed
     if (!$saved) {
         if (is_uploaded_file($tmpPath)) {
-            $saved = @move_uploaded_file($tmpPath, $targetPath);
+            $saved = @move_uploaded_file($tmpPath, $absTarget);
         } else {
-            $saved = @copy($tmpPath, $targetPath);
+            $saved = @copy($tmpPath, $absTarget);
         }
     }
 
-    if ($saved && file_exists($targetPath)) {
+    if ($saved && file_exists($absTarget)) {
+        @chmod($absTarget, 0666);
         return [
             'success' => true,
-            'path'    => $targetPath,
-            'size'    => filesize($targetPath),
+            'path'    => $cleanRelPath,
+            'size'    => filesize($absTarget),
             'mime'    => $mimeType
         ];
     }
@@ -306,14 +314,25 @@ function validateCSRF($token) {
     return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
 }
 
-// File-based caching with TTL support
+// File-based caching and storage directories
 define('CACHE_DIR', __DIR__ . '/cache');
 define('CACHE_ENABLED', true);
 define('CACHE_TTL_DEFAULT', 3600); // 1 hour default
 
-// Initialize cache directory
-if (!is_dir(CACHE_DIR) && CACHE_ENABLED) {
-    @mkdir(CACHE_DIR, 0755, true);
+// Initialize storage & cache directories
+$storageDirs = [
+    __DIR__ . '/uploads',
+    __DIR__ . '/uploads/settings',
+    __DIR__ . '/uploads/avatars',
+    __DIR__ . '/uploads/chat',
+    __DIR__ . '/cache',
+    __DIR__ . '/logs'
+];
+foreach ($storageDirs as $sDir) {
+    if (!is_dir($sDir)) {
+        @mkdir($sDir, 0777, true);
+    }
+    @chmod($sDir, 0777);
 }
 
 /**

@@ -169,7 +169,7 @@ $tg_token = getSetting('telegram_bot_token', '');
     </div>
 
     <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <form method="POST" action="index.php?page=settings" enctype="multipart/form-data" novalidate class="p-6 md:p-8">
+        <form method="POST" action="index.php?page=settings" enctype="multipart/form-data" data-no-ajax="true" novalidate class="p-6 md:p-8">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="active_tab" id="activeTabInput" value="<?php echo htmlspecialchars($active_tab); ?>">
             <input type="hidden" name="delete_logo" id="deleteLogoInput" value="0">
