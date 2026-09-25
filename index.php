@@ -30,6 +30,14 @@ if ((isset($_GET['print_view']) && $_GET['print_view'] === '1') || (isset($_GET[
         include 'pages/reports.php';
         exit;
     }
+    if ($page === 'team-reports') {
+        if (isAdmin()) {
+            include 'pages/team-reports.php';
+        } else {
+            echo "Akses Ditolak";
+        }
+        exit;
+    }
 }
 
 // AJAX Content Helper
@@ -46,6 +54,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         case 'activities': include 'pages/activities.php'; break;
         case 'chat': include 'pages/chat.php'; break;
         case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
+        case 'team-reports': if(isAdmin()) include 'pages/team-reports.php'; else echo "Akses Ditolak"; break;
         case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
         case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
         case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;
@@ -440,6 +449,13 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                     <span class="nav-label truncate">Users</span>
                 </a>
 
+                <a href="<?php echo route('team-reports'); ?>" class="nav-item <?php echo $page==='team-reports'?'active':''; ?>" data-nav="team-reports" title="Laporan Tim">
+                    <span class="nav-icon">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="14" y1="11" x2="20" y2="11"/></svg>
+                    </span>
+                    <span class="nav-label truncate">Laporan Tim</span>
+                </a>
+
                 <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>" data-nav="backup" title="Backup">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -504,6 +520,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 case 'activities': include 'pages/activities.php'; break;
                 case 'chat': include 'pages/chat.php'; break;
                 case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
+                case 'team-reports': if(isAdmin()) include 'pages/team-reports.php'; else echo "Akses Ditolak"; break;
                 case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
                 case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
                 case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;

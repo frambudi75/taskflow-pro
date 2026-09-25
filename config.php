@@ -77,6 +77,7 @@ function route($page) {
         'profile' => 'index.php?page=profile',
         'reset-password' => 'index.php?page=reset-password',
         'admin' => 'index.php?page=admin',
+        'team-reports' => 'index.php?page=team-reports',
         'backup' => 'index.php?page=backup',
         'cache' => 'index.php?page=cache',
         'notif-harian' => 'notif_harian.php',
