@@ -5,7 +5,7 @@ if (!isAdmin()) {
     return;
 }
 
-// pages/team-reports.php - Monitoring Seluruh Laporan Harian Anggota Tim (Khusus Administrator)
+// pages/team-reports.php - Executive Team Monitoring & Audit Dashboard (Khusus Administrator)
 $user_id = (int)$_SESSION['user_id'];
 $display_name = $_SESSION['display_name'] ?? 'Administrator';
 $email = $_SESSION['email'] ?? '';
@@ -90,17 +90,18 @@ function calculateTeamDurationHoursNum($start, $end) {
 }
 
 // Request parameters
-$period = $_GET['period'] ?? 'all';
-$start_date = isset($_GET['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['start_date']) ? $_GET['start_date'] : null;
-$end_date   = isset($_GET['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['end_date']) ? $_GET['end_date'] : null;
-$filter_date = isset($_GET['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['date']) ? $_GET['date'] : null;
+$view_mode       = $_GET['view'] ?? 'members'; // 'members', 'feed', 'table'
+$period          = $_GET['period'] ?? 'all';
+$start_date      = isset($_GET['start_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['start_date']) ? $_GET['start_date'] : null;
+$end_date        = isset($_GET['end_date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['end_date']) ? $_GET['end_date'] : null;
+$filter_date     = isset($_GET['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['date']) ? $_GET['date'] : null;
 $filter_category = isset($_GET['category']) && $_GET['category'] !== '' ? trim($_GET['category']) : null;
 $filter_project  = isset($_GET['project_id']) && (int)$_GET['project_id'] > 0 ? (int)$_GET['project_id'] : null;
 $filter_user     = isset($_GET['user_id']) && (int)$_GET['user_id'] > 0 ? (int)$_GET['user_id'] : null;
-$search = isset($_GET['search']) ? trim($_GET['search']) : '';
-$print_view = isset($_GET['print_view']) && $_GET['print_view'] === '1';
-$print_layout = $_GET['layout'] ?? 'card'; // 'card' or 'table'
-$print_orient = $_GET['orient'] ?? 'landscape'; // default landscape
+$search          = isset($_GET['search']) ? trim($_GET['search']) : '';
+$print_view      = isset($_GET['print_view']) && $_GET['print_view'] === '1';
+$print_layout    = $_GET['layout'] ?? 'card'; // 'card' or 'table'
+$print_orient    = $_GET['orient'] ?? 'landscape'; // default landscape
 
 // Handle quick preset logic
 if ($filter_date && !$start_date && !$end_date) {
@@ -180,6 +181,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_team_report'])) 
 
             $redirect_query = http_build_query(array_filter([
                 'page'       => 'team-reports',
+                'view'       => $view_mode,
                 'success'    => 'updated',
                 'period'     => $period !== 'all' ? $period : null,
                 'start_date' => $start_date,
@@ -216,6 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_team_report'])
 
             $redirect_query = http_build_query(array_filter([
                 'page'       => 'team-reports',
+                'view'       => $view_mode,
                 'success'    => 'deleted',
                 'period'     => $period !== 'all' ? $period : null,
                 'start_date' => $start_date,
@@ -349,27 +352,82 @@ if (isset($_GET['export']) && $_GET['export'] === 'csv') {
     exit;
 }
 
-// Compute KPIs for filtered dataset
+// Compute KPIs & Member Aggregations for filtered dataset
 $total_reports = count($reports);
 $total_photos = 0;
 $total_hours = 0;
 $category_counts = [];
 $active_authors = [];
+$grouped_by_user = [];
+$grouped_by_date = [];
+
+// Initialize member report buckets
+foreach ($all_team_users as $u) {
+    $grouped_by_user[$u['id']] = [
+        'user'          => $u,
+        'reports'       => [],
+        'total_hours'   => 0,
+        'total_photos'  => 0,
+        'total_reports' => 0,
+        'latest_report' => null
+    ];
+}
 
 foreach ($reports as $r) {
     $photos = getTeamReportPhotos($r['photo_path']);
-    $total_photos += count($photos);
-    $total_hours += calculateTeamDurationHoursNum($r['start_time'], $r['end_time']);
+    $photo_count = count($photos);
+    $dur_hours = calculateTeamDurationHoursNum($r['start_time'], $r['end_time']);
+    
+    $total_photos += $photo_count;
+    $total_hours += $dur_hours;
+    
     $cat = $r['category'] ?: 'Umum';
     $category_counts[$cat] = ($category_counts[$cat] ?? 0) + 1;
-    if (!empty($r['user_id'])) {
-        $active_authors[$r['user_id']] = true;
+    
+    $uId = (int)$r['user_id'];
+    if ($uId > 0) {
+        $active_authors[$uId] = true;
+        if (!isset($grouped_by_user[$uId])) {
+            $grouped_by_user[$uId] = [
+                'user' => [
+                    'id'            => $uId,
+                    'display_name'  => $r['author_name'] ?: 'User #' . $uId,
+                    'email'         => $r['author_email'] ?? '',
+                    'role'          => $r['author_role'] ?? 'user',
+                    'profile_photo' => $r['author_photo'] ?? null
+                ],
+                'reports'       => [],
+                'total_hours'   => 0,
+                'total_photos'  => 0,
+                'total_reports' => 0,
+                'latest_report' => null
+            ];
+        }
+        $grouped_by_user[$uId]['reports'][] = $r;
+        $grouped_by_user[$uId]['total_hours'] += $dur_hours;
+        $grouped_by_user[$uId]['total_photos'] += $photo_count;
+        $grouped_by_user[$uId]['total_reports']++;
+        if (!$grouped_by_user[$uId]['latest_report']) {
+            $grouped_by_user[$uId]['latest_report'] = $r['report_date'];
+        }
     }
+
+    $grouped_by_date[$r['report_date']][] = $r;
 }
 
 arsort($category_counts);
 $top_category = !empty($category_counts) ? array_key_first($category_counts) : '-';
 $total_active_members = count($active_authors);
+$total_team_count = count($all_team_users);
+$participation_rate = $total_team_count > 0 ? round(($total_active_members / $total_team_count) * 100) : 0;
+
+// Sort users: active reporters first, then by total reports desc
+uasort($grouped_by_user, function($a, $b) {
+    if ($a['total_reports'] === $b['total_reports']) {
+        return strcmp($a['user']['display_name'], $b['user']['display_name']);
+    }
+    return $b['total_reports'] <=> $a['total_reports'];
+});
 
 // Calculate Period Label
 $period_label = 'Semua Periode';
@@ -381,10 +439,11 @@ if ($start_date && $end_date && $start_date === $end_date) {
     $period_label = 'Mulai ' . date('d M Y', strtotime($start_date));
 }
 
-// Group reports by date
-$grouped_reports = [];
-foreach ($reports as $r) {
-    $grouped_reports[$r['report_date']][] = $r;
+// Build query helper for switching views / filters
+function buildTeamUrl($overrides = []) {
+    $params = array_merge($_GET, $overrides);
+    $params['page'] = 'team-reports';
+    return 'index.php?' . http_build_query(array_filter($params, function($v) { return $v !== null && $v !== ''; }));
 }
 
 // =========================================================================
@@ -399,7 +458,7 @@ if ($print_view) {
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Rekap Laporan Tim - <?php echo htmlspecialchars($company_name); ?> (<?php echo htmlspecialchars($period_label); ?>)</title>
+        <title>Audit &amp; Rekap Laporan Tim - <?php echo htmlspecialchars($company_name); ?> (<?php echo htmlspecialchars($period_label); ?>)</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -537,20 +596,20 @@ if ($print_view) {
         <div class="screen-actions">
             <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="font-size: 11px; font-weight: bold; color: #64748b;">Orientasi:</span>
-                <a href="<?php echo 'index.php?' . http_build_query(array_merge($_GET, ['orient' => 'landscape'])); ?>" class="btn-pill <?php echo $is_landscape ? 'active' : ''; ?>">
+                <a href="<?php echo buildTeamUrl(['orient' => 'landscape']); ?>" class="btn-pill <?php echo $is_landscape ? 'active' : ''; ?>">
                     🖼️ Lanskap (Horizontal)
                 </a>
-                <a href="<?php echo 'index.php?' . http_build_query(array_merge($_GET, ['orient' => 'portrait'])); ?>" class="btn-pill <?php echo !$is_landscape ? 'active' : ''; ?>">
+                <a href="<?php echo buildTeamUrl(['orient' => 'portrait']); ?>" class="btn-pill <?php echo !$is_landscape ? 'active' : ''; ?>">
                     📄 Potret (Vertikal)
                 </a>
             </div>
 
             <div style="display: flex; align-items: center; gap: 6px;">
                 <span style="font-size: 11px; font-weight: bold; color: #64748b;">Format:</span>
-                <a href="<?php echo 'index.php?' . http_build_query(array_merge($_GET, ['layout' => 'card'])); ?>" class="btn-pill <?php echo $print_layout === 'card' ? 'active' : ''; ?>">
+                <a href="<?php echo buildTeamUrl(['layout' => 'card']); ?>" class="btn-pill <?php echo $print_layout === 'card' ? 'active' : ''; ?>">
                     📑 Kartu Kegiatan
                 </a>
-                <a href="<?php echo 'index.php?' . http_build_query(array_merge($_GET, ['layout' => 'table'])); ?>" class="btn-pill <?php echo $print_layout === 'table' ? 'active' : ''; ?>">
+                <a href="<?php echo buildTeamUrl(['layout' => 'table']); ?>" class="btn-pill <?php echo $print_layout === 'table' ? 'active' : ''; ?>">
                     📊 Tabel Terpadu
                 </a>
             </div>
@@ -785,53 +844,63 @@ if ($print_view) {
 
 <div class="p-4 md:p-8 w-full max-w-7xl mx-auto space-y-6">
 
-    <!-- Header Banner -->
-    <div class="rounded-3xl p-6 md:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white shadow-lg border border-slate-800">
-        <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-3">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                Khusus Administrator · Monitoring Tim
+    <!-- 1. EXECUTIVE COMMAND HEADER (Distinct Dark Slate Glassmorphic Theme) -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-indigo-950 p-6 md:p-8 text-white border border-slate-800/80 shadow-2xl">
+        <!-- Background Ambient Accents -->
+        <div class="absolute -right-16 -top-16 w-80 h-80 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute right-1/3 -bottom-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
+        
+        <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+            <!-- Left Info Block -->
+            <div class="space-y-3">
+                <div class="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-black tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    AUDIT &amp; PENGAWASAN TIM · KHUSUS ADMINISTRATOR
+                </div>
+                
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-black tracking-tight text-white flex items-center gap-3">
+                        <span>Pusat Kendali Laporan Tim</span>
+                        <span class="text-xs px-2.5 py-0.5 rounded-lg bg-indigo-600 text-white font-extrabold tracking-normal">Live</span>
+                    </h1>
+                    <p class="text-slate-300 text-sm max-w-2xl mt-1 leading-relaxed">
+                        Dasbor monitoring terpadu seluruh personil tim. Evaluasi kepatuhan pelaporan, rincian aktivitas di lapangan, akumulasi jam kerja, dan verifikasi dokumentasi foto real-time.
+                    </p>
+                </div>
+
+                <!-- Live Team Participation Bar -->
+                <div class="pt-1 max-w-md">
+                    <div class="flex items-center justify-between text-xs font-bold mb-1.5">
+                        <span class="text-slate-300">Tingkat Partisipasi Tim (<?php echo htmlspecialchars($period_label); ?>)</span>
+                        <span class="text-indigo-300 font-extrabold"><?php echo $participation_rate; ?>% (<?php echo $total_active_members; ?>/<?php echo $total_team_count; ?> Anggota)</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-slate-800 border border-slate-700 overflow-hidden">
+                        <div class="h-full bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 rounded-full transition-all duration-500" style="width: <?php echo min(100, $participation_rate); ?>%"></div>
+                    </div>
+                </div>
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">
-                Monitoring Laporan Anggota Tim
-            </h1>
-            <p class="text-slate-300 text-sm max-w-2xl leading-relaxed">
-                Pantau seluruh aktivitas harian anggota tim, periksa rincian pekerjaan, durasi, dan foto dokumentasi lapangan secara terpusat tanpa tercampur laporan pribadi Anda.
-            </p>
-        </div>
 
-        <div class="flex flex-wrap items-center gap-2.5 flex-shrink-0">
-            <a href="<?php echo route('reports'); ?>" class="px-4 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                Laporan Pribadi Saya
-            </a>
+            <!-- Right Action Toolbar -->
+            <div class="flex flex-wrap items-center gap-2.5 flex-shrink-0">
+                <a href="<?php echo route('reports'); ?>" class="px-4 py-2.5 rounded-xl bg-slate-800/90 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-bold transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    <span>Laporan Pribadi Saya</span>
+                </a>
 
-            <?php if (!empty($reports)): ?>
-            <!-- Export Excel Button -->
-            <?php 
-                $exportParams = $_GET;
-                $exportParams['page'] = 'team-reports';
-                $exportParams['export'] = 'csv';
-                $exportUrl = 'index.php?' . http_build_query($exportParams);
-            ?>
-            <a href="<?php echo htmlspecialchars($exportUrl); ?>" class="px-4 py-2.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 border border-emerald-500/30 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                Ekspor Excel
-            </a>
+                <?php if (!empty($reports)): ?>
+                <!-- Export Excel Button -->
+                <a href="<?php echo buildTeamUrl(['export' => 'csv']); ?>" class="px-4 py-2.5 rounded-xl bg-emerald-600/90 hover:bg-emerald-600 border border-emerald-500/30 text-white text-xs font-extrabold transition-all flex items-center gap-2 shadow-sm active:scale-95">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    <span>Ekspor Excel</span>
+                </a>
 
-            <!-- Dedicated Print Button -->
-            <?php 
-                $printParams = $_GET;
-                $printParams['page'] = 'team-reports';
-                $printParams['print_view'] = '1';
-                $printParams['orient'] = 'landscape';
-                $printViewUrl = 'index.php?' . http_build_query($printParams);
-            ?>
-            <button type="button" onclick="openTeamPrintWindow('<?php echo htmlspecialchars($printViewUrl); ?>')" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/30 text-white text-xs font-extrabold transition-all flex items-center gap-2 shadow-sm active:scale-95">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                Cetak Rekap Resmi
-            </button>
-            <?php endif; ?>
+                <!-- Dedicated Print Button -->
+                <button type="button" onclick="openTeamPrintWindow('<?php echo buildTeamUrl(['print_view' => '1', 'orient' => 'landscape']); ?>')" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/30 text-white text-xs font-black transition-all flex items-center gap-2 shadow-lg shadow-indigo-900/40 active:scale-95">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    <span>Cetak Rekap A4</span>
+                </button>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 
@@ -850,91 +919,189 @@ if ($print_view) {
     </div>
     <?php endif; ?>
 
-    <!-- KPI Summary Cards for Team Selection -->
+    <!-- 2. EXECUTIVE TEAM MEMBER QUICK-SELECTOR BAR (Avatars Carousel) -->
+    <div class="bg-white rounded-3xl border border-slate-200 p-4 md:p-5 shadow-sm space-y-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <span>👥</span> Pilih Personil Tim
+                </span>
+                <span class="text-[11px] text-slate-400 font-bold">(<?php echo count($all_team_users); ?> Anggota)</span>
+            </div>
+            <?php if ($filter_user): ?>
+            <a href="<?php echo buildTeamUrl(['user_id' => '']); ?>" class="text-xs font-bold text-indigo-600 hover:text-indigo-800 flex items-center gap-1">
+                ✕ Reset Filter Anggota
+            </a>
+            <?php endif; ?>
+        </div>
+
+        <!-- Horizontal scrollable list of team members with submission badges -->
+        <div class="flex items-center gap-3 overflow-x-auto pb-2 custom-scrollbar">
+            <!-- 'All' Card -->
+            <a href="<?php echo buildTeamUrl(['user_id' => '']); ?>" 
+               class="flex items-center gap-3 px-4 py-2.5 rounded-2xl border transition-all flex-shrink-0 <?php echo !$filter_user ? 'bg-slate-900 text-white border-slate-900 shadow-md ring-2 ring-slate-900/20' : 'bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200'; ?>">
+                <div class="w-9 h-9 rounded-xl <?php echo !$filter_user ? 'bg-indigo-600 text-white' : 'bg-slate-200 text-slate-600'; ?> flex items-center justify-center font-black text-sm">
+                    👥
+                </div>
+                <div class="text-left pr-1">
+                    <div class="text-xs font-black leading-none">Semua Tim</div>
+                    <div class="text-[10px] <?php echo !$filter_user ? 'text-slate-300' : 'text-slate-500'; ?> font-bold mt-1">
+                        <?php echo $total_reports; ?> Laporan
+                    </div>
+                </div>
+            </a>
+
+            <!-- Individual Member Cards -->
+            <?php foreach ($grouped_by_user as $uId => $uData): 
+                $usr = $uData['user'];
+                $is_selected = ($filter_user === (int)$uId);
+                $has_submitted = $uData['total_reports'] > 0;
+                $avatar_url = !empty($usr['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $usr['profile_photo'])
+                    ? 'uploads/avatars/' . $usr['profile_photo']
+                    : getAvatarDataUri($usr['display_name'] ?: 'User', 36);
+            ?>
+            <a href="<?php echo buildTeamUrl(['user_id' => $uId]); ?>" 
+               class="flex items-center gap-3 px-3.5 py-2 rounded-2xl border transition-all flex-shrink-0 group <?php echo $is_selected ? 'bg-indigo-600 text-white border-indigo-600 shadow-md ring-2 ring-indigo-500/30' : 'bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-200'; ?>">
+                <div class="relative flex-shrink-0">
+                    <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="w-9 h-9 rounded-xl object-cover border <?php echo $is_selected ? 'border-white/30' : 'border-slate-300'; ?>">
+                    <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 rounded-full border-2 <?php echo $is_selected ? 'border-indigo-600' : 'border-white'; ?> <?php echo $has_submitted ? 'bg-emerald-500' : 'bg-slate-300'; ?>" title="<?php echo $has_submitted ? 'Ada laporan' : 'Belum melapor'; ?>"></span>
+                </div>
+                <div class="text-left pr-1">
+                    <div class="text-xs font-extrabold leading-tight truncate max-w-[120px] <?php echo $is_selected ? 'text-white' : 'text-slate-900 group-hover:text-indigo-600'; ?>">
+                        <?php echo htmlspecialchars($usr['display_name'] ?: 'User #' . $uId); ?>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-[10px] font-bold mt-0.5 <?php echo $is_selected ? 'text-indigo-100' : ($has_submitted ? 'text-emerald-600' : 'text-slate-400'); ?>">
+                        <span><?php echo $uData['total_reports']; ?> Lap</span>
+                        <span>·</span>
+                        <span><?php echo round($uData['total_hours'], 1); ?>j</span>
+                    </div>
+                </div>
+            </a>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+    <!-- 3. FOUR EXECUTIVE KPI METRIC CARDS -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 font-bold text-xl">
-                📋
+        <!-- Card 1 -->
+        <div class="bg-gradient-to-br from-white to-indigo-50/40 rounded-3xl p-5 border border-indigo-100 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-black text-indigo-900/70 uppercase tracking-wider">Total Laporan Tim</span>
+                <span class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">📋</span>
             </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Kegiatan Tim</p>
-                <p class="text-xl font-black text-slate-900"><?php echo $total_reports; ?> <span class="text-xs font-semibold text-slate-400">laporan</span></p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black text-slate-900"><?php echo $total_reports; ?></span>
+                <span class="text-xs font-bold text-slate-500">kegiatan</span>
             </div>
-        </div>
-
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0 font-bold text-xl">
-                👥
-            </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Anggota yang Melapor</p>
-                <p class="text-xl font-black text-slate-900"><?php echo $total_active_members; ?> <span class="text-xs font-semibold text-slate-400">/ <?php echo count($all_team_users); ?> orang</span></p>
+            <div class="text-[11px] font-semibold text-slate-500 mt-1">
+                Kategori teratas: <strong class="text-indigo-700"><?php echo htmlspecialchars($top_category); ?></strong>
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0 font-bold text-xl">
-                ⏱️
+        <!-- Card 2 -->
+        <div class="bg-gradient-to-br from-white to-blue-50/40 rounded-3xl p-5 border border-blue-100 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-black text-blue-900/70 uppercase tracking-wider">Anggota Melapor</span>
+                <span class="w-8 h-8 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center font-bold text-sm">👥</span>
             </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Akumulasi Jam Kerja</p>
-                <p class="text-xl font-black text-slate-900"><?php echo round($total_hours, 1); ?> <span class="text-xs font-semibold text-slate-400">jam</span></p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black text-slate-900"><?php echo $total_active_members; ?></span>
+                <span class="text-xs font-bold text-slate-500">/ <?php echo $total_team_count; ?> personil</span>
+            </div>
+            <div class="text-[11px] font-semibold text-blue-700 mt-1 flex items-center gap-1">
+                <span class="inline-block w-1.5 h-1.5 rounded-full bg-blue-600"></span>
+                <strong><?php echo $participation_rate; ?>%</strong> partisipasi aktif
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl p-4 md:p-5 border border-slate-200 shadow-sm flex items-center gap-4">
-            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center flex-shrink-0 font-bold text-xl">
-                📸
+        <!-- Card 3 -->
+        <div class="bg-gradient-to-br from-white to-emerald-50/40 rounded-3xl p-5 border border-emerald-100 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-black text-emerald-900/70 uppercase tracking-wider">Jam Lapangan Tim</span>
+                <span class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">⏱️</span>
             </div>
-            <div>
-                <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Dokumentasi Foto</p>
-                <p class="text-xl font-black text-slate-900"><?php echo $total_photos; ?> <span class="text-xs font-semibold text-slate-400">foto</span></p>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black text-slate-900"><?php echo round($total_hours, 1); ?></span>
+                <span class="text-xs font-bold text-slate-500">jam kerja</span>
+            </div>
+            <div class="text-[11px] font-semibold text-slate-500 mt-1">
+                Rata-rata: <strong class="text-emerald-700"><?php echo $total_active_members > 0 ? round($total_hours / $total_active_members, 1) : 0; ?> jam/orang</strong>
+            </div>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="bg-gradient-to-br from-white to-purple-50/40 rounded-3xl p-5 border border-purple-100 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-[11px] font-black text-purple-900/70 uppercase tracking-wider">Bukti Dokumentasi</span>
+                <span class="w-8 h-8 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center font-bold text-sm">📸</span>
+            </div>
+            <div class="flex items-baseline gap-2">
+                <span class="text-2xl font-black text-slate-900"><?php echo $total_photos; ?></span>
+                <span class="text-xs font-bold text-slate-500">foto terverifikasi</span>
+            </div>
+            <div class="text-[11px] font-semibold text-purple-700 mt-1">
+                Bukti visual seluruh lapangan
             </div>
         </div>
     </div>
 
-    <!-- Filter Controls Bar -->
+    <!-- 4. VIEW MODE SWITCHER & ADVANCED AUDIT FILTER BAR -->
     <div class="bg-white rounded-3xl border border-slate-200 p-5 shadow-sm space-y-4">
         
-        <!-- Period Preset Pills -->
-        <?php 
-            $user_qs = $filter_user ? '&user_id=' . $filter_user : ''; 
-            $cat_qs = $filter_category ? '&category=' . urlencode($filter_category) : '';
-            $prj_qs = $filter_project ? '&project_id=' . $filter_project : '';
-        ?>
-        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-4">
-            <div class="flex flex-wrap items-center gap-2">
-                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">Periode:</span>
-                
-                <a href="?page=team-reports&period=all<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
-                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'all' && !$filter_date && !$start_date ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
-                    Semua
+        <!-- Header row: View Mode Tabs + Period Filter Pills -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+            
+            <!-- VIEW MODE TABS -->
+            <div class="flex items-center p-1 rounded-2xl bg-slate-100/90 border border-slate-200 flex-shrink-0">
+                <a href="<?php echo buildTeamUrl(['view' => 'members']); ?>"
+                   class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all <?php echo $view_mode === 'members' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200' : 'text-slate-600 hover:text-slate-900'; ?>">
+                    <span>👥</span>
+                    <span>Per Anggota Tim</span>
                 </a>
 
-                <a href="?page=team-reports&period=today<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
-                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'today' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
-                    Hari Ini
+                <a href="<?php echo buildTeamUrl(['view' => 'table']); ?>"
+                   class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all <?php echo $view_mode === 'table' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200' : 'text-slate-600 hover:text-slate-900'; ?>">
+                    <span>📊</span>
+                    <span>Tabel Audit</span>
                 </a>
 
-                <a href="?page=team-reports&period=this_week<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
-                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'this_week' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
-                    Minggu Ini
-                </a>
-
-                <a href="?page=team-reports&period=this_month<?php echo $cat_qs . $prj_qs . $user_qs; ?>"
-                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all <?php echo $period === 'this_month' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
-                    Bulan Ini
+                <a href="<?php echo buildTeamUrl(['view' => 'feed']); ?>"
+                   class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all <?php echo $view_mode === 'feed' ? 'bg-white text-indigo-700 shadow-sm border border-slate-200' : 'text-slate-600 hover:text-slate-900'; ?>">
+                    <span>📑</span>
+                    <span>Feed Kronologis</span>
                 </a>
             </div>
 
-            <div class="text-xs font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-3 py-1 rounded-xl">
-                📍 Filter Aktif: <span class="font-extrabold"><?php echo htmlspecialchars($period_label); ?></span>
+            <!-- Quick Period Filter Pills -->
+            <div class="flex flex-wrap items-center gap-1.5">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-wider mr-1">Periode:</span>
+                
+                <a href="<?php echo buildTeamUrl(['period' => 'all', 'date' => '', 'start_date' => '', 'end_date' => '']); ?>"
+                   class="px-3 py-1 rounded-xl text-xs font-bold transition-all <?php echo $period === 'all' && !$filter_date && !$start_date ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    Semua
+                </a>
+
+                <a href="<?php echo buildTeamUrl(['period' => 'today', 'date' => '', 'start_date' => '', 'end_date' => '']); ?>"
+                   class="px-3 py-1 rounded-xl text-xs font-bold transition-all <?php echo $period === 'today' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    Hari Ini
+                </a>
+
+                <a href="<?php echo buildTeamUrl(['period' => 'this_week', 'date' => '', 'start_date' => '', 'end_date' => '']); ?>"
+                   class="px-3 py-1 rounded-xl text-xs font-bold transition-all <?php echo $period === 'this_week' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    Minggu Ini
+                </a>
+
+                <a href="<?php echo buildTeamUrl(['period' => 'this_month', 'date' => '', 'start_date' => '', 'end_date' => '']); ?>"
+                   class="px-3 py-1 rounded-xl text-xs font-bold transition-all <?php echo $period === 'this_month' ? 'bg-indigo-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'; ?>">
+                    Bulan Ini
+                </a>
             </div>
         </div>
 
         <!-- Filter Form -->
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3 items-end">
             <input type="hidden" name="page" value="team-reports">
+            <input type="hidden" name="view" value="<?php echo htmlspecialchars($view_mode); ?>">
             <input type="hidden" name="period" value="custom">
 
             <!-- Team Member Dropdown -->
@@ -993,17 +1160,18 @@ if ($print_view) {
             <!-- Search Keyword -->
             <div>
                 <label for="searchInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-wider mb-1">Cari Kata Kunci</label>
-                <input type="text" id="searchInput" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Judul, uraian, nama anggota..."
+                <input type="text" id="searchInput" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Judul, uraian, pengawas..."
                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 placeholder:text-slate-400">
             </div>
 
             <!-- Actions -->
             <div class="flex items-center gap-2">
-                <button type="submit" class="flex-1 py-2.5 rounded-xl text-xs font-extrabold text-white bg-slate-800 hover:bg-slate-700 transition-colors text-center shadow-sm">
+                <button type="submit" class="flex-1 py-2.5 rounded-xl text-xs font-black text-white bg-slate-900 hover:bg-slate-800 transition-colors text-center shadow-sm">
                     Terapkan
                 </button>
                 <?php if ($start_date || $end_date || $filter_category || $filter_project || $filter_user || $search): ?>
-                    <a href="?page=team-reports" class="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors" title="Reset Filter">
+                    <a href="<?php echo buildTeamUrl(['user_id' => '', 'category' => '', 'project_id' => '', 'search' => '', 'start_date' => '', 'end_date' => '', 'period' => 'all']); ?>" 
+                       class="px-3 py-2.5 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 transition-colors" title="Reset Filter">
                         Reset
                     </a>
                 <?php endif; ?>
@@ -1011,188 +1179,503 @@ if ($print_view) {
         </form>
     </div>
 
-    <!-- Feed / List of Team Reports -->
+    <!-- 5. MAIN CONTENT AREA (Based on active View Mode) -->
+
     <?php if (empty($reports)): ?>
         <div class="bg-white rounded-3xl border border-slate-200 p-16 text-center shadow-sm">
             <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-indigo-50 text-indigo-600 text-3xl">
                 👥
             </div>
             <h3 class="text-slate-800 font-extrabold text-base mb-1">Tidak Ada Laporan Anggota Ditemukan</h3>
-            <p class="text-slate-400 text-xs max-w-sm mx-auto mb-6">Belum ada anggota tim yang memasukkan kegiatan pada filter ini.</p>
+            <p class="text-slate-400 text-xs max-w-sm mx-auto mb-6">Belum ada personil tim yang memasukkan kegiatan pada kriteria filter yang dipilih.</p>
+            <a href="<?php echo buildTeamUrl(['user_id' => '', 'category' => '', 'project_id' => '', 'search' => '', 'period' => 'all']); ?>" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-sm">
+                Lihat Semua Laporan Tim
+            </a>
         </div>
     <?php else: ?>
-        <div class="space-y-6">
-            <?php foreach ($grouped_reports as $date_group => $day_items): 
-                $formatted_date_group = date('l, d F Y', strtotime($date_group));
-                $day_hours = 0;
-                $day_photos = 0;
-                $day_authors = [];
-                foreach ($day_items as $di) {
-                    $day_hours += calculateTeamDurationHoursNum($di['start_time'], $di['end_time']);
-                    $day_photos += count(getTeamReportPhotos($di['photo_path']));
-                    if (!empty($di['user_id'])) {
-                        $day_authors[$di['user_id']] = true;
-                    }
-                }
-            ?>
-            <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
-                <!-- Date Group Header -->
-                <div class="px-6 py-4 bg-slate-50/90 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3">
-                    <div class="flex items-center gap-3">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-600 text-white flex flex-col items-center justify-center font-black leading-none shadow-sm">
-                            <span class="text-xs"><?php echo date('d', strtotime($date_group)); ?></span>
-                            <span class="text-[8px] uppercase"><?php echo date('M', strtotime($date_group)); ?></span>
-                        </div>
-                        <div>
-                            <h2 class="text-sm font-extrabold text-slate-900"><?php echo $formatted_date_group; ?></h2>
-                            <div class="flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                                <span><?php echo count($day_items); ?> Kegiatan</span>
-                                <span>·</span>
-                                <span class="text-blue-700">👥 <?php echo count($day_authors); ?> Anggota</span>
-                                <?php if ($day_hours > 0): ?>
-                                <span>·</span>
-                                <span class="text-emerald-700">⏱️ <?php echo round($day_hours, 1); ?> Jam</span>
-                                <?php endif; ?>
-                                <?php if ($day_photos > 0): ?>
-                                <span>·</span>
-                                <span class="text-indigo-700">📸 <?php echo $day_photos; ?> Foto</span>
-                                <?php endif; ?>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW MODE 1: PER ANGGOTA TIM (Grouped By Team Member)                     -->
+        <!-- ========================================================================= -->
+        <?php if ($view_mode === 'members'): ?>
+            <div class="space-y-8">
+                <?php 
+                foreach ($grouped_by_user as $uId => $uData): 
+                    if ($filter_user && (int)$uId !== $filter_user) continue;
+                    if (empty($uData['reports'])) continue; // Skip members with 0 reports in current filter
+
+                    $usr = $uData['user'];
+                    $usr_avatar = !empty($usr['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $usr['profile_photo'])
+                        ? 'uploads/avatars/' . $usr['profile_photo']
+                        : getAvatarDataUri($usr['display_name'] ?: 'User', 48);
+                ?>
+                <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+                    
+                    <!-- Member Header Banner -->
+                    <div class="p-5 md:p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800">
+                        <div class="flex items-center gap-4">
+                            <div class="relative">
+                                <img src="<?php echo $usr_avatar; ?>" alt="Avatar" class="w-13 h-13 rounded-2xl object-cover border-2 border-indigo-400/50 shadow-md">
+                                <span class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-emerald-500 border-2 border-slate-900" title="Aktif Melapor"></span>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-base md:text-lg font-black text-white">
+                                        <?php echo htmlspecialchars($usr['display_name'] ?: 'User #' . $uId); ?>
+                                    </h2>
+                                    <span class="px-2 py-0.5 rounded-md bg-indigo-500/30 text-indigo-300 text-[10px] font-extrabold uppercase border border-indigo-400/30">
+                                        <?php echo htmlspecialchars($usr['role'] ?? 'user'); ?>
+                                    </span>
+                                </div>
+                                <div class="text-xs text-slate-300 font-medium mt-0.5">
+                                    <?php echo htmlspecialchars($usr['email'] ?? ''); ?>
+                                </div>
                             </div>
                         </div>
+
+                        <!-- Member Quick Stat Pills -->
+                        <div class="flex flex-wrap items-center gap-2">
+                            <div class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 text-xs font-bold text-slate-200 flex items-center gap-1.5">
+                                <span>📋</span>
+                                <span><strong><?php echo $uData['total_reports']; ?></strong> Kegiatan</span>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                                <span>⏱️</span>
+                                <span><strong><?php echo round($uData['total_hours'], 1); ?></strong> Jam Kerja</span>
+                            </div>
+                            <div class="px-3 py-1.5 rounded-xl bg-white/10 backdrop-blur-sm border border-white/10 text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                                <span>📸</span>
+                                <span><strong><?php echo $uData['total_photos']; ?></strong> Foto</span>
+                            </div>
+                            <button type="button" onclick="openTeamPrintWindow('<?php echo buildTeamUrl(['user_id' => $uId, 'print_view' => '1', 'orient' => 'landscape']); ?>')"
+                                    class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm ml-1">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                                <span>Cetak Anggota Ini</span>
+                            </button>
+                        </div>
                     </div>
-                    
-                    <button type="button" onclick="printTeamDateGroup('<?php echo $date_group; ?>')" class="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 text-slate-700 text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-                        Cetak Tanggal Ini
-                    </button>
+
+                    <!-- Member's Reports Grid / List -->
+                    <div class="divide-y divide-slate-100 bg-slate-50/30">
+                        <?php foreach ($uData['reports'] as $item): 
+                            $photos = getTeamReportPhotos($item['photo_path']);
+                            $photos_count = count($photos);
+                            $item_cat = $item['category'] ?: 'Umum';
+                            $cat_style = $categories_meta[$item_cat] ?? $categories_meta['Umum'];
+                            $dur_text = calculateTeamDurationText($item['start_time'], $item['end_time']);
+                        ?>
+                        <div class="p-5 md:p-6 bg-white hover:bg-slate-50/60 transition-colors">
+                            <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                                
+                                <!-- Activity Core Details -->
+                                <div class="space-y-3 flex-1">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <!-- Date Badge -->
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-extrabold bg-slate-900 text-white">
+                                            📅 <?php echo date('d M Y', strtotime($item['report_date'])); ?>
+                                        </span>
+
+                                        <!-- Category -->
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold border <?php echo $cat_style['color']; ?>">
+                                            <span><?php echo $cat_style['icon']; ?></span>
+                                            <span><?php echo htmlspecialchars($item_cat); ?></span>
+                                        </span>
+
+                                        <!-- Project -->
+                                        <?php if (!empty($item['project_name'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                            📁 <?php echo htmlspecialchars($item['project_name']); ?>
+                                        </span>
+                                        <?php endif; ?>
+
+                                        <!-- Time & Duration -->
+                                        <?php if (!empty($item['start_time']) && !empty($item['end_time'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            ⏱️ <?php echo date('H:i', strtotime($item['start_time'])); ?> - <?php echo date('H:i', strtotime($item['end_time'])); ?>
+                                            <?php if ($dur_text): ?>
+                                                <span class="text-indigo-600 font-extrabold">(<?php echo $dur_text; ?>)</span>
+                                            <?php endif; ?>
+                                        </span>
+                                        <?php elseif (!empty($item['start_time'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            ⏱️ Mulai: <?php echo date('H:i', strtotime($item['start_time'])); ?>
+                                        </span>
+                                        <?php endif; ?>
+
+                                        <!-- Supervisor -->
+                                        <?php if (!empty($item['supervisor_name'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                            👤 Pengawas: <?php echo htmlspecialchars($item['supervisor_name']); ?>
+                                        </span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <div>
+                                        <h3 class="text-base font-extrabold text-slate-900 leading-snug">
+                                            <?php echo htmlspecialchars($item['title']); ?>
+                                        </h3>
+                                        <div class="text-[11px] font-bold text-slate-400 mt-0.5">
+                                            Dicatat: <?php echo date('d/m/Y H:i', strtotime($item['created_at'])); ?> WIB
+                                        </div>
+                                    </div>
+
+                                    <!-- Description box -->
+                                    <div class="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                        <?php echo htmlspecialchars($item['description']); ?>
+                                    </div>
+
+                                    <!-- Photos -->
+                                    <?php if ($photos_count > 0): ?>
+                                    <div>
+                                        <div class="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-2">Dokumentasi Terlampir (<?php echo $photos_count; ?> Foto):</div>
+                                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                                            <?php foreach ($photos as $pIndex => $pPath): 
+                                                $pUrl = 'serve_file.php?file=' . rawurlencode(str_replace('\\', '/', $pPath));
+                                            ?>
+                                            <div class="group/img relative h-28 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer shadow-sm flex items-center justify-center"
+                                                 onclick="window.open('<?php echo htmlspecialchars($pUrl); ?>', '_blank')">
+                                                <img src="<?php echo htmlspecialchars($pUrl); ?>" alt="Dokumentasi <?php echo $pIndex + 1; ?>"
+                                                     class="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300">
+                                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                                                    🔍 Perbesar
+                                                </div>
+                                                <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-black">
+                                                    #<?php echo $pIndex + 1; ?>
+                                                </span>
+                                            </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <!-- Action Buttons for Admin -->
+                                <div class="flex md:flex-col items-center gap-2 flex-shrink-0 pt-2 md:pt-0 border-t md:border-t-0 border-slate-100">
+                                    <button type="button" onclick='openEditTeamReportModal(<?php echo json_encode($item); ?>)'
+                                            title="Edit / Koreksi Laporan Anggota" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 transition-colors flex items-center gap-1.5 text-xs font-bold">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        <span>Edit</span>
+                                    </button>
+
+                                    <form method="POST" onsubmit="return confirm('Hapus laporan kegiatan anggota ini?')">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                        <input type="hidden" name="delete_team_report" value="1">
+                                        <input type="hidden" name="report_id" value="<?php echo $item['id']; ?>">
+                                        <button type="submit" title="Hapus Laporan" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition-colors flex items-center gap-1.5 text-xs font-bold">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            <span>Hapus</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW MODE 2: TABEL AUDIT & VERIFIKASI (Data Grid Matrix)                  -->
+        <!-- ========================================================================= -->
+        <?php elseif ($view_mode === 'table'): ?>
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between">
+                    <div>
+                        <h2 class="text-sm font-black tracking-wide">Tabel Audit Kegiatan Tim</h2>
+                        <p class="text-xs text-slate-400">Total <?php echo $total_reports; ?> laporan tercatat dalam filter aktif</p>
+                    </div>
+                    <span class="text-xs font-extrabold px-3 py-1 rounded-xl bg-indigo-600 text-white">
+                        <?php echo htmlspecialchars($period_label); ?>
+                    </span>
                 </div>
 
-                <!-- Items in Day -->
-                <div class="divide-y divide-slate-100">
-                    <?php foreach ($day_items as $item): 
-                        $photos = getTeamReportPhotos($item['photo_path']);
-                        $photos_count = count($photos);
-                        $item_cat = $item['category'] ?: 'Umum';
-                        $cat_style = $categories_meta[$item_cat] ?? $categories_meta['Umum'];
-                        $dur_text = calculateTeamDurationText($item['start_time'], $item['end_time']);
-                        $author_avatar_src = !empty($item['author_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $item['author_photo'])
-                            ? 'uploads/avatars/' . $item['author_photo']
-                            : getAvatarDataUri($item['author_name'] ?: 'User', 32);
-                    ?>
-                    <div class="p-6 hover:bg-slate-50/40 transition-colors flex flex-col gap-4">
-                        
-                        <!-- Top Row: Title, Author, Category Badge, Time Badge & Actions -->
-                        <div class="flex items-start justify-between gap-4">
-                            <div class="space-y-2">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <!-- Author Badge -->
-                                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-bold bg-slate-900 text-white shadow-sm">
-                                        <img src="<?php echo $author_avatar_src; ?>" alt="Avatar" class="w-4 h-4 rounded-full object-cover">
-                                        <span><?php echo htmlspecialchars($item['author_name'] ?: ($item['author_email'] ?: 'User #' . $item['user_id'])); ?></span>
-                                        <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-extrabold"><?php echo htmlspecialchars($item['author_role'] ?? 'user'); ?></span>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead>
+                            <tr class="bg-slate-100/90 text-slate-700 font-extrabold uppercase tracking-wider text-[10px] border-b border-slate-200">
+                                <th class="p-3.5 text-center w-10">No</th>
+                                <th class="p-3.5">Anggota Tim (Pelapor)</th>
+                                <th class="p-3.5">Tgl &amp; Waktu</th>
+                                <th class="p-3.5">Kategori &amp; Proyek</th>
+                                <th class="p-3.5">Judul &amp; Ringkasan Kegiatan</th>
+                                <th class="p-3.5 text-center">Foto</th>
+                                <th class="p-3.5 text-center">Pengawas</th>
+                                <th class="p-3.5 text-right w-24">Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100 font-medium text-slate-800">
+                            <?php $tIndex = 1; foreach ($reports as $r): 
+                                $photos = getTeamReportPhotos($r['photo_path']);
+                                $photos_count = count($photos);
+                                $item_cat = $r['category'] ?: 'Umum';
+                                $cat_style = $categories_meta[$item_cat] ?? $categories_meta['Umum'];
+                                $dur_text = calculateTeamDurationText($r['start_time'], $r['end_time']);
+                                $avatar_url = !empty($r['author_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $r['author_photo'])
+                                    ? 'uploads/avatars/' . $r['author_photo']
+                                    : getAvatarDataUri($r['author_name'] ?: 'User', 28);
+                            ?>
+                            <tr class="hover:bg-indigo-50/30 transition-colors">
+                                <td class="p-3.5 text-center font-black text-slate-400">
+                                    <?php echo $tIndex++; ?>
+                                </td>
+                                
+                                <td class="p-3.5">
+                                    <div class="flex items-center gap-2.5">
+                                        <img src="<?php echo $avatar_url; ?>" alt="Avatar" class="w-7 h-7 rounded-lg object-cover border border-slate-200">
+                                        <div>
+                                            <div class="font-extrabold text-slate-900"><?php echo htmlspecialchars($r['author_name'] ?: 'User #' . $r['user_id']); ?></div>
+                                            <div class="text-[10px] text-slate-400 font-bold uppercase"><?php echo htmlspecialchars($r['author_role'] ?? 'user'); ?></div>
+                                        </div>
                                     </div>
+                                </td>
 
-                                    <!-- Category Badge -->
-                                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border <?php echo $cat_style['color']; ?>">
-                                        <span><?php echo $cat_style['icon']; ?></span>
-                                        <span><?php echo htmlspecialchars($item_cat); ?></span>
-                                    </span>
-
-                                    <!-- Project Badge -->
-                                    <?php if (!empty($item['project_name'])): ?>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
-                                        📁 <?php echo htmlspecialchars($item['project_name']); ?>
-                                    </span>
-                                    <?php endif; ?>
-
-                                    <!-- Time & Duration Badge -->
-                                    <?php if (!empty($item['start_time']) && !empty($item['end_time'])): ?>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                        ⏱️ <?php echo date('H:i', strtotime($item['start_time'])); ?> - <?php echo date('H:i', strtotime($item['end_time'])); ?>
-                                        <?php if ($dur_text): ?>
-                                            <span class="text-indigo-600 font-extrabold">(<?php echo $dur_text; ?>)</span>
+                                <td class="p-3.5 whitespace-nowrap">
+                                    <div class="font-black text-slate-900"><?php echo date('d/m/Y', strtotime($r['report_date'])); ?></div>
+                                    <div class="text-[10px] text-slate-500 font-bold">
+                                        <?php if (!empty($r['start_time']) && !empty($r['end_time'])): ?>
+                                            ⏱️ <?php echo date('H:i', strtotime($r['start_time'])); ?>-<?php echo date('H:i', strtotime($r['end_time'])); ?>
+                                            <?php if ($dur_text): ?><span class="text-indigo-600">(<?php echo $dur_text; ?>)</span><?php endif; ?>
+                                        <?php elseif (!empty($r['start_time'])): ?>
+                                            ⏱️ <?php echo date('H:i', strtotime($r['start_time'])); ?>
+                                        <?php else: ?>
+                                            -
                                         <?php endif; ?>
-                                    </span>
-                                    <?php elseif (!empty($item['start_time'])): ?>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                                        ⏱️ Mulai: <?php echo date('H:i', strtotime($item['start_time'])); ?>
-                                    </span>
-                                    <?php endif; ?>
-
-                                    <!-- Supervisor Badge -->
-                                    <?php if (!empty($item['supervisor_name'])): ?>
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
-                                        👤 Pengawas: <?php echo htmlspecialchars($item['supervisor_name']); ?>
-                                    </span>
-                                    <?php endif; ?>
-                                </div>
-
-                                <h3 class="text-base font-extrabold text-slate-900 leading-snug">
-                                    <?php echo htmlspecialchars($item['title']); ?>
-                                </h3>
-
-                                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400">
-                                    <span>Dicatat <?php echo date('H:i, d M Y', strtotime($item['created_at'])); ?></span>
-                                    <?php if ($photos_count > 0): ?>
-                                    <span>·</span>
-                                    <span class="text-indigo-600 font-extrabold bg-indigo-50 px-1.5 py-0.5 rounded">📸 <?php echo $photos_count; ?> Foto Dokumentasi</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-
-                            <!-- Action Buttons for Admin -->
-                            <div class="flex items-center gap-1.5 flex-shrink-0">
-                                <button type="button" onclick='openEditTeamReportModal(<?php echo json_encode($item); ?>)'
-                                        title="Edit / Koreksi Laporan Anggota" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-colors flex items-center justify-center">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                </button>
-
-                                <form method="POST" onsubmit="return confirm('Hapus laporan anggota ini?')">
-                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                    <input type="hidden" name="delete_team_report" value="1">
-                                    <input type="hidden" name="report_id" value="<?php echo $item['id']; ?>">
-                                    <button type="submit" title="Hapus Laporan" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors flex items-center justify-center">
-                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-
-                        <!-- Description text -->
-                        <div class="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-line bg-slate-50/80 p-4 rounded-2xl border border-slate-100">
-                            <?php echo htmlspecialchars($item['description']); ?>
-                        </div>
-
-                        <!-- Photos Gallery -->
-                        <?php if ($photos_count > 0): ?>
-                        <div>
-                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Dokumentasi Terlampir (<?php echo $photos_count; ?> Foto):</div>
-                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-                                <?php foreach ($photos as $pIndex => $pPath): 
-                                    $pUrl = 'serve_file.php?file=' . rawurlencode(str_replace('\\', '/', $pPath));
-                                ?>
-                                <div class="group/img relative h-32 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer shadow-sm flex items-center justify-center"
-                                     onclick="window.open('<?php echo htmlspecialchars($pUrl); ?>', '_blank')">
-                                    <img src="<?php echo htmlspecialchars($pUrl); ?>" alt="Dokumentasi <?php echo $pIndex + 1; ?>"
-                                         class="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300">
-                                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
-                                        🔍 Perbesar
                                     </div>
-                                    <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-black">
-                                        #<?php echo $pIndex + 1; ?>
-                                    </span>
-                                </div>
-                                <?php endforeach; ?>
-                            </div>
-                        </div>
-                        <?php endif; ?>
+                                </td>
 
-                    </div>
-                    <?php endforeach; ?>
+                                <td class="p-3.5">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold border <?php echo $cat_style['color']; ?>">
+                                        <?php echo $cat_style['icon'] . ' ' . htmlspecialchars($item_cat); ?>
+                                    </span>
+                                    <?php if (!empty($r['project_name'])): ?>
+                                        <div class="text-[10px] text-emerald-700 font-bold mt-1 truncate max-w-[140px]" title="<?php echo htmlspecialchars($r['project_name']); ?>">
+                                            📁 <?php echo htmlspecialchars($r['project_name']); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td class="p-3.5 max-w-xs">
+                                    <div class="font-black text-slate-900 leading-tight mb-1"><?php echo htmlspecialchars($r['title']); ?></div>
+                                    <div class="text-[11px] text-slate-600 line-clamp-2 leading-relaxed"><?php echo htmlspecialchars($r['description']); ?></div>
+                                </td>
+
+                                <td class="p-3.5 text-center whitespace-nowrap">
+                                    <?php if ($photos_count > 0): ?>
+                                        <button type="button" onclick='openEditTeamReportModal(<?php echo json_encode($r); ?>)' class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 font-black text-[11px] border border-purple-200 transition-colors">
+                                            📸 <?php echo $photos_count; ?> Foto
+                                        </button>
+                                    <?php else: ?>
+                                        <span class="text-slate-300 text-[10px] italic">-</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td class="p-3.5 text-center text-[11px] text-slate-600 whitespace-nowrap">
+                                    <?php echo !empty($r['supervisor_name']) ? htmlspecialchars($r['supervisor_name']) : '<span class="text-slate-300">-</span>'; ?>
+                                </td>
+
+                                <td class="p-3.5 text-right whitespace-nowrap">
+                                    <div class="inline-flex items-center gap-1">
+                                        <button type="button" onclick='openEditTeamReportModal(<?php echo json_encode($r); ?>)'
+                                                title="Edit Laporan" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-colors flex items-center justify-center">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                        </button>
+
+                                        <form method="POST" onsubmit="return confirm('Hapus laporan kegiatan anggota ini?')" class="inline-block">
+                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                            <input type="hidden" name="delete_team_report" value="1">
+                                            <input type="hidden" name="report_id" value="<?php echo $r['id']; ?>">
+                                            <button type="submit" title="Hapus Laporan" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors flex items-center justify-center">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
-            <?php endforeach; ?>
-        </div>
+
+        <!-- ========================================================================= -->
+        <!-- VIEW MODE 3: FEED KRONOLOGIS TIM (Executive Stream By Date)               -->
+        <!-- ========================================================================= -->
+        <?php else: ?>
+            <div class="space-y-6">
+                <?php foreach ($grouped_by_date as $date_group => $day_items): 
+                    $formatted_date_group = date('l, d F Y', strtotime($date_group));
+                    $day_hours = 0;
+                    $day_photos = 0;
+                    $day_authors = [];
+                    foreach ($day_items as $di) {
+                        $day_hours += calculateTeamDurationHoursNum($di['start_time'], $di['end_time']);
+                        $day_photos += count(getTeamReportPhotos($di['photo_path']));
+                        if (!empty($di['user_id'])) {
+                            $day_authors[$di['user_id']] = true;
+                        }
+                    }
+                ?>
+                <div class="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+                    <!-- Date Group Header -->
+                    <div class="px-6 py-4 bg-slate-900 text-white flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex flex-col items-center justify-center font-black leading-none shadow-md">
+                                <span class="text-xs"><?php echo date('d', strtotime($date_group)); ?></span>
+                                <span class="text-[8px] uppercase"><?php echo date('M', strtotime($date_group)); ?></span>
+                            </div>
+                            <div>
+                                <h2 class="text-sm font-black text-white"><?php echo $formatted_date_group; ?></h2>
+                                <div class="flex items-center gap-2 text-[10px] font-bold text-slate-300 uppercase tracking-wider">
+                                    <span><?php echo count($day_items); ?> Kegiatan</span>
+                                    <span>·</span>
+                                    <span class="text-blue-300">👥 <?php echo count($day_authors); ?> Anggota</span>
+                                    <?php if ($day_hours > 0): ?>
+                                    <span>·</span>
+                                    <span class="text-emerald-300">⏱️ <?php echo round($day_hours, 1); ?> Jam</span>
+                                    <?php endif; ?>
+                                    <?php if ($day_photos > 0): ?>
+                                    <span>·</span>
+                                    <span class="text-purple-300">📸 <?php echo $day_photos; ?> Foto</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button type="button" onclick="printTeamDateGroup('<?php echo $date_group; ?>')" class="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-indigo-600 text-slate-200 hover:text-white text-xs font-bold transition-colors flex items-center gap-1.5 shadow-sm border border-slate-700">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                            <span>Cetak Tanggal Ini</span>
+                        </button>
+                    </div>
+
+                    <!-- Items in Day -->
+                    <div class="divide-y divide-slate-100">
+                        <?php foreach ($day_items as $item): 
+                            $photos = getTeamReportPhotos($item['photo_path']);
+                            $photos_count = count($photos);
+                            $item_cat = $item['category'] ?: 'Umum';
+                            $cat_style = $categories_meta[$item_cat] ?? $categories_meta['Umum'];
+                            $dur_text = calculateTeamDurationText($item['start_time'], $item['end_time']);
+                            $author_avatar_src = !empty($item['author_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $item['author_photo'])
+                                ? 'uploads/avatars/' . $item['author_photo']
+                                : getAvatarDataUri($item['author_name'] ?: 'User', 36);
+                        ?>
+                        <div class="p-6 hover:bg-slate-50/40 transition-colors flex flex-col gap-4">
+                            
+                            <!-- Top Row: Title, Author, Category Badge, Time Badge & Actions -->
+                            <div class="flex items-start justify-between gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <!-- Author Badge -->
+                                        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-xl text-xs font-black bg-slate-900 text-white shadow-sm">
+                                            <img src="<?php echo $author_avatar_src; ?>" alt="Avatar" class="w-4 h-4 rounded-full object-cover">
+                                            <span><?php echo htmlspecialchars($item['author_name'] ?: ($item['author_email'] ?: 'User #' . $item['user_id'])); ?></span>
+                                            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.2 rounded bg-indigo-500/30 text-indigo-200 font-extrabold"><?php echo htmlspecialchars($item['author_role'] ?? 'user'); ?></span>
+                                        </div>
+
+                                        <!-- Category Badge -->
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border <?php echo $cat_style['color']; ?>">
+                                            <span><?php echo $cat_style['icon']; ?></span>
+                                            <span><?php echo htmlspecialchars($item_cat); ?></span>
+                                        </span>
+
+                                        <!-- Project Badge -->
+                                        <?php if (!empty($item['project_name'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+                                            📁 <?php echo htmlspecialchars($item['project_name']); ?>
+                                        </span>
+                                        <?php endif; ?>
+
+                                        <!-- Time & Duration Badge -->
+                                        <?php if (!empty($item['start_time']) && !empty($item['end_time'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            ⏱️ <?php echo date('H:i', strtotime($item['start_time'])); ?> - <?php echo date('H:i', strtotime($item['end_time'])); ?>
+                                            <?php if ($dur_text): ?>
+                                                <span class="text-indigo-600 font-extrabold">(<?php echo $dur_text; ?>)</span>
+                                            <?php endif; ?>
+                                        </span>
+                                        <?php elseif (!empty($item['start_time'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                            ⏱️ Mulai: <?php echo date('H:i', strtotime($item['start_time'])); ?>
+                                        </span>
+                                        <?php endif; ?>
+
+                                        <!-- Supervisor Badge -->
+                                        <?php if (!empty($item['supervisor_name'])): ?>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                            👤 Pengawas: <?php echo htmlspecialchars($item['supervisor_name']); ?>
+                                        </span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <h3 class="text-base font-extrabold text-slate-900 leading-snug">
+                                        <?php echo htmlspecialchars($item['title']); ?>
+                                    </h3>
+
+                                    <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400">
+                                        <span>Dicatat <?php echo date('H:i, d M Y', strtotime($item['created_at'])); ?> WIB</span>
+                                        <?php if ($photos_count > 0): ?>
+                                        <span>·</span>
+                                        <span class="text-indigo-600 font-extrabold bg-indigo-50 px-1.5 py-0.5 rounded">📸 <?php echo $photos_count; ?> Foto Dokumentasi</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons for Admin -->
+                                <div class="flex items-center gap-1.5 flex-shrink-0">
+                                    <button type="button" onclick='openEditTeamReportModal(<?php echo json_encode($item); ?>)'
+                                            title="Edit / Koreksi Laporan Anggota" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 transition-colors flex items-center justify-center">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M11 4H4a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                    </button>
+
+                                    <form method="POST" onsubmit="return confirm('Hapus laporan kegiatan anggota ini?')">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                                        <input type="hidden" name="delete_team_report" value="1">
+                                        <input type="hidden" name="report_id" value="<?php echo $item['id']; ?>">
+                                        <button type="submit" title="Hapus Laporan" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors flex items-center justify-center">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Description text -->
+                            <div class="text-xs text-slate-700 font-medium leading-relaxed whitespace-pre-line bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                <?php echo htmlspecialchars($item['description']); ?>
+                            </div>
+
+                            <!-- Photos Gallery -->
+                            <?php if ($photos_count > 0): ?>
+                            <div>
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 mb-2">Dokumentasi Terlampir (<?php echo $photos_count; ?> Foto):</div>
+                                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                                    <?php foreach ($photos as $pIndex => $pPath): 
+                                        $pUrl = 'serve_file.php?file=' . rawurlencode(str_replace('\\', '/', $pPath));
+                                    ?>
+                                    <div class="group/img relative h-32 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 cursor-pointer shadow-sm flex items-center justify-center"
+                                         onclick="window.open('<?php echo htmlspecialchars($pUrl); ?>', '_blank')">
+                                        <img src="<?php echo htmlspecialchars($pUrl); ?>" alt="Dokumentasi <?php echo $pIndex + 1; ?>"
+                                             class="w-full h-full object-cover group-hover/img:scale-105 transition-transform duration-300">
+                                        <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold">
+                                            🔍 Perbesar
+                                        </div>
+                                        <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-black">
+                                            #<?php echo $pIndex + 1; ?>
+                                        </span>
+                                    </div>
+                                    <?php endforeach; ?>
+                                </div>
+                            </div>
+                            <?php endif; ?>
+
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+
     <?php endif; ?>
 
 </div>
@@ -1393,6 +1876,12 @@ if ($print_view) {
 
     window.closeTeamReportModal = function() {
         const modal = document.getElementById('teamReportModal');
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    };
+})();
+</script>
+dal = document.getElementById('teamReportModal');
         modal.classList.add('hidden');
         modal.style.display = 'none';
     };
