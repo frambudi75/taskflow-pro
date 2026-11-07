@@ -169,97 +169,88 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         }
 
         .sidebar-section-label {
-            font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+            font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
             text-transform: uppercase; color: #64748b;
-            padding: 0 18px; margin: 16px 0 6px;
+            padding: 0 16px; margin: 14px 0 6px;
         }
 
         .nav-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 9px 12px; border-radius: 12px;
-            margin: 2px 10px; font-size: 13px; font-weight: 600;
-            color: #94a3b8; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; align-items: center; gap: 11px;
+            padding: 8px 12px; border-radius: 10px;
+            margin: 2px 10px; font-size: 13px; font-weight: 500;
+            color: #94a3b8; transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none; position: relative;
-            border: 1px solid transparent;
         }
         .nav-item:hover {
             background: rgba(255,255,255,0.06);
-            color: #f8fafc;
-            transform: translateX(4px);
-            border-color: rgba(255,255,255,0.05);
+            color: #f1f5f9;
         }
         .nav-item:active {
             transform: scale(0.98);
         }
         .nav-item:focus-visible {
             outline: 2px solid #6366f1;
-            outline-offset: 2px;
+            outline-offset: 1px;
         }
+        /* Soft Accent Active State with Vertical Indicator Bar */
         .nav-item.active {
-            background: linear-gradient(135deg, rgba(79,70,229,0.9) 0%, rgba(99,102,241,0.85) 100%);
-            color: #ffffff;
-            box-shadow: 0 4px 14px rgba(79,70,229,0.35);
-            border-color: rgba(255,255,255,0.15);
+            background: rgba(99, 102, 241, 0.14) !important;
+            color: #ffffff !important;
+            font-weight: 600 !important;
+        }
+        .nav-item.active::before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 5px;
+            bottom: 5px;
+            width: 3.5px;
+            border-radius: 0 4px 4px 0;
+            background: #6366f1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
         }
         .nav-item.active .nav-icon {
-            color: #ffffff;
-            background: rgba(255,255,255,0.22);
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            color: #a5b4fc !important;
+            background: transparent !important;
         }
 
+        /* Clean Stroke Icon - No Heavy Container Box */
         .nav-icon {
-            width: 34px; height: 34px; border-radius: 10px;
+            width: 20px; height: 20px;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; background: rgba(255,255,255,0.04);
-            color: #94a3b8; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255,255,255,0.05);
+            flex-shrink: 0; background: transparent;
+            color: #94a3b8; transition: all 0.18s ease;
+            border: none;
         }
         .nav-item:hover .nav-icon {
-            background: rgba(255,255,255,0.12);
-            color: #ffffff;
-            transform: scale(1.06);
+            color: #f8fafc;
         }
 
-        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 12px 18px; }
-        .sidebar-brand-text { color: #ffffff; font-size: 16px; font-weight: 900; letter-spacing: -0.02em; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 10px 16px; }
+        .sidebar-brand-text { color: #ffffff; font-size: 15px; font-weight: 900; letter-spacing: -0.02em; }
         .sidebar-brand-sub {
-            font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
-            text-transform: uppercase; color: #818cf8;
+            font-size: 9px; font-weight: 700; letter-spacing: 0.14em;
+            text-transform: uppercase; color: #818cf8; line-height: 1.2;
         }
 
         .sidebar-user-card {
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px; padding: 10px 12px; margin: 0 10px 8px;
-            transition: all 0.2s ease;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px; padding: 7px 10px; margin: 0 10px 8px;
+            transition: all 0.18s ease;
         }
         .sidebar-user-card:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.14);
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.12);
         }
-        .sidebar-user-name { color: #f8fafc; font-size: 13px; font-weight: 700; }
-        .sidebar-logout-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: calc(100% - 20px); min-height: 42px; padding: 10px;
-            background: rgba(239,68,68,0.08);
-            border: 1px solid rgba(239,68,68,0.2); border-radius: 12px;
-            color: #fca5a5; font-size: 12px; font-weight: 700;
-            text-decoration: none; margin: 4px 10px 0;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        .sidebar-user-name { color: #f8fafc; font-size: 12px; font-weight: 700; }
+        
+        .sidebar-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
         }
-        .sidebar-logout-btn:hover {
-            background: rgba(239,68,68,0.22);
-            color: #ffffff;
-            border-color: rgba(239,68,68,0.4);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(239,68,68,0.2);
-        }
-        .sidebar-logout-btn:active {
-            transform: scale(0.98);
-        }
-        .sidebar-logout-btn:focus-visible {
-            outline: 2px solid #ef4444;
-            outline-offset: 2px;
+        .sidebar-scrollbar::-webkit-scrollbar {
+            display: none;
         }
 
         /* Ambient Glassmorphism & High-Craft Surface System */
@@ -325,14 +316,14 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         /* Desktop Collapsed Sidebar Styles */
         @media (min-width: 768px) {
             aside#sidebar.sidebar-collapsed {
-                width: 5rem !important; /* 80px */
+                width: 4.75rem !important; /* 76px */
             }
             aside#sidebar.sidebar-collapsed .sidebar-header-box {
                 flex-direction: column !important;
                 align-items: center !important;
                 justify-content: center !important;
-                padding: 1.25rem 0.5rem 0.75rem !important;
-                gap: 0.625rem !important;
+                padding: 1.1rem 0.5rem 0.75rem !important;
+                gap: 0.5rem !important;
             }
             aside#sidebar.sidebar-collapsed .sidebar-brand-text-wrap {
                 display: none !important;
@@ -340,8 +331,6 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             aside#sidebar.sidebar-collapsed #sidebarCollapseBtn {
                 display: flex !important;
                 margin: 0 auto !important;
-                width: 2rem !important;
-                height: 2rem !important;
             }
             aside#sidebar.sidebar-collapsed .sidebar-section-label {
                 display: none !important;
@@ -351,35 +340,35 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             }
             aside#sidebar.sidebar-collapsed .nav-item {
                 justify-content: center !important;
-                padding: 10px 0 !important;
-                margin: 4px 10px !important;
+                padding: 9px 0 !important;
+                margin: 3px 8px !important;
                 gap: 0 !important;
+            }
+            aside#sidebar.sidebar-collapsed .nav-item.active::before {
+                left: -8px;
             }
             aside#sidebar.sidebar-collapsed .nav-label {
                 display: none !important;
             }
             aside#sidebar.sidebar-collapsed .sidebar-user-card {
-                padding: 8px !important;
-                margin: 0 10px 8px !important;
+                flex-direction: column !important;
+                padding: 6px !important;
+                margin: 0 8px 8px !important;
+                gap: 6px !important;
+            }
+            aside#sidebar.sidebar-collapsed .sidebar-user-link {
                 justify-content: center !important;
+                flex: initial !important;
             }
             aside#sidebar.sidebar-collapsed .sidebar-user-info {
                 display: none !important;
             }
-            aside#sidebar.sidebar-collapsed .sidebar-logout-btn {
-                width: 38px !important;
-                min-height: 38px !important;
-                padding: 0 !important;
-                margin: 6px auto 0 !important;
-                justify-content: center !important;
-            }
-            aside#sidebar.sidebar-collapsed .sidebar-logout-text {
-                display: none !important;
+            aside#sidebar.sidebar-collapsed .sidebar-user-logout {
+                margin: 0 auto !important;
             }
             aside#sidebar.sidebar-collapsed #collapseIcon {
                 transform: rotate(180deg);
             }
-
         }
 
         @media print {
@@ -425,121 +414,112 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         <aside id="sidebar" 
                class="sidebar-bg fixed inset-y-0 left-0 z-50 w-72 transform -translate-x-full transition-all duration-300 md:static md:translate-x-0 md:inset-auto md:w-64 flex flex-col h-full overflow-hidden flex-shrink-0">
 
-            <div class="px-4 pt-5 pb-4 flex items-center justify-between relative z-20 sidebar-header-box">
-                <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            <div class="px-4 py-3.5 flex items-center justify-between relative z-20 sidebar-header-box border-b border-white/[0.08]">
+                <div class="flex items-center gap-2.5 overflow-hidden">
+                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
                     </div>
                     <div class="sidebar-brand-text-wrap overflow-hidden whitespace-nowrap">
                         <div class="sidebar-brand-text truncate"><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow')); ?></div>
-                        <div class="sidebar-brand-sub truncate">Management System</div>
+                        <div class="sidebar-brand-sub truncate">Workspace</div>
                     </div>
                 </div>
-                <button type="button" onclick="toggleDesktopSidebar()" id="sidebarCollapseBtn" aria-label="Minimize sidebar" title="Minimize sidebar" class="hidden md:flex w-8 h-8 rounded-lg bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white items-center justify-center transition-all flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                    <svg id="collapseIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-300"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
+                <button type="button" onclick="toggleDesktopSidebar()" id="sidebarCollapseBtn" aria-label="Minimize sidebar" title="Minimize sidebar" class="hidden md:flex w-7 h-7 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 items-center justify-center transition-colors flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <svg id="collapseIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="transition-transform duration-300"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></svg>
                 </button>
             </div>
 
-            <nav class="flex-1 overflow-y-auto sidebar-scrollbar pb-2 relative z-20">
+            <nav class="flex-1 overflow-y-auto sidebar-scrollbar py-2 relative z-20">
 
                 <!-- Main -->
                 <div class="sidebar-section-label">Menu Utama</div>
 
-                <a href="<?php echo route('dashboard'); ?>" class="nav-item <?php echo $page==='dashboard'?'active':''; ?>" data-nav="dashboard" title="Dashboard">
+                <a href="<?php echo route('dashboard'); ?>" class="nav-item <?php echo $page==='dashboard'?'active':''; ?>" data-nav="dashboard" title="Dasbor">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
                     </span>
-                    <span class="nav-label truncate">Dashboard</span>
+                    <span class="nav-label truncate">Dasbor</span>
                 </a>
 
                 <a href="<?php echo route('calendar'); ?>" class="nav-item <?php echo $page==='calendar'?'active':''; ?>" data-nav="calendar" title="Kalender">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </span>
                     <span class="nav-label truncate">Kalender</span>
                 </a>
 
                 <a href="<?php echo route('notes'); ?>" class="nav-item <?php echo $page==='notes'?'active':''; ?>" data-nav="notes" title="Catatan">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     </span>
                     <span class="nav-label truncate">Catatan</span>
                 </a>
 
                 <a href="<?php echo route('documents'); ?>" class="nav-item <?php echo $page==='documents'?'active':''; ?>" data-nav="documents" title="Dokumen">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                     </span>
                     <span class="nav-label truncate">Dokumen</span>
                 </a>
 
                 <a href="<?php echo route('projects'); ?>" class="nav-item <?php echo $page==='projects'?'active':''; ?>" data-nav="projects" title="Proyek (Kanban)">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
                     </span>
                     <span class="nav-label truncate">Proyek (Kanban)</span>
                 </a>
 
                 <a href="<?php echo route('activities'); ?>" class="nav-item <?php echo $page==='activities'?'active':''; ?>" data-nav="activities" title="Aktivitas">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </span>
                     <span class="nav-label truncate">Aktivitas</span>
                 </a>
-
-
 
                 <div class="sidebar-divider"></div>
 
                 <!-- Account -->
                 <div class="sidebar-section-label">Akun Saya</div>
 
-                <a href="<?php echo route('profile'); ?>" class="nav-item <?php echo $page==='profile'?'active':''; ?>" data-nav="profile" title="Profil">
+                <a href="<?php echo route('profile'); ?>" class="nav-item <?php echo in_array($page, ['profile','reset-password'])?'active':''; ?>" data-nav="profile" title="Profil & Keamanan">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
-                    <span class="nav-label truncate">Profil</span>
-                </a>
-
-                <a href="<?php echo route('reset-password'); ?>" class="nav-item <?php echo $page==='reset-password'?'active':''; ?>" data-nav="reset-password" title="Password">
-                    <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                    </span>
-                    <span class="nav-label truncate">Password</span>
+                    <span class="nav-label truncate">Profil &amp; Keamanan</span>
                 </a>
 
                 <?php if (isAdmin()): ?>
                 <div class="sidebar-divider"></div>
                 <div class="sidebar-section-label">Administrasi</div>
 
-                <a href="<?php echo route('admin'); ?>" class="nav-item <?php echo $page==='admin'?'active':''; ?>" data-nav="admin" title="Users">
+                <a href="<?php echo route('admin'); ?>" class="nav-item <?php echo $page==='admin'?'active':''; ?>" data-nav="admin" title="Pengguna">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </span>
-                    <span class="nav-label truncate">Users</span>
+                    <span class="nav-label truncate">Pengguna</span>
                 </a>
 
-                <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>" data-nav="backup" title="Backup">
+                <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>" data-nav="backup" title="Cadangan Data">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     </span>
-                    <span class="nav-label truncate">Backup</span>
+                    <span class="nav-label truncate">Cadangan Data</span>
                 </a>
 
-                <a href="<?php echo route('cache'); ?>" class="nav-item <?php echo $page==='cache'?'active':''; ?>" data-nav="cache" title="Cache">
+                <a href="<?php echo route('cache'); ?>" class="nav-item <?php echo $page==='cache'?'active':''; ?>" data-nav="cache" title="Optimasi Cache">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                     </span>
-                    <span class="nav-label truncate">Cache</span>
+                    <span class="nav-label truncate">Optimasi Cache</span>
                 </a>
 
-                <a href="<?php echo route('settings'); ?>" class="nav-item <?php echo $page==='settings'?'active':''; ?>" data-nav="settings" title="Pengaturan">
+                <a href="<?php echo route('settings'); ?>" class="nav-item <?php echo $page==='settings'?'active':''; ?>" data-nav="settings" title="Pengaturan Sistem">
                     <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </span>
-                    <span class="nav-label truncate">Pengaturan</span>
+                    <span class="nav-label truncate">Pengaturan Sistem</span>
                 </a>
-<?php endif; ?>
+                <?php endif; ?>
 
             </nav>
 
@@ -550,21 +530,19 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 ? 'uploads/avatars/' . $profilePhoto
                 : getAvatarDataUri($display_name, 40);
             ?>
-            <div class="relative z-20 pt-2 border-t border-white/10 flex-shrink-0">
-
-                <div class="sidebar-user-card flex items-center gap-3">
-                    <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-9 h-9 rounded-xl border border-white/20 object-cover flex-shrink-0" />
-                    <div class="sidebar-user-info flex-1 min-w-0">
-                        <div class="sidebar-user-name truncate"><?php echo htmlspecialchars($display_name); ?></div>
-                        <div class="text-[9px] font-bold uppercase tracking-widest text-slate-400 mt-0.5"><?php echo $role; ?></div>
-                    </div>
+            <div class="relative z-20 p-2.5 border-t border-white/[0.08] flex-shrink-0">
+                <div class="sidebar-user-card flex items-center justify-between gap-2">
+                    <a href="<?php echo route('profile'); ?>" class="sidebar-user-link flex items-center gap-2.5 min-w-0 flex-1 group" title="Buka Profil Saya">
+                        <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-8 h-8 rounded-lg border border-white/20 object-cover flex-shrink-0" />
+                        <div class="sidebar-user-info flex-1 min-w-0 text-left">
+                            <div class="sidebar-user-name truncate text-xs font-bold text-slate-200 group-hover:text-white transition-colors"><?php echo htmlspecialchars($display_name); ?></div>
+                            <div class="text-[9px] font-semibold uppercase tracking-wider text-slate-400 mt-0.5"><?php echo $role; ?></div>
+                        </div>
+                    </a>
+                    <a href="<?php echo route('logout'); ?>" class="sidebar-user-logout w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all flex-shrink-0" title="Keluar">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </a>
                 </div>
-
-                <a href="<?php echo route('logout'); ?>" class="sidebar-logout-btn" title="Logout">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="flex-shrink-0"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-                    <span class="sidebar-logout-text">Logout</span>
-                </a>
-                <div class="pb-4"></div>
             </div>
         </aside>
 
@@ -623,7 +601,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 <a href="index.php?page=dashboard" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
                         <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">📊</span>
-                        Dashboard Utama
+                        Dasbor Utama
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
@@ -659,6 +637,13 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                     <span class="flex items-center gap-2.5">
                         <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">⚡</span>
                         Audit Log &amp; Aktivitas
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+                <a href="index.php?page=profile" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">👤</span>
+                        Profil &amp; Keamanan Akun
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
@@ -739,7 +724,12 @@ function loadPage(url, pushState = true) {
         const urlObj = new URL(url, window.location.origin);
         const page = urlObj.searchParams.get('page') || 'dashboard';
         document.querySelectorAll('.nav-item').forEach(el => {
-            el.classList.toggle('active', el.getAttribute('data-nav') === page);
+            const dataNav = el.getAttribute('data-nav');
+            if (dataNav === 'profile' && (page === 'profile' || page === 'reset-password')) {
+                el.classList.add('active');
+            } else {
+                el.classList.toggle('active', dataNav === page);
+            }
         });
 
         loader.classList.add('finish');
