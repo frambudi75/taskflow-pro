@@ -111,55 +111,121 @@ for ($i = 6; $i >= 0; $i--) {
 ?>
 
 <style>
-.dash-stat {
-    background: var(--bg-card); border: 1px solid var(--border-color);
-    border-radius: 20px; padding: 20px 22px;
-    display: flex; flex-direction: column; gap: 12px;
-    position: relative; overflow: hidden;
-    transition: transform 0.25s, box-shadow 0.25s;
-    cursor: default;
+@keyframes barFill {
+    from { width: 0 !important; }
 }
-.dash-stat:hover { transform: translateY(-4px); box-shadow: 0 16px 36px rgba(0,0,0,0.12); }
+
+.dash-stat {
+    border-radius: 22px; padding: 22px;
+    display: flex; flex-direction: column; gap: 14px;
+    position: relative; overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: default;
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+}
+.dash-stat:hover { 
+    transform: translateY(-5px) scale(1.01); 
+    box-shadow: 0 20px 35px -8px rgba(0,0,0,0.18); 
+}
 .dash-stat::after {
     content: ''; position: absolute;
-    width: 140px; height: 140px; border-radius: 50%;
+    width: 150px; height: 150px; border-radius: 50%;
     right: -30px; top: -30px;
-    background: rgba(255,255,255,0.12); pointer-events: none;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
+    pointer-events: none;
+    transition: transform 0.4s ease;
 }
+.dash-stat:hover::after {
+    transform: scale(1.2);
+}
+.stat-icon {
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dash-stat:hover .stat-icon {
+    transform: scale(1.15) rotate(5deg);
+}
+
 .d-section {
     background: #ffffff; border: 1px solid #e2e8f0;
-    border-radius: 20px; overflow: hidden;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    border-radius: 22px; overflow: hidden;
+    box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05);
+    transition: all 0.25s ease;
 }
 .dark .d-section {
     background: #0f172a; border-color: #1e293b;
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
 }
+.d-section:hover {
+    border-color: #cbd5e1;
+    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+}
+.dark .d-section:hover {
+    border-color: #334155;
+    box-shadow: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+}
+
 .d-section-head {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 22px; border-bottom: 1px solid #e2e8f0;
+    padding: 18px 24px; border-bottom: 1px solid #e2e8f0;
 }
 .dark .d-section-head { border-color: #1e293b; }
 .d-section-head h3 { font-size: 14px; font-weight: 800; color: #0f172a; margin: 0; }
 .dark .d-section-head h3 { color: #f8fafc; }
-.d-section-head a { font-size: 12px; font-weight: 700; color: #4f46e5; text-decoration: none; }
-.d-section-head a:hover { color: #4338ca; text-decoration: underline; }
+.d-section-head a { 
+    font-size: 12px; font-weight: 700; color: #4f46e5; text-decoration: none; 
+    transition: all 0.2s;
+}
+.d-section-head a:hover { 
+    color: #4338ca; transform: translateX(2px);
+}
+
 .d-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 14px 22px; border-bottom: 1px solid #f1f5f9;
-    transition: background 0.15s;
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 24px; border-bottom: 1px solid #f1f5f9;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .d-row { border-color: #1e293b; }
 .d-row:last-child { border-bottom: none; }
-.d-row:hover { background: rgba(0,0,0,0.02); }
+.d-row:hover { 
+    background: rgba(99, 102, 241, 0.04); 
+    transform: translateX(4px);
+}
+.dark .d-row:hover { 
+    background: rgba(255, 255, 255, 0.03); 
+}
+
 .q-btn {
     display: flex; align-items: center; gap: 14px;
-    padding: 13px 16px; border-radius: 14px;
-    text-decoration: none; transition: all 0.2s;
+    padding: 14px 18px; border-radius: 16px;
+    text-decoration: none; 
     border-width: 1.5px; border-style: solid;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
 }
-.q-btn:hover { transform: translateX(4px); opacity: 0.95; }
-.pb-bg { background: rgba(255,255,255,0.25); border-radius: 100px; height: 5px; margin-top: 4px; }
-.pb-fill { height: 5px; border-radius: 100px; background: #ffffff; }
+.q-btn:hover { 
+    transform: translateX(6px) translateY(-1px); 
+    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.08);
+}
+.q-btn:active {
+    transform: scale(0.98);
+}
+.q-icon {
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.q-btn:hover .q-icon {
+    transform: scale(1.12) rotate(6deg);
+}
+
+.pb-bg { 
+    background: rgba(255,255,255,0.22); 
+    border-radius: 100px; height: 6px; margin-top: 4px; overflow: hidden;
+}
+.pb-fill { 
+    height: 6px; border-radius: 100px; background: #ffffff; 
+    transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    animation: barFill 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
 
 /* Chart specific override */
 .chart-container { position: relative; height: 320px; width: 100%; padding: 14px 20px 20px; }
@@ -168,85 +234,92 @@ for ($i = 6; $i >= 0; $i--) {
 <div class="p-5 md:p-8 w-full max-w-[1600px] mx-auto">
 
     <!-- WELCOME BANNER -->
-    <div class="rounded-3xl p-6 md:p-9 mb-6 bg-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-xl shadow-slate-950/20 border border-slate-800">
+    <div class="relative overflow-hidden rounded-3xl p-6 md:p-9 mb-7 bg-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-xl shadow-slate-950/20 border border-slate-800">
+        <!-- Ambient lighting glow -->
+        <div class="pointer-events-none absolute -right-20 -top-20 w-80 h-80 rounded-full bg-indigo-500/15 blur-3xl"></div>
+        <div class="pointer-events-none absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-violet-600/15 blur-3xl"></div>
+
         <div class="relative z-10">
-            <div class="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-2"><?php echo date('l, d F Y'); ?></div>
-            <h1 class="text-2xl md:text-3xl font-black text-white leading-tight mb-1.5">
-                <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-widest mb-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+                <?php echo date('l, d F Y'); ?>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-white leading-tight mb-2 tracking-tight">
+                <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?> 👋
             </h1>
             <p class="text-slate-300 text-sm font-medium">
                 <?php echo ($total_todos - $completed_todos) > 0
-                    ? ($total_todos - $completed_todos) . ' tugas masih menunggu diselesaikan · ' . $total_hours_7d . ' jam kerja terlapor minggu ini.'
-                    : 'Semua tugas telah selesai dikerjakan · ' . $total_hours_7d . ' jam kerja terlapor minggu ini.'; ?>
+                    ? ($total_todos - $completed_todos) . ' tugas masih menunggu diselesaikan. Tetap semangat produktif hari ini!'
+                    : 'Semua tugas telah selesai dikerjakan dengan sangat baik!'; ?>
             </p>
         </div>
-        <div class="relative z-10 flex items-center gap-3 flex-shrink-0">
+        <div class="relative z-10 flex items-center gap-3.5 flex-shrink-0">
             <div class="text-right hidden md:block">
-                <div class="text-white font-bold text-sm"><?php echo htmlspecialchars($_SESSION['display_name'] ?? ''); ?></div>
+                <div class="text-white font-bold text-sm tracking-wide"><?php echo htmlspecialchars($_SESSION['display_name'] ?? ''); ?></div>
                 <div class="text-indigo-300 text-xs font-semibold uppercase tracking-wider"><?php echo $_SESSION['role'] ?? ''; ?></div>
             </div>
             <img src="<?php echo $avatarSrc; ?>" alt="Avatar Pengguna"
-                 class="w-12 h-12 rounded-2xl object-cover border-2 border-white/20 shadow-md">
+                 class="w-12 h-12 rounded-2xl object-cover border-2 border-indigo-400/30 shadow-lg shadow-indigo-900/30 transition-transform duration-300 hover:scale-105">
         </div>
     </div>
 
     <!-- STAT CARDS (4 Columns) -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-7">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-7">
         <!-- TUGAS -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
+        <div class="dash-stat" style="background:linear-gradient(135deg,#6366f1 0%,#4338ca 100%)">
             <div class="flex items-center justify-between">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </div>
                 <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">TUGAS</span>
             </div>
             <div>
-                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $total_todos; ?></div>
+                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $total_todos; ?></div>
                 <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?> selesai · <?php echo $pct; ?>%</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- PROGRESS -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#d97706,#b45309)">
+        <div class="dash-stat" style="background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%)">
             <div class="flex items-center justify-between">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
                 <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">PROGRESS</span>
             </div>
             <div>
-                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $pct; ?>%</div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?> Tugas Selesai</div>
+                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $pct; ?>%</div>
+                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?> Selesai</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- CATATAN -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#8b5cf6,#7c3aed)">
+        <div class="dash-stat" style="background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%)">
             <div class="flex items-center justify-between">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
                 </div>
                 <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">CATATAN</span>
             </div>
             <div>
-                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $total_notes; ?></div>
+                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $total_notes; ?></div>
                 <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95">Ide &amp; Dokumentasi</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo min(100, $total_notes * 10); ?>%"></div></div>
         </div>
 
         <!-- DOKUMEN -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#059669,#047857)">
+        <div class="dash-stat" style="background:linear-gradient(135deg,#10b981 0%,#047857 100%)">
             <div class="flex items-center justify-between">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 </div>
                 <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">DOKUMEN</span>
             </div>
             <div>
-                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $total_docs; ?></div>
+                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $total_docs; ?></div>
                 <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95">File Tersimpan</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo min(100, $total_docs * 10); ?>%"></div></div>
@@ -360,7 +433,7 @@ for ($i = 6; $i >= 0; $i--) {
                 </div>
                 <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
                     <a href="?page=calendar" class="q-btn" style="background:#eef2ff; border-color: #a5b4fc;">
-                        <div style="width:38px;height:38px;border-radius:12px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(79,70,229,0.3)">
+                        <div class="q-icon" style="width:38px;height:38px;border-radius:12px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(79,70,229,0.35)">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
                         <div>
@@ -370,7 +443,7 @@ for ($i = 6; $i >= 0; $i--) {
                     </a>
 
                     <a href="?page=notes" class="q-btn" style="background:#f5f3ff; border-color: #c4b5fd;">
-                        <div style="width:38px;height:38px;border-radius:12px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(124,58,237,0.3)">
+                        <div class="q-icon" style="width:38px;height:38px;border-radius:12px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(124,58,237,0.35)">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                         </div>
                         <div>
@@ -380,7 +453,7 @@ for ($i = 6; $i >= 0; $i--) {
                     </a>
 
                     <a href="?page=documents" class="q-btn" style="background:#ecfdf5; border-color: #6ee7b7;">
-                        <div style="width:38px;height:38px;border-radius:12px;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(5,150,105,0.3)">
+                        <div class="q-icon" style="width:38px;height:38px;border-radius:12px;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(5,150,105,0.35)">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                         </div>
                         <div>
@@ -462,6 +535,10 @@ for ($i = 6; $i >= 0; $i--) {
         window.taskflowProductivityChart.destroy();
     }
 
+    var grad = ctx.createLinearGradient(0, 0, 0, 280);
+    grad.addColorStop(0, 'rgba(99, 102, 241, 0.35)');
+    grad.addColorStop(1, 'rgba(99, 102, 241, 0.00)');
+
     window.taskflowProductivityChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -471,13 +548,18 @@ for ($i = 6; $i >= 0; $i--) {
                     label: 'Tugas Selesai',
                     data: todosData,
                     borderColor: '#4f46e5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                    backgroundColor: grad,
                     borderWidth: 3,
-                    tension: 0.35,
+                    tension: 0.38,
                     fill: true,
-                    pointBackgroundColor: '#4f46e5',
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#ffffff',
+                    pointBorderColor: '#4f46e5',
+                    pointBorderWidth: 2.5,
+                    pointRadius: 4.5,
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: '#4f46e5',
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 2
                 }
             ]
         },
@@ -497,7 +579,8 @@ for ($i = 6; $i >= 0; $i--) {
                 },
                 tooltip: {
                     padding: 12,
-                    cornerRadius: 10
+                    cornerRadius: 10,
+                    boxPadding: 6
                 }
             },
             scales: {

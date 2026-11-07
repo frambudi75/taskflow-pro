@@ -132,65 +132,117 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         
         .main-content { background: var(--bg-main); }
 
+        /* Elegant micro-interactions and smooth transitions */
         .sidebar-bg {
-            background: #0f172a;
+            background: linear-gradient(180deg, #0b1120 0%, #0f172a 50%, #111827 100%);
             position: relative;
             overflow: hidden;
-            box-shadow: 2px 0 12px rgba(0,0,0,0.12);
+            box-shadow: 4px 0 24px rgba(0,0,0,0.25);
+            border-right: 1px solid rgba(255,255,255,0.06);
+        }
+
+        /* Subtle glow accent inside sidebar */
+        .sidebar-bg::before {
+            content: '';
+            position: absolute;
+            top: -60px;
+            left: -60px;
+            width: 180px;
+            height: 180px;
+            background: radial-gradient(circle, rgba(99,102,241,0.15) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 1;
         }
 
         .sidebar-section-label {
-            font-size: 10px; font-weight: 700; letter-spacing: 0.12em;
-            text-transform: uppercase; color: #94a3b8;
-            padding: 0 16px; margin: 12px 0 6px;
+            font-size: 10px; font-weight: 800; letter-spacing: 0.14em;
+            text-transform: uppercase; color: #64748b;
+            padding: 0 18px; margin: 16px 0 6px;
         }
 
         .nav-item {
             display: flex; align-items: center; gap: 12px;
-            padding: 10px 14px; border-radius: 12px;
-            margin: 2px 8px; font-size: 13px; font-weight: 600;
-            color: var(--sidebar-text); transition: all 0.2s ease;
+            padding: 9px 12px; border-radius: 12px;
+            margin: 2px 10px; font-size: 13px; font-weight: 600;
+            color: #94a3b8; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none; position: relative;
+            border: 1px solid transparent;
         }
-        .nav-item:hover { background: rgba(255,255,255,0.08); color: #fff; }
+        .nav-item:hover {
+            background: rgba(255,255,255,0.06);
+            color: #f8fafc;
+            transform: translateX(4px);
+            border-color: rgba(255,255,255,0.05);
+        }
+        .nav-item:active {
+            transform: scale(0.98);
+        }
         .nav-item:focus-visible {
-            outline: 2px solid #818cf8;
+            outline: 2px solid #6366f1;
             outline-offset: 2px;
         }
         .nav-item.active {
-            background: #4338ca; color: #fff;
+            background: linear-gradient(135deg, rgba(79,70,229,0.9) 0%, rgba(99,102,241,0.85) 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 14px rgba(79,70,229,0.35);
+            border-color: rgba(255,255,255,0.15);
         }
-        .nav-item.active .nav-icon { color: #fff; background: rgba(255,255,255,0.15); }
+        .nav-item.active .nav-icon {
+            color: #ffffff;
+            background: rgba(255,255,255,0.22);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
 
         .nav-icon {
-            width: 36px; height: 36px; border-radius: 10px;
+            width: 34px; height: 34px; border-radius: 10px;
             display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0; background: var(--sidebar-icon-bg);
-            color: rgba(203,213,225,0.7); transition: all 0.2s ease;
+            flex-shrink: 0; background: rgba(255,255,255,0.04);
+            color: #94a3b8; transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(255,255,255,0.05);
         }
-        .nav-item:hover .nav-icon { background: rgba(255,255,255,0.12); color: #fff; }
+        .nav-item:hover .nav-icon {
+            background: rgba(255,255,255,0.12);
+            color: #ffffff;
+            transform: scale(1.06);
+        }
 
-        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.07); margin: 10px 16px; }
-        .sidebar-brand-text { color: #fff; font-size: 17px; font-weight: 800; }
+        .sidebar-divider { height: 1px; background: rgba(255,255,255,0.06); margin: 12px 18px; }
+        .sidebar-brand-text { color: #ffffff; font-size: 16px; font-weight: 900; letter-spacing: -0.02em; }
         .sidebar-brand-sub {
-            font-size: 10px; font-weight: 600; letter-spacing: 0.15em;
-            text-transform: uppercase; color: #94a3b8;
+            font-size: 10px; font-weight: 700; letter-spacing: 0.15em;
+            text-transform: uppercase; color: #818cf8;
         }
 
         .sidebar-user-card {
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px; padding: 12px; margin: 0 8px 8px;
-        }
-        .sidebar-user-name { color: #f1f5f9; font-size: 13px; font-weight: 700; }
-        .sidebar-logout-btn {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            width: calc(100% - 16px); min-height: 44px; padding: 10px; background: rgba(239,68,68,0.1);
-            border: 1px solid rgba(239,68,68,0.2); border-radius: 10px;
-            color: #fca5a5; font-size: 12px; font-weight: 700;
-            text-decoration: none; margin: 8px 8px 0;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px; padding: 10px 12px; margin: 0 10px 8px;
             transition: all 0.2s ease;
         }
-        .sidebar-logout-btn:hover { background: rgba(239,68,68,0.2); color: #fff; }
+        .sidebar-user-card:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.14);
+        }
+        .sidebar-user-name { color: #f8fafc; font-size: 13px; font-weight: 700; }
+        .sidebar-logout-btn {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            width: calc(100% - 20px); min-height: 42px; padding: 10px;
+            background: rgba(239,68,68,0.08);
+            border: 1px solid rgba(239,68,68,0.2); border-radius: 12px;
+            color: #fca5a5; font-size: 12px; font-weight: 700;
+            text-decoration: none; margin: 4px 10px 0;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-logout-btn:hover {
+            background: rgba(239,68,68,0.22);
+            color: #ffffff;
+            border-color: rgba(239,68,68,0.4);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(239,68,68,0.2);
+        }
+        .sidebar-logout-btn:active {
+            transform: scale(0.98);
+        }
         .sidebar-logout-btn:focus-visible {
             outline: 2px solid #ef4444;
             outline-offset: 2px;
