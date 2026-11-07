@@ -141,6 +141,13 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
     background: rgba(255, 255, 255, 0.98);
     z-index: 5;
 }
+.cal-cell.is-selected,
+.cal-cell.is-selected:hover {
+    background: #EEF2FF !important;
+    box-shadow: inset 0 0 0 2px #4f46e5, inset 0 0 12px rgba(79, 70, 229, 0.08) !important;
+    position: relative;
+    z-index: 20 !important;
+}
 
 .cal-task-pill {
     transition: transform 0.15s ease;
@@ -283,14 +290,14 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
             </div>
 
             <!-- Day of Week Header -->
-            <div class="grid grid-cols-7 border-b border-slate-200 bg-slate-50/90 text-center text-xs font-black uppercase tracking-wider py-3">
-                <div class="text-rose-600">Min</div>
-                <div class="text-slate-600">Sen</div>
-                <div class="text-slate-600">Sel</div>
-                <div class="text-slate-600">Rab</div>
-                <div class="text-slate-600">Kam</div>
-                <div class="text-slate-600">Jum</div>
-                <div class="text-indigo-600">Sab</div>
+            <div class="grid grid-cols-7 bg-slate-200/80 gap-[1px] border-b border-slate-200/90 text-center text-xs font-black uppercase tracking-wider">
+                <div class="py-3 bg-slate-50/95 text-rose-600">Min</div>
+                <div class="py-3 bg-slate-50/95 text-slate-600">Sen</div>
+                <div class="py-3 bg-slate-50/95 text-slate-600">Sel</div>
+                <div class="py-3 bg-slate-50/95 text-slate-600">Rab</div>
+                <div class="py-3 bg-slate-50/95 text-slate-600">Kam</div>
+                <div class="py-3 bg-slate-50/95 text-slate-600">Jum</div>
+                <div class="py-3 bg-slate-50/95 text-indigo-600">Sab</div>
             </div>
 
             <!-- Calendar Cells Grid -->
@@ -309,7 +316,10 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                 for ($i = 0; $i < $start_day; $i++) {
                     $p_day = $days_in_prev_month - ($start_day - 1 - $i);
                     $p_date_str = $prev_month_str . '-' . sprintf('%02d', $p_day);
-                    echo '<a href="?page=calendar&month=' . $prev_month_str . '&date=' . $p_date_str . '" class="cal-cell min-h-[85px] md:min-h-[96px] p-2 flex flex-col justify-between opacity-35 hover:opacity-75 bg-slate-50/70 transition-all select-none">';
+                    $p_is_selected = $p_date_str === $selected_date;
+                    $p_classes = 'cal-cell min-h-[85px] md:min-h-[96px] p-2 md:p-2.5 flex flex-col justify-between opacity-35 hover:opacity-75 bg-slate-50/70 transition-all select-none ';
+                    if ($p_is_selected) $p_classes .= 'is-selected opacity-100 ';
+                    echo '<a href="?page=calendar&month=' . $prev_month_str . '&date=' . $p_date_str . '" class="' . $p_classes . '">';
                     echo '<div class="flex items-center justify-between w-full">';
                     echo '<span class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-slate-400">' . $p_day . '</span>';
                     echo '</div>';
@@ -336,7 +346,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                     // Container styling (Clean Crisp White Surface)
                     $cell_classes = 'cal-cell min-h-[85px] md:min-h-[96px] p-2 md:p-2.5 flex flex-col justify-between relative group ';
                     if ($is_selected) {
-                        $cell_classes .= 'bg-indigo-50/90 ring-2 ring-indigo-600 z-10 shadow-sm';
+                        $cell_classes .= 'is-selected ';
                     } elseif ($is_today) {
                         $cell_classes .= 'bg-indigo-50/40 hover:bg-indigo-50/70';
                     } elseif ($is_sunday) {
@@ -362,18 +372,18 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                     echo '<a href="' . $day_link . '" class="' . $cell_classes . '">';
                     
                     // Top Row: Number & Status Indicators (Dots)
-                    echo '<div class="flex items-center justify-between w-full">';
+                    echo '<div class="flex items-center justify-between w-full gap-1">';
                     echo '<span class="' . $num_classes . '">' . $day . '</span>';
                     
                     // Status indicator dot cluster
-                    echo '<div class="flex items-center gap-1">';
+                    echo '<div class="flex items-center gap-1 shrink-0">';
                     if ($is_today) {
-                        echo '<span class="hidden md:inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-tight text-indigo-700 bg-indigo-100/90 px-1.5 py-0.5 rounded-full"><span class="w-1 h-1 rounded-full bg-indigo-500 animate-ping"></span>Hari Ini</span>';
+                        echo '<span class="inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-tight text-indigo-700 bg-indigo-100/90 px-1.5 py-0.5 rounded-full shrink-0" title="Hari Ini"><span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span><span class="hidden 2xl:inline">Hari Ini</span></span>';
                     }
                     if ($total > 0) {
-                        if ($done > 0) echo '<span class="w-2 h-2 rounded-full bg-emerald-500" title="' . $done . ' Selesai"></span>';
-                        if ($inprog > 0) echo '<span class="w-2 h-2 rounded-full bg-sky-500" title="' . $inprog . ' Dalam Proses"></span>';
-                        if ($pending > 0) echo '<span class="w-2 h-2 rounded-full bg-indigo-500" title="' . $pending . ' Belum Selesai"></span>';
+                        if ($done > 0) echo '<span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0" title="' . $done . ' Selesai"></span>';
+                        if ($inprog > 0) echo '<span class="w-2 h-2 rounded-full bg-sky-500 shrink-0" title="' . $inprog . ' Dalam Proses"></span>';
+                        if ($pending > 0) echo '<span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0" title="' . $pending . ' Belum Selesai"></span>';
                     }
                     echo '</div>';
                     echo '</div>';
@@ -424,7 +434,10 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 
                 for ($i = 1; $i <= $remaining; $i++) {
                     $n_date_str = $next_month_str . '-' . sprintf('%02d', $i);
-                    echo '<a href="?page=calendar&month=' . $next_month_str . '&date=' . $n_date_str . '" class="cal-cell min-h-[85px] md:min-h-[96px] p-2 flex flex-col justify-between opacity-35 hover:opacity-75 bg-slate-50/70 transition-all select-none">';
+                    $n_is_selected = $n_date_str === $selected_date;
+                    $n_classes = 'cal-cell min-h-[85px] md:min-h-[96px] p-2 md:p-2.5 flex flex-col justify-between opacity-35 hover:opacity-75 bg-slate-50/70 transition-all select-none ';
+                    if ($n_is_selected) $n_classes .= 'is-selected opacity-100 ';
+                    echo '<a href="?page=calendar&month=' . $next_month_str . '&date=' . $n_date_str . '" class="' . $n_classes . '">';
                     echo '<div class="flex items-center justify-between w-full">';
                     echo '<span class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-slate-400">' . $i . '</span>';
                     echo '</div>';
