@@ -170,7 +170,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
         .sidebar-section-label {
             font-size: 10px; font-weight: 800; letter-spacing: 0.12em;
-            text-transform: uppercase; color: #64748b;
+            text-transform: uppercase; color: #94a3b8;
             padding: 0 16px; margin: 14px 0 6px;
         }
 
@@ -180,6 +180,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             margin: 2px 10px; font-size: 13px; font-weight: 500;
             color: #94a3b8; transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none; position: relative;
+            border: 1px solid transparent;
         }
         .nav-item:hover {
             background: rgba(255,255,255,0.06);
@@ -192,25 +193,25 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             outline: 2px solid #6366f1;
             outline-offset: 1px;
         }
-        /* Soft Accent Active State with Vertical Indicator Bar */
+        /* Soft Accent Active State with Luminous Left Indicator Bar */
         .nav-item.active {
-            background: rgba(99, 102, 241, 0.14) !important;
+            background: rgba(99, 102, 241, 0.18) !important;
+            border-color: rgba(99, 102, 241, 0.32) !important;
             color: #ffffff !important;
             font-weight: 600 !important;
+            box-shadow: 0 2px 10px -2px rgba(99, 102, 241, 0.28) !important;
         }
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: -10px;
-            top: 5px;
-            bottom: 5px;
-            width: 3.5px;
-            border-radius: 0 4px 4px 0;
-            background: #6366f1;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.7);
+        .nav-item .nav-indicator {
+            opacity: 0;
+            transform: scaleY(0.4);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .nav-item.active .nav-indicator {
+            opacity: 1;
+            transform: scaleY(1);
         }
         .nav-item.active .nav-icon {
-            color: #a5b4fc !important;
+            color: #818cf8 !important;
             background: transparent !important;
         }
 
@@ -235,15 +236,34 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
         .sidebar-user-card {
             background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px; padding: 7px 10px; margin: 0 10px 8px;
             transition: all 0.18s ease;
         }
         .sidebar-user-card:hover {
             background: rgba(255,255,255,0.06);
-            border-color: rgba(255,255,255,0.12);
+            border-color: rgba(255,255,255,0.14);
         }
         .sidebar-user-name { color: #f8fafc; font-size: 12px; font-weight: 700; }
+        
+        .sidebar-logout-icon-btn {
+            width: 32px; height: 32px; border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            flex-shrink: 0; cursor: pointer;
+        }
+        .sidebar-logout-icon-btn:hover {
+            color: #f87171 !important;
+            background: rgba(239, 68, 68, 0.15) !important;
+            border-color: rgba(239, 68, 68, 0.3) !important;
+            transform: scale(1.05);
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+        }
+        .sidebar-logout-icon-btn:active {
+            transform: scale(0.95);
+        }
         
         .sidebar-scrollbar {
             scrollbar-width: none;
@@ -347,7 +367,8 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             aside#sidebar.sidebar-collapsed .nav-item.active::before {
                 left: -8px;
             }
-            aside#sidebar.sidebar-collapsed .nav-label {
+            aside#sidebar.sidebar-collapsed .nav-label,
+            aside#sidebar.sidebar-collapsed .sidebar-badge {
                 display: none !important;
             }
             aside#sidebar.sidebar-collapsed .sidebar-user-card {
@@ -363,7 +384,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             aside#sidebar.sidebar-collapsed .sidebar-user-info {
                 display: none !important;
             }
-            aside#sidebar.sidebar-collapsed .sidebar-user-logout {
+            aside#sidebar.sidebar-collapsed .sidebar-logout-icon-btn {
+                width: 28px !important;
+                height: 28px !important;
                 margin: 0 auto !important;
             }
             aside#sidebar.sidebar-collapsed #collapseIcon {
@@ -429,51 +452,71 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 </button>
             </div>
 
+            <?php
+            // Sidebar pending tasks count for badge
+            $badge_pending_tasks = 0;
+            try {
+                $stmtBadge = $pdo->prepare("SELECT COUNT(*) FROM todos WHERE (completed = 0 AND status != 'done')");
+                $stmtBadge->execute();
+                $badge_pending_tasks = (int)$stmtBadge->fetchColumn();
+            } catch(Exception $e) {}
+            ?>
+
             <nav class="flex-1 overflow-y-auto sidebar-scrollbar py-2 relative z-20">
 
                 <!-- Main -->
                 <div class="sidebar-section-label">Menu Utama</div>
 
                 <a href="<?php echo route('dashboard'); ?>" class="nav-item <?php echo $page==='dashboard'?'active':''; ?>" data-nav="dashboard" title="Dasbor">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
                     </span>
-                    <span class="nav-label truncate">Dasbor</span>
+                    <span class="nav-label truncate flex-1">Dasbor</span>
                 </a>
 
                 <a href="<?php echo route('calendar'); ?>" class="nav-item <?php echo $page==='calendar'?'active':''; ?>" data-nav="calendar" title="Kalender">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </span>
-                    <span class="nav-label truncate">Kalender</span>
+                    <span class="nav-label truncate flex-1">Kalender</span>
                 </a>
 
                 <a href="<?php echo route('notes'); ?>" class="nav-item <?php echo $page==='notes'?'active':''; ?>" data-nav="notes" title="Catatan">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                     </span>
-                    <span class="nav-label truncate">Catatan</span>
+                    <span class="nav-label truncate flex-1">Catatan</span>
                 </a>
 
                 <a href="<?php echo route('documents'); ?>" class="nav-item <?php echo $page==='documents'?'active':''; ?>" data-nav="documents" title="Dokumen">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                     </span>
-                    <span class="nav-label truncate">Dokumen</span>
+                    <span class="nav-label truncate flex-1">Dokumen</span>
                 </a>
 
                 <a href="<?php echo route('projects'); ?>" class="nav-item <?php echo $page==='projects'?'active':''; ?>" data-nav="projects" title="Proyek (Kanban)">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
                     </span>
-                    <span class="nav-label truncate">Proyek (Kanban)</span>
+                    <span class="nav-label truncate flex-1">Proyek (Kanban)</span>
+                    <?php if ($badge_pending_tasks > 0): ?>
+                    <span class="sidebar-badge text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 flex-shrink-0" title="<?php echo $badge_pending_tasks; ?> agenda aktif"><?php echo $badge_pending_tasks; ?></span>
+                    <?php endif; ?>
                 </a>
 
                 <a href="<?php echo route('activities'); ?>" class="nav-item <?php echo $page==='activities'?'active':''; ?>" data-nav="activities" title="Aktivitas">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </span>
-                    <span class="nav-label truncate">Aktivitas</span>
+                    <span class="nav-label truncate flex-1">Aktivitas</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(52,211,153,0.8)] flex-shrink-0" title="Sistem Aktif"></span>
                 </a>
 
                 <div class="sidebar-divider"></div>
@@ -482,10 +525,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 <div class="sidebar-section-label">Akun Saya</div>
 
                 <a href="<?php echo route('profile'); ?>" class="nav-item <?php echo in_array($page, ['profile','reset-password'])?'active':''; ?>" data-nav="profile" title="Profil & Keamanan">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                     </span>
-                    <span class="nav-label truncate">Profil &amp; Keamanan</span>
+                    <span class="nav-label truncate flex-1">Profil &amp; Keamanan</span>
                 </a>
 
                 <?php if (isAdmin()): ?>
@@ -493,6 +537,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 <div class="sidebar-section-label">Administrasi</div>
 
                 <a href="<?php echo route('admin'); ?>" class="nav-item <?php echo $page==='admin'?'active':''; ?>" data-nav="admin" title="Pengguna">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </span>
@@ -500,6 +545,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 </a>
 
                 <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>" data-nav="backup" title="Cadangan Data">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     </span>
@@ -507,6 +553,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 </a>
 
                 <a href="<?php echo route('cache'); ?>" class="nav-item <?php echo $page==='cache'?'active':''; ?>" data-nav="cache" title="Optimasi Cache">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
                     </span>
@@ -514,6 +561,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 </a>
 
                 <a href="<?php echo route('settings'); ?>" class="nav-item <?php echo $page==='settings'?'active':''; ?>" data-nav="settings" title="Pengaturan Sistem">
+                    <span class="nav-indicator absolute left-0 top-1.5 bottom-1.5 w-[3.5px] bg-indigo-500 rounded-r-full shadow-[0_0_10px_rgba(99,102,241,0.85)]"></span>
                     <span class="nav-icon">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                     </span>
@@ -529,18 +577,46 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             $avatarSrc = $profilePhoto && file_exists(__DIR__ . '/uploads/avatars/' . $profilePhoto)
                 ? 'uploads/avatars/' . $profilePhoto
                 : getAvatarDataUri($display_name, 40);
+
+            // User subtitle differentiation (avoid duplicate Administrator label)
+            $role_label = ($role === 'admin') ? 'Super Admin' : 'Anggota Tim';
+            $user_subtitle = !empty($email) ? $email : $role_label;
+            if (strtolower($display_name) === strtolower($role_label) || strtolower($display_name) === 'administrator') {
+                $user_subtitle = !empty($email) ? $email : 'Super Admin';
+            }
             ?>
             <div class="relative z-20 p-2.5 border-t border-white/[0.08] flex-shrink-0">
-                <div class="sidebar-user-card flex items-center justify-between gap-2">
-                    <a href="<?php echo route('profile'); ?>" class="sidebar-user-link flex items-center gap-2.5 min-w-0 flex-1 group" title="Buka Profil Saya">
-                        <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-8 h-8 rounded-lg border border-white/20 object-cover flex-shrink-0" />
+                <div class="sidebar-user-card flex items-center justify-between gap-2.5 relative">
+                    <a href="<?php echo route('profile'); ?>" onclick="handleUserAvatarClick(event)" class="sidebar-user-link flex items-center gap-2.5 min-w-0 flex-1 group" title="Buka Profil Saya">
+                        <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-8 h-8 rounded-lg border border-white/20 object-cover flex-shrink-0 group-hover:border-indigo-400 transition-colors" />
                         <div class="sidebar-user-info flex-1 min-w-0 text-left">
-                            <div class="sidebar-user-name truncate text-xs font-bold text-slate-200 group-hover:text-white transition-colors"><?php echo htmlspecialchars($display_name); ?></div>
-                            <div class="text-[9px] font-semibold uppercase tracking-wider text-slate-400 mt-0.5"><?php echo $role; ?></div>
+                            <div class="sidebar-user-name truncate text-xs font-bold text-slate-100 group-hover:text-white transition-colors"><?php echo htmlspecialchars($display_name); ?></div>
+                            <div class="text-[11px] font-medium text-slate-400 group-hover:text-slate-300 transition-colors truncate"><?php echo htmlspecialchars($user_subtitle); ?></div>
                         </div>
                     </a>
-                    <a href="<?php echo route('logout'); ?>" class="sidebar-user-logout w-7 h-7 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all flex-shrink-0" title="Keluar">
+                    <a href="<?php echo route('logout'); ?>" class="sidebar-logout-icon-btn" title="Keluar dari Sistem" aria-label="Keluar">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                    </a>
+                </div>
+
+                <!-- Floating Popover for Collapsed Sidebar or Quick Actions -->
+                <div id="userProfilePopover" class="hidden absolute bottom-16 left-3 z-50 w-52 rounded-2xl bg-[#0f172a] border border-white/10 shadow-2xl p-1.5 text-xs backdrop-blur-md">
+                    <div class="px-3 py-2 border-b border-white/10 mb-1">
+                        <div class="font-bold text-white truncate"><?php echo htmlspecialchars($display_name); ?></div>
+                        <div class="text-[11px] text-slate-400 truncate"><?php echo htmlspecialchars($user_subtitle); ?></div>
+                    </div>
+                    <a href="<?php echo route('profile'); ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        Profil Saya
+                    </a>
+                    <a href="<?php echo route('reset-password'); ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                        Ubah Password
+                    </a>
+                    <div class="my-1 border-t border-white/10"></div>
+                    <a href="<?php echo route('logout'); ?>" class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-colors font-medium">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                        Keluar
                     </a>
                 </div>
             </div>
@@ -861,6 +937,28 @@ function toggleDesktopSidebar() {
         collapseBtn.setAttribute('title', isCollapsed ? 'Expand sidebar' : 'Minimize sidebar');
     }
 }
+
+// Collapsed user profile popover handler
+function handleUserAvatarClick(event) {
+    const sidebar = document.getElementById('sidebar');
+    const popover = document.getElementById('userProfilePopover');
+    if (sidebar && sidebar.classList.contains('sidebar-collapsed')) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (popover) {
+            popover.classList.toggle('hidden');
+        }
+    }
+}
+
+document.addEventListener('click', function(e) {
+    const popover = document.getElementById('userProfilePopover');
+    if (popover && !popover.classList.contains('hidden')) {
+        if (!popover.contains(e.target) && !e.target.closest('.sidebar-user-card')) {
+            popover.classList.add('hidden');
+        }
+    }
+});
 
 // Restore sidebar collapsed preference on load
 (function() {
