@@ -1,6 +1,6 @@
 <?php
 if (!defined('IN_APP')) exit('Akses Ditolak');
-// pages/projects.php - Kanban Board 2.0 (Executive Clean & Interactive Task Tracking)
+// pages/projects.php - Kanban Board 2.0 (Executive Clean & Interactive Task Tracking with Lane Pagination)
 $user_id = (int)$_SESSION['user_id'];
 
 // Handle Quick Add Task
@@ -186,6 +186,30 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
         </div>
     </div>
 
+    <!-- Filter & Pagination Bar -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="relative w-full sm:w-80">
+                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="kanbanSearchInput" placeholder="Cari kartu tugas di papan..." oninput="filterKanban(this.value)"
+                       class="pl-9 pr-4 py-2 text-xs font-bold w-full rounded-xl text-slate-900 bg-slate-50 border border-slate-200/90 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+            </div>
+        </div>
+
+        <div class="flex items-center gap-3 justify-end">
+            <label class="flex items-center gap-2 text-xs font-semibold text-slate-500">
+                <span>Tampilan per kolom:</span>
+                <select id="kanbanPageSizeSelect" onchange="changeKanbanPageSize(this.value)" 
+                        class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer">
+                    <option value="5" selected>5 Tugas</option>
+                    <option value="10">10 Tugas</option>
+                    <option value="20">20 Tugas</option>
+                    <option value="999">Semua</option>
+                </select>
+            </label>
+        </div>
+    </div>
+
     <!-- Kanban Grid (3 Responsive Columns) -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
         <?php foreach ($columns as $cid => $cdata): 
@@ -205,7 +229,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                     <span class="w-2.5 h-2.5 rounded-full <?php echo $cdata['dot']; ?>"></span>
                     <h2 class="font-black text-slate-900 text-sm tracking-tight"><?php echo $cdata['title']; ?></h2>
                 </div>
-                <span class="px-2.5 py-0.5 rounded-full text-xs font-black border <?php echo $cdata['badge_bg']; ?>">
+                <span id="badge-count-<?php echo $cid; ?>" class="px-2.5 py-0.5 rounded-full text-xs font-black border <?php echo $cdata['badge_bg']; ?>">
                     <?php echo $count; ?>
                 </span>
             </div>
@@ -215,13 +239,13 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
 
             <!-- Quick Add Button Per Column -->
             <button type="button" onclick="openAddTaskModal('<?php echo $cid; ?>')" 
-                    class="w-full mb-3.5 py-2 px-3 rounded-xl border border-dashed border-slate-300 hover:border-indigo-500 hover:bg-white text-slate-500 hover:text-indigo-600 text-xs font-bold transition-all flex items-center justify-center gap-1.5">
+                    class="w-full mb-3.5 py-2 px-3 rounded-xl border border-dashed border-slate-300 hover:border-indigo-500 hover:bg-white text-slate-500 hover:text-indigo-600 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Tambah ke <?php echo $cdata['title']; ?></span>
             </button>
 
             <!-- Cards Container -->
-            <div class="flex flex-col gap-3 flex-1">
+            <div class="flex flex-col gap-3 flex-1 kanban-cards-wrapper" id="lane-cards-<?php echo $cid; ?>">
                 <?php foreach ($tasks as $todo): 
                     $dateObj   = strtotime($todo['todo_date']);
                     $dateFmt   = date('d M Y', $dateObj);
@@ -232,7 +256,9 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                      draggable="true" 
                      ondragstart="kanbanDragStart(event, <?php echo $todo['id']; ?>)" 
                      ondragend="kanbanDragEnd(event)"
-                     id="todo-<?php echo $todo['id']; ?>">
+                     id="todo-<?php echo $todo['id']; ?>"
+                     data-lane="<?php echo $cid; ?>"
+                     data-title="<?php echo strtolower(htmlspecialchars($todo['title'])); ?>">
                     
                     <!-- Card Header: Title -->
                     <div class="mb-2.5">
@@ -285,13 +311,27 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                 </div>
                 <?php endforeach; ?>
 
-                <?php if (empty($tasks)): ?>
                 <!-- Empty Column Drop Area -->
-                <div class="flex-1 min-h-[140px] flex flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200/90 rounded-2xl bg-white/60">
+                <div id="empty-lane-<?php echo $cid; ?>" class="<?php echo empty($tasks) ? 'flex' : 'hidden'; ?> flex-1 min-h-[140px] flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200/90 rounded-2xl bg-white/60">
                     <p class="text-xs font-bold text-slate-400 mb-0.5">Tidak ada tugas</p>
                     <p class="text-[10px] text-slate-400">Tarik kartu ke sini untuk memindahkan</p>
                 </div>
-                <?php endif; ?>
+            </div>
+
+            <!-- Lane Pagination Footer -->
+            <div id="lane-pagination-<?php echo $cid; ?>" class="pt-3 mt-auto border-t border-slate-200/70 flex items-center justify-between text-xs font-bold text-slate-500">
+                <button type="button" onclick="prevLanePage('<?php echo $cid; ?>')" id="prev-btn-<?php echo $cid; ?>" 
+                        class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shadow-2xs">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                </button>
+                <div class="flex items-center gap-1.5">
+                    <span id="lane-indicator-<?php echo $cid; ?>" class="text-[11px] font-extrabold text-slate-600">Hal 1 / 1</span>
+                    <span id="lane-count-<?php echo $cid; ?>" class="text-[10px] text-slate-400 font-semibold">(<?php echo $count; ?> tugas)</span>
+                </div>
+                <button type="button" onclick="nextLanePage('<?php echo $cid; ?>')" id="next-btn-<?php echo $cid; ?>" 
+                        class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shadow-2xs">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
             </div>
         </div>
         <?php endforeach; ?>
@@ -367,6 +407,113 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
 
 <script>
 (function() {
+    // -------------------------------------------------------------
+    // Kanban Pagination State
+    // -------------------------------------------------------------
+    const lanes = ['todo', 'in_progress', 'done'];
+    const lanePages = { todo: 1, in_progress: 1, done: 1 };
+    let kanbanPageSize = 5;
+    let kanbanSearchQuery = '';
+
+    window.changeKanbanPageSize = function(size) {
+        kanbanPageSize = parseInt(size, 10) || 5;
+        lanes.forEach(lane => {
+            lanePages[lane] = 1;
+            paginateKanbanLane(lane);
+        });
+    };
+
+    window.filterKanban = function(query) {
+        kanbanSearchQuery = (query || '').toLowerCase().trim();
+        lanes.forEach(lane => {
+            lanePages[lane] = 1;
+            paginateKanbanLane(lane);
+        });
+    };
+
+    window.prevLanePage = function(lane) {
+        if (lanePages[lane] > 1) {
+            lanePages[lane]--;
+            paginateKanbanLane(lane);
+        }
+    };
+
+    window.nextLanePage = function(lane) {
+        lanePages[lane]++;
+        paginateKanbanLane(lane);
+    };
+
+    function paginateKanbanLane(lane) {
+        const wrapper = document.getElementById('lane-cards-' + lane);
+        if (!wrapper) return;
+
+        const cards = Array.from(wrapper.querySelectorAll('.kanban-task-card'));
+        const emptyEl = document.getElementById('empty-lane-' + lane);
+        const indicator = document.getElementById('lane-indicator-' + lane);
+        const countText = document.getElementById('lane-count-' + lane);
+        const prevBtn = document.getElementById('prev-btn-' + lane);
+        const nextBtn = document.getElementById('next-btn-' + lane);
+
+        // Filter cards by search
+        const matchedCards = cards.filter(card => {
+            if (!kanbanSearchQuery) return true;
+            const title = card.dataset.title || '';
+            return title.includes(kanbanSearchQuery);
+        });
+
+        const totalMatched = matchedCards.length;
+        const totalPages = Math.max(1, Math.ceil(totalMatched / kanbanPageSize));
+
+        if (lanePages[lane] > totalPages) {
+            lanePages[lane] = totalPages;
+        }
+        if (lanePages[lane] < 1) {
+            lanePages[lane] = 1;
+        }
+        const curPage = lanePages[lane];
+
+        // Hide all cards first
+        cards.forEach(c => c.style.display = 'none');
+
+        if (totalMatched === 0) {
+            if (emptyEl) {
+                emptyEl.classList.remove('hidden');
+                emptyEl.classList.add('flex');
+            }
+        } else {
+            if (emptyEl) {
+                emptyEl.classList.add('hidden');
+                emptyEl.classList.remove('flex');
+            }
+
+            // Slice visible cards for this page
+            const startIdx = (curPage - 1) * kanbanPageSize;
+            const endIdx = Math.min(startIdx + kanbanPageSize, totalMatched);
+            const visibleSlice = matchedCards.slice(startIdx, endIdx);
+
+            visibleSlice.forEach(c => c.style.display = 'block');
+        }
+
+        // Update indicators
+        if (indicator) {
+            indicator.textContent = `Hal ${curPage} / ${totalPages}`;
+        }
+        if (countText) {
+            countText.textContent = `(${totalMatched} tugas)`;
+        }
+
+        // Update Prev / Next buttons state
+        if (prevBtn) {
+            prevBtn.disabled = (curPage <= 1);
+        }
+        if (nextBtn) {
+            nextBtn.disabled = (curPage >= totalPages);
+        }
+    }
+
+    // Initialize lane pagination
+    lanes.forEach(lane => paginateKanbanLane(lane));
+
     // -------------------------------------------------------------
     // Drag and Drop Logic
     // -------------------------------------------------------------

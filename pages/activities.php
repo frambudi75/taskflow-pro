@@ -1,6 +1,6 @@
 <?php
 if (!defined('IN_APP')) exit('Akses Ditolak');
-// pages/activities.php - Aktivitas 2.0 (Modern Executive Audit Log & Real-time Timeline)
+// pages/activities.php - Aktivitas 2.0 (Modern Executive Audit Log & Real-time Timeline with Rich Pagination)
 $isAdmin = isAdmin();
 $user_id = (int)$_SESSION['user_id'];
 
@@ -10,7 +10,7 @@ $stmt = $pdo->prepare("
     FROM activities a 
     LEFT JOIN users u ON a.user_id = u.id 
     ORDER BY a.created_at DESC 
-    LIMIT 200
+    LIMIT 300
 ");
 $stmt->execute();
 $all_activities = $stmt->fetchAll();
@@ -91,7 +91,7 @@ function getActionStyle($action) {
 function renderTimeline($activities, $tabId) {
     if (empty($activities)) {
         echo '
-        <div class="bg-white rounded-3xl p-14 text-center border border-slate-200/90 shadow-sm">
+        <div class="bg-white/80 backdrop-blur-md rounded-3xl p-14 text-center border border-slate-200/90 shadow-sm">
             <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 shadow-xs">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
@@ -101,7 +101,7 @@ function renderTimeline($activities, $tabId) {
         return;
     }
     
-    echo '<div class="flex flex-col gap-4 activity-timeline-list" data-tab="' . $tabId . '">';
+    echo '<div class="flex flex-col gap-3 activity-timeline-list" id="timeline-' . $tabId . '" data-tab="' . $tabId . '">';
     $currentDate = '';
     
     foreach ($activities as $act) {
@@ -114,11 +114,12 @@ function renderTimeline($activities, $tabId) {
         $initials = strtoupper(substr($act['display_name'] ?? 'US', 0, 2));
         $hasPhoto = !empty($act['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $act['profile_photo']);
         
+        // Date divider element (identified by data-date)
         if ($displayDate) {
             echo '
-            <div class="relative flex items-center gap-4 my-2 date-divider">
+            <div class="date-divider relative flex items-center gap-4 my-2" data-date="' . htmlspecialchars($dateLabel) . '" data-tab="' . $tabId . '">
                 <div class="h-px flex-1 bg-slate-200/80"></div>
-                <span class="bg-white px-4 py-1 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-wider border border-slate-200/80 shadow-xs">' . htmlspecialchars($dateLabel) . '</span>
+                <span class="bg-white px-4 py-1 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-wider border border-slate-200/80 shadow-2xs">' . htmlspecialchars($dateLabel) . '</span>
                 <div class="h-px flex-1 bg-slate-200/80"></div>
             </div>';
         }
@@ -128,7 +129,10 @@ function renderTimeline($activities, $tabId) {
             : '<span class="text-[9px] font-black text-slate-500">' . htmlspecialchars($initials) . '</span>';
             
         echo '
-        <div class="activity-item group relative flex gap-4 items-start" data-text="' . strtolower(htmlspecialchars($act['action'] . ' ' . ($act['display_name'] ?? ''))) . '">
+        <div class="activity-item group relative flex gap-4 items-start" 
+             data-tab="' . $tabId . '" 
+             data-date="' . htmlspecialchars($dateLabel) . '"
+             data-text="' . strtolower(htmlspecialchars($act['action'] . ' ' . ($act['display_name'] ?? '') . ' ' . $dateLabel)) . '">
             <div class="hidden sm:flex flex-col items-end w-14 pt-2.5 flex-shrink-0">
                 <span class="text-xs font-black text-slate-900 leading-none">' . htmlspecialchars($timeLabel) . '</span>
                 <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-1">WIB</span>
@@ -152,6 +156,7 @@ function renderTimeline($activities, $tabId) {
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             <span>' . htmlspecialchars($timeLabel) . ' WIB</span>
                         </div>
+                        <span class="text-xs text-slate-400 font-medium sm:hidden">• ' . htmlspecialchars($dateLabel) . '</span>
                     </div>
                 </div>
                 <div class="hidden md:block flex-shrink-0">
@@ -161,6 +166,37 @@ function renderTimeline($activities, $tabId) {
         </div>';
     }
     echo '</div>';
+
+    // Empty search state
+    echo '
+    <div id="empty-search-' . $tabId . '" class="hidden bg-white/80 backdrop-blur-md rounded-3xl p-12 text-center border border-slate-200/90 shadow-sm mt-4">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        </div>
+        <p class="text-slate-700 font-bold text-sm">Tidak ada aktivitas yang sesuai.</p>
+        <p class="text-slate-400 text-xs font-medium mt-1">Coba gunakan kata kunci lain dalam pencarian Anda.</p>
+    </div>';
+
+    // Pagination Bar
+    echo '
+    <div id="pagination-' . $tabId . '" class="activity-pagination-bar mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
+        <div class="flex items-center gap-3 text-xs font-bold text-slate-500">
+            <span id="info-' . $tabId . '" class="pagination-info">Menampilkan...</span>
+            <span class="text-slate-300">•</span>
+            <label class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold">
+                Per hal:
+                <select id="size-' . $tabId . '" onchange="changeActPageSize(this.value)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer">
+                    <option value="10">10</option>
+                    <option value="15" selected>15</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </label>
+        </div>
+        <div id="nav-' . $tabId . '" class="flex items-center gap-1.5 pagination-buttons">
+            <!-- Buttons dynamically generated -->
+        </div>
+    </div>';
 }
 ?>
 
@@ -213,7 +249,7 @@ function renderTimeline($activities, $tabId) {
         <!-- Search input -->
         <div class="relative">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="text" id="actSearchInput" placeholder="Cari aktivitas atau nama..." oninput="filterActivities(this.value)"
+            <input type="text" id="actSearchInput" placeholder="Cari aktivitas atau nama..." oninput="handleActSearch(this.value)"
                    class="pl-9 pr-4 py-2 text-xs font-bold w-full sm:w-64 rounded-xl text-slate-900 bg-white border border-slate-200/90 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400">
         </div>
     </div>
@@ -235,26 +271,201 @@ function renderTimeline($activities, $tabId) {
 </div>
 
 <script>
-function switchActTab(tab) {
-    const tabs = ['all', 'work', 'system'];
-    tabs.forEach(t => {
-        const btn = document.getElementById('tab-btn-' + t);
-        const content = document.getElementById('tab-content-' + t);
-        if (t === tab) {
-            btn.className = "px-4 py-2 rounded-xl text-xs font-extrabold transition-all bg-white text-slate-900 shadow-xs";
-            content.classList.remove('hidden');
-        } else {
-            btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-900";
-            content.classList.add('hidden');
-        }
-    });
-}
+(function() {
+    let currentTab = 'all';
+    let searchQuery = '';
+    let pageSize = 15;
+    const pageState = {
+        all: 1,
+        work: 1,
+        system: 1
+    };
 
-function filterActivities(query) {
-    const q = query.toLowerCase().trim();
-    document.querySelectorAll('.activity-item').forEach(item => {
-        const text = item.dataset.text || '';
-        item.style.display = (!q || text.includes(q)) ? '' : 'none';
+    window.switchActTab = function(tab) {
+        currentTab = tab;
+        const tabs = ['all', 'work', 'system'];
+        tabs.forEach(t => {
+            const btn = document.getElementById('tab-btn-' + t);
+            const content = document.getElementById('tab-content-' + t);
+            if (t === tab) {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-extrabold transition-all bg-white text-slate-900 shadow-xs";
+                content.classList.remove('hidden');
+            } else {
+                btn.className = "px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-900";
+                content.classList.add('hidden');
+            }
+        });
+        paginateTab(currentTab);
+    };
+
+    window.handleActSearch = function(query) {
+        searchQuery = (query || '').toLowerCase().trim();
+        pageState[currentTab] = 1;
+        paginateTab(currentTab);
+    };
+
+    window.changeActPageSize = function(size) {
+        pageSize = parseInt(size, 10) || 15;
+        // Keep all dropdowns synced
+        ['all', 'work', 'system'].forEach(t => {
+            const el = document.getElementById('size-' + t);
+            if (el) el.value = pageSize;
+        });
+        pageState[currentTab] = 1;
+        paginateTab(currentTab);
+    };
+
+    window.goToActPage = function(tab, page) {
+        pageState[tab] = page;
+        paginateTab(tab);
+        // Scroll to timeline smoothly
+        const container = document.getElementById('tab-content-' + tab);
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    };
+
+    function paginateTab(tab) {
+        const container = document.getElementById('timeline-' + tab);
+        if (!container) return;
+
+        const items = Array.from(container.querySelectorAll('.activity-item[data-tab="' + tab + '"]'));
+        const dividers = Array.from(container.querySelectorAll('.date-divider[data-tab="' + tab + '"]'));
+        const emptyState = document.getElementById('empty-search-' + tab);
+        const paginationBar = document.getElementById('pagination-' + tab);
+        const infoEl = document.getElementById('info-' + tab);
+        const navEl = document.getElementById('nav-' + tab);
+
+        // 1. Filter items by search query
+        const matchedItems = items.filter(item => {
+            if (!searchQuery) return true;
+            const text = item.dataset.text || '';
+            return text.includes(searchQuery);
+        });
+
+        const totalItems = matchedItems.length;
+        const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+        
+        if (pageState[tab] > totalPages) {
+            pageState[tab] = totalPages;
+        }
+        const currentPage = pageState[tab];
+
+        // If no matching items
+        if (totalItems === 0) {
+            items.forEach(it => it.style.display = 'none');
+            dividers.forEach(d => d.style.display = 'none');
+            if (emptyState) emptyState.classList.remove('hidden');
+            if (paginationBar) paginationBar.classList.add('hidden');
+            return;
+        }
+
+        if (emptyState) emptyState.classList.add('hidden');
+        if (paginationBar) paginationBar.classList.remove('hidden');
+
+        // 2. Hide all items initially
+        items.forEach(it => it.style.display = 'none');
+        dividers.forEach(d => d.style.display = 'none');
+
+        // 3. Slice visible items for current page
+        const startIdx = (currentPage - 1) * pageSize;
+        const endIdx = Math.min(startIdx + pageSize, totalItems);
+        const pageItems = matchedItems.slice(startIdx, endIdx);
+
+        // 4. Reveal current page items and organize date dividers
+        const datesShown = new Set();
+        pageItems.forEach(item => {
+            item.style.display = 'flex';
+            const itemDate = item.dataset.date;
+            if (itemDate && !datesShown.has(itemDate)) {
+                datesShown.add(itemDate);
+                // Find matching divider
+                const div = dividers.find(d => d.dataset.date === itemDate);
+                if (div) {
+                    div.style.display = 'flex';
+                }
+            }
+        });
+
+        // 5. Update info text
+        if (infoEl) {
+            const startDisplay = totalItems > 0 ? (startIdx + 1) : 0;
+            const endDisplay = endIdx;
+            infoEl.textContent = `Menampilkan ${startDisplay} – ${endDisplay} dari ${totalItems} aktivitas`;
+        }
+
+        // 6. Render pagination controls
+        if (navEl) {
+            let html = '';
+
+            // Prev Button
+            const prevDisabled = currentPage === 1;
+            html += `
+                <button type="button" onclick="goToActPage('${tab}', ${currentPage - 1})" ${prevDisabled ? 'disabled' : ''}
+                        class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold transition-all flex items-center gap-1 ${prevDisabled ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white hover:bg-slate-50 text-slate-700 active:scale-95 shadow-2xs'}">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
+                    <span class="hidden sm:inline">Sebelumnya</span>
+                </button>
+            `;
+
+            // Page numbers
+            const maxVisiblePills = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePills / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePills - 1);
+            if (endPage - startPage + 1 < maxVisiblePills) {
+                startPage = Math.max(1, endPage - maxVisiblePills + 1);
+            }
+
+            if (startPage > 1) {
+                html += `
+                    <button type="button" onclick="goToActPage('${tab}', 1)" class="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-2xs">1</button>
+                `;
+                if (startPage > 2) {
+                    html += `<span class="px-1 text-slate-400 text-xs font-bold">...</span>`;
+                }
+            }
+
+            for (let p = startPage; p <= endPage; p++) {
+                const isActive = (p === currentPage);
+                if (isActive) {
+                    html += `
+                        <button type="button" class="w-8 h-8 rounded-xl bg-indigo-600 text-white text-xs font-extrabold shadow-sm shadow-indigo-600/30">${p}</button>
+                    `;
+                } else {
+                    html += `
+                        <button type="button" onclick="goToActPage('${tab}', ${p})" class="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all active:scale-95 shadow-2xs">${p}</button>
+                    `;
+                }
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    html += `<span class="px-1 text-slate-400 text-xs font-bold">...</span>`;
+                }
+                html += `
+                    <button type="button" onclick="goToActPage('${tab}', ${totalPages})" class="w-8 h-8 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition-all shadow-2xs">${totalPages}</button>
+                `;
+            }
+
+            // Next Button
+            const nextDisabled = currentPage === totalPages;
+            html += `
+                <button type="button" onclick="goToActPage('${tab}', ${currentPage + 1})" ${nextDisabled ? 'disabled' : ''}
+                        class="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs font-bold transition-all flex items-center gap-1 ${nextDisabled ? 'bg-slate-100 text-slate-300 cursor-not-allowed' : 'bg-white hover:bg-slate-50 text-slate-700 active:scale-95 shadow-2xs'}">
+                    <span class="hidden sm:inline">Selanjutnya</span>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            `;
+
+            navEl.innerHTML = html;
+        }
+    }
+
+    // Initialize all tabs pagination on load
+    document.addEventListener('DOMContentLoaded', function() {
+        ['all', 'work', 'system'].forEach(t => paginateTab(t));
     });
-}
+    // Also run immediately in case DOM is already ready (e.g. loaded via SPA/fetch)
+    ['all', 'work', 'system'].forEach(t => paginateTab(t));
+})();
 </script>
