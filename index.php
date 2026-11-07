@@ -348,15 +348,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             aside#sidebar.sidebar-collapsed #collapseIcon {
                 transform: rotate(180deg);
             }
-            aside#sidebar.sidebar-collapsed #unreadChatBadge {
-                position: absolute;
-                top: 2px;
-                right: 2px;
-            }
+
         }
 
         @media print {
-            header, aside, #sidebar, .sidebar-overlay, #pageLoader, #unreadChatBadge, .no-print {
+            header, aside, #sidebar, .sidebar-overlay, #pageLoader, .no-print {
                 display: none !important;
             }
             body {
@@ -460,22 +456,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                     <span class="nav-label truncate">Aktivitas</span>
                 </a>
 
-                <?php if (getSetting('enable_chat', '1') === '1'): ?>
-                <a href="<?php echo route('chat'); ?>" class="nav-item <?php echo $page==='chat'?'active':''; ?>" data-nav="chat" title="Pesan">
-                    <span class="nav-icon relative">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
-                    </span>
-                    <span class="nav-label truncate flex-1">Pesan</span>
-                    <?php 
-                        $unreadMsg = countUnreadMessages($user_id);
-                        $badgeStyle = $unreadMsg > 0 ? '' : 'display:none';
-                    ?>
-                    <span id="unreadChatBadge" style="<?php echo $badgeStyle; ?>" 
-                          class="w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-[10px] font-black border-2 border-[#1e293b]">
-                        <?php echo $unreadMsg; ?>
-                    </span>
-                </a>
-                <?php endif; ?>
+
 
                 <div class="sidebar-divider"></div>
 
@@ -573,7 +554,6 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 case 'documents': include 'pages/documents.php'; break;
                 case 'projects': include 'pages/projects.php'; break;
                 case 'activities': include 'pages/activities.php'; break;
-                case 'chat': include 'pages/chat.php'; break;
                 case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
                 case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
                 case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
@@ -777,43 +757,7 @@ function toggleDesktopSidebar() {
     } catch(e) {}
 })();
 
-<?php if (getSetting('enable_chat', '1') === '1'): ?>
-let lastUnreadCount = <?php echo countUnreadMessages($user_id); ?>;
-function updateChatBadge() {
-    fetch('api_chat.php?action=count_unread', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-        .then(res => res.json())
-        .then(data => {
-            const badge = document.getElementById('unreadChatBadge');
-            if (badge) {
-                if (data.unread_count > lastUnreadCount) {
-                    const sound = document.getElementById('notifSound');
-                    if (sound) sound.play().catch(e => console.log('Audio play blocked:', e));
-                    if (Notification.permission === "granted") {
-                        new Notification("TaskFlow Pro", {
-                            body: "Pesan baru masuk! Klik untuk baca.",
-                            icon: "favicon.ico"
-                        }).onclick = function() {
-                            window.focus();
-                            loadPage('index.php?page=chat');
-                        };
-                    }
-                }
-                lastUnreadCount = data.unread_count;
-                if (data.unread_count > 0) {
-                    badge.innerText = data.unread_count;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        }).catch(e => console.log('Chat badge error:', e));
-}
-if (Notification.permission !== "granted" && Notification.permission !== "denied") {
-    Notification.requestPermission();
-}
-setInterval(updateChatBadge, 15000); 
-updateChatBadge(); 
-<?php endif; ?>
+
 </script>
 
 </body>

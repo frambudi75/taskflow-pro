@@ -35,17 +35,6 @@ $originalName = $basename;
 // 1. Public authenticated assets: Settings Logo, Avatars
 if (strpos($file, 'uploads/settings/') === 0 || strpos($file, 'uploads/avatars/') === 0) {
     $isAllowed = true;
-} elseif (strpos($file, 'uploads/chat/') === 0) {
-    // Chat attachments accessible to sender, receiver, or admin
-    $chatStmt = $pdo->prepare("
-        SELECT id FROM messages 
-        WHERE (sender_id = ? OR receiver_id = ?" . (isAdmin() ? " OR 1=1" : "") . ") 
-        AND file_path LIKE ?
-    ");
-    $chatStmt->execute([$user_id, $user_id, '%' . $basename]);
-    if ($chatStmt->fetch()) {
-        $isAllowed = true;
-    }
 } else {
     // Check Document Ownership or Shared Access
     $stmt = $pdo->prepare("

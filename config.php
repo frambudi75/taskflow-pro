@@ -79,8 +79,6 @@ function route($page) {
         'backup' => 'index.php?page=backup',
         'cache' => 'index.php?page=cache',
         'notif-harian' => 'notif_harian.php',
-
-        'chat' => 'index.php?page=chat',
         'logout' => 'index.php?logout=1'
     ];
     return baseUrl($map[$page] ?? "index.php?page=" . $page);

@@ -25,7 +25,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'smtp_from'          => trim($_POST['smtp_from'] ?? ''),
                 'notif_time'         => $_POST['notif_time'] ?? '08',
                 'app_url'            => trim($_POST['app_url'] ?? ''),
-                'enable_chat'        => isset($_POST['enable_chat']) ? '1' : '0',
                 'company_name'       => trim($_POST['company_name'] ?? ''),
                 'company_tagline'    => trim($_POST['company_tagline'] ?? ''),
                 'company_address'    => trim($_POST['company_address'] ?? ''),
@@ -293,22 +292,6 @@ $tg_token = getSetting('telegram_bot_token', '');
                         <input type="url" name="app_url" value="<?php echo htmlspecialchars(getSetting('app_url')); ?>" placeholder="Contoh: http://localhost/taskflow"
                                class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
                         <p class="mt-1 text-[10px] text-slate-400 font-medium">Gunakan untuk menghasilkan tautan berbagi dokumen publik dan notifikasi eksternal.</p>
-                    </div>
-
-                    <div class="p-5 bg-slate-50 dark:bg-slate-800/60 rounded-2xl border border-slate-200/80 dark:border-slate-700 flex items-center justify-between">
-                        <div class="flex items-center gap-3.5">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/40">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 1 1-7.6-10.6 8.38 8.38 0 0 1 3.8.9L22 4l-2 5z"/></svg>
-                            </div>
-                            <div>
-                                <h4 class="text-xs font-extrabold text-slate-900 dark:text-white">Fitur Chat Tim Internal</h4>
-                                <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Aktifkan atau nonaktifkan fitur kirim pesan real-time antar pengguna.</p>
-                            </div>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" name="enable_chat" class="sr-only peer" <?php echo getSetting('enable_chat', '1') === '1' ? 'checked' : ''; ?>>
-                            <div class="w-11 h-6 bg-slate-200 dark:bg-slate-700 peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600 rounded-full"></div>
-                        </label>
                     </div>
                 </div>
 
