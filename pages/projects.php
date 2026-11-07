@@ -106,41 +106,55 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
 ?>
 
 <style>
-/* Kanban 2.0 Visual Refinement */
+/* Kanban 2.0 Frosted Glassmorphism Visual Refinement */
 .kanban-lane {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
+    background: rgba(248, 250, 252, 0.72);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.8);
     border-radius: 24px;
+    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.03), inset 0 1px 0 rgba(255, 255, 255, 0.9);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .kanban-lane.dragover {
-    background: #eef2ff;
+    background: rgba(238, 242, 255, 0.85);
     border-color: #6366f1;
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
 
 .kanban-task-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.84);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.9);
     border-radius: 18px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03), inset 0 1px 0 #ffffff;
     transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .kanban-task-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 20px -4px rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.98);
+    border-color: rgba(99, 102, 241, 0.4);
+    box-shadow: 0 10px 24px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
     transform: translateY(-2px);
 }
 .kanban-task-card.is-dragging {
     opacity: 0.4;
     transform: scale(0.98);
 }
+
+.kanban-glass-panel {
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
 </style>
 
 <div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
 
-    <!-- Executive Header Section -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Executive Header Section (Glassmorphic) -->
+    <div class="rounded-3xl p-6 md:p-7 kanban-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
                 <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>

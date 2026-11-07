@@ -263,22 +263,39 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         }
 
         /* Ambient Glassmorphism & High-Craft Surface System */
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.82);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.9);
+        .glass-panel,
+        .glass-surface {
+            background: rgba(255, 255, 255, 0.76) !important;
+            backdrop-filter: blur(18px) saturate(180%);
+            -webkit-backdrop-filter: blur(18px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.85) !important;
             box-shadow: 
-                0 1px 2px rgba(15, 23, 42, 0.03),
-                0 10px 30px -4px rgba(15, 23, 42, 0.05),
-                inset 0 1px 0 rgba(255, 255, 255, 1);
+                0 4px 20px -2px rgba(15, 23, 42, 0.04),
+                0 1px 3px rgba(15, 23, 42, 0.02),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
         }
-        .dark .glass-panel {
-            background: rgba(15, 23, 42, 0.78);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+        .dark .glass-panel,
+        .dark .glass-surface {
+            background: rgba(15, 23, 42, 0.78) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             box-shadow: 
                 0 4px 24px -2px rgba(0, 0, 0, 0.4),
-                inset 0 1px 0 rgba(255, 255, 255, 0.06);
+                inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.78) !important;
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.85) !important;
+            box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95) !important;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.94) !important;
+            border-color: rgba(99, 102, 241, 0.35) !important;
+            box-shadow: 0 12px 30px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff !important;
+            transform: translateY(-2px);
         }
         /* Mobile Overlaybackdrop */
         .sidebar-overlay {
@@ -552,11 +569,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-hidden flex flex-col relative bg-[#f3f6fb] dark:bg-[#090d16]" style="min-width:0">
+    <main class="flex-1 overflow-hidden flex flex-col relative bg-[#f1f5fb] dark:bg-[#090d16]" style="min-width:0">
         <!-- Ambient Glassmorphism Atmospheric Lighting Orbs (Visible through frosted glass) -->
-        <div class="fixed top-[-80px] right-[-80px] w-[650px] h-[650px] bg-gradient-to-br from-indigo-400/25 via-purple-300/20 to-transparent dark:from-indigo-600/20 dark:via-purple-600/10 dark:to-transparent rounded-full blur-[100px] pointer-events-none z-0"></div>
-        <div class="fixed bottom-[-60px] left-64 w-[550px] h-[550px] bg-gradient-to-tr from-sky-400/20 via-indigo-300/15 to-transparent dark:from-sky-600/15 dark:via-indigo-900/15 dark:to-transparent rounded-full blur-[90px] pointer-events-none z-0"></div>
-        <div class="fixed top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] bg-indigo-200/20 dark:bg-indigo-900/15 rounded-full blur-[120px] pointer-events-none z-0"></div>
+        <div class="fixed top-[-100px] right-[-60px] w-[620px] h-[620px] bg-gradient-to-br from-indigo-500/20 via-purple-400/18 to-sky-300/12 rounded-full blur-[110px] pointer-events-none z-0"></div>
+        <div class="fixed bottom-[-80px] left-64 w-[600px] h-[600px] bg-gradient-to-tr from-sky-400/18 via-indigo-300/14 to-emerald-300/12 rounded-full blur-[110px] pointer-events-none z-0"></div>
+        <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[750px] bg-gradient-to-r from-purple-300/12 via-indigo-200/18 to-transparent rounded-full blur-[130px] pointer-events-none z-0"></div>
 
         <div id="ajaxContent" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col relative z-10">
             <?php

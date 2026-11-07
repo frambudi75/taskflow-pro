@@ -79,31 +79,31 @@ if (!function_exists('notesTimeAgo')) {
 ?>
 
 <style>
-/* Catatan 2.0 Visual Craft & Micro-interactions */
+/* Catatan 2.0 Frosted Glass Craft & Micro-interactions */
 .note-glass-card {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(226, 232, 240, 0.85);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     border-radius: 20px;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
     position: relative;
     overflow: hidden;
 }
-.dark .note-glass-card {
-    background: rgba(15, 23, 42, 0.82);
-    border-color: rgba(30, 41, 59, 0.85);
-    box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.05);
-}
 .note-glass-card:hover {
     transform: translateY(-3px);
-    border-color: #cbd5e1;
-    box-shadow: 0 12px 28px -4px rgba(15, 23, 42, 0.09);
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 12px 30px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
 }
-.dark .note-glass-card:hover {
-    border-color: #334155;
-    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.45);
+
+.notes-glass-panel {
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .note-quick-action {
@@ -124,39 +124,35 @@ if (!function_exists('notesTimeAgo')) {
 
 <div class="p-4 md:p-8 w-full max-w-[1600px] mx-auto space-y-6">
 
-    <!-- Executive Header Banner -->
-    <div class="rounded-3xl p-6 md:p-7 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 text-white">
-        <!-- Ambient radial highlights -->
-        <div class="pointer-events-none absolute -right-16 -top-16 w-72 h-72 rounded-full bg-violet-500/20 blur-3xl"></div>
-        <div class="pointer-events-none absolute -left-16 -bottom-16 w-72 h-72 rounded-full bg-indigo-500/15 blur-3xl"></div>
-
-        <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-200 text-xs font-extrabold uppercase tracking-widest mb-2.5">
-                <span class="w-2 h-2 rounded-full bg-violet-400 animate-pulse"></span>
+    <!-- Executive Header Banner (Frosted Glass) -->
+    <div class="rounded-3xl p-6 md:p-7 notes-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 border border-violet-100 text-violet-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span>
                 Dokumentasi &amp; Ide
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight mb-1">Catatan &amp; Ide Kerja</h1>
-            <p class="text-slate-300 text-xs md:text-sm font-medium max-w-xl leading-relaxed">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Catatan &amp; Ide Kerja</h1>
+            <p class="text-slate-500 text-xs md:text-sm font-medium max-w-xl leading-relaxed">
                 Kelola draf ide, notula rapat, dan dokumentasi kerja Anda dalam ruang tulis yang bersih.
             </p>
         </div>
 
         <!-- Metric Badges & Action -->
-        <div class="relative z-10 flex flex-wrap items-center gap-3 flex-shrink-0">
-            <div class="bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-xl border border-white/15 flex items-center gap-3">
+        <div class="flex flex-wrap items-center gap-3 flex-shrink-0">
+            <div class="bg-slate-50 border border-slate-200/80 px-3.5 py-2 rounded-xl flex items-center gap-3">
                 <div>
-                    <div class="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Total Catatan</div>
-                    <div class="text-lg font-black text-white leading-none mt-0.5"><?php echo $total_notes; ?></div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Catatan</div>
+                    <div class="text-lg font-black text-slate-900 leading-none mt-0.5"><?php echo $total_notes; ?></div>
                 </div>
-                <div class="w-px h-6 bg-white/20"></div>
+                <div class="w-px h-6 bg-slate-200"></div>
                 <div>
-                    <div class="text-[10px] uppercase font-bold text-slate-300 tracking-wider">Estimasi Kata</div>
-                    <div class="text-lg font-black text-indigo-200 leading-none mt-0.5"><?php echo number_format($total_words); ?></div>
+                    <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Estimasi Kata</div>
+                    <div class="text-lg font-black text-violet-700 leading-none mt-0.5"><?php echo number_format($total_words); ?></div>
                 </div>
             </div>
 
             <button onclick="openAddModal()"
-                    class="min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-600/30 transition-all active:scale-95">
+                    class="min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 transition-all active:scale-95">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 + Catatan Baru
             </button>

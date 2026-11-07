@@ -108,25 +108,37 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 ?>
 
 <style>
-/* Clean & Crisp SaaS Calendar System */
+/* Clean & Crisp SaaS Frosted Glass Calendar System */
 .cal-white-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     border-radius: 20px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04), 0 6px 16px -2px rgba(15, 23, 42, 0.02);
+    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.95);
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .cal-white-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
+    transform: translateY(-2px);
+}
+
+.cal-glass-panel {
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .cal-cell {
-    background: #ffffff;
+    background: rgba(255, 255, 255, 0.85);
     transition: all 0.16s ease;
 }
 .cal-cell:hover {
-    background: #f8fafc;
+    background: rgba(255, 255, 255, 0.98);
     z-index: 5;
 }
 
@@ -148,8 +160,8 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 
 <div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
 
-    <!-- Header Section (Executive Clean SaaS Header with Month Navigation) -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Header Section (Executive Clean SaaS Frosted Glass Header) -->
+    <div class="rounded-3xl p-6 md:p-7 cal-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -253,7 +265,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
         <!-- Calendar Matrix (8 Columns on desktop) -->
-        <div class="xl:col-span-8 bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden flex flex-col">
+        <div class="xl:col-span-8 cal-glass-panel rounded-3xl overflow-hidden flex flex-col">
             
             <!-- Calendar Top Info Bar -->
             <div class="px-5 py-3.5 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/60">
@@ -400,7 +412,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
         </div>
 
         <!-- Right Side Panel: Day Agenda & Tasks (Always active, defaults to Today) -->
-        <div class="xl:col-span-4 bg-white rounded-3xl border border-slate-200/90 shadow-sm p-6 flex flex-col min-h-[580px]">
+        <div class="xl:col-span-4 cal-glass-panel rounded-3xl p-6 flex flex-col min-h-[580px]">
             
             <!-- Panel Header -->
             <div class="border-b border-slate-200/80 pb-4 mb-4">

@@ -133,14 +133,14 @@ function renderTimeline($activities, $tabId) {
                 <span class="text-xs font-black text-slate-900 leading-none">' . htmlspecialchars($timeLabel) . '</span>
                 <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-1">WIB</span>
             </div>
-            <div class="flex-1 bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/90 shadow-xs hover:border-slate-300 hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center gap-3.5">
+            <div class="flex-1 bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-xs hover:bg-white/95 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center gap-3.5">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center border flex-shrink-0 shadow-xs ' . $style[1] . '">
                     ' . $style[0] . '
                 </div>
                 <div class="flex-1 min-w-0">
                     <p class="text-slate-900 font-bold leading-snug text-sm mb-2">' . htmlspecialchars($act['action']) . '</p>
                     <div class="flex flex-wrap items-center gap-2">
-                        <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-50 border border-slate-200/80 rounded-lg">
+                        <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-50/80 border border-slate-200/80 rounded-lg">
                             <div class="w-5 h-5 rounded-md overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
                                 ' . $photoHtml . '
                             </div>
@@ -166,8 +166,8 @@ function renderTimeline($activities, $tabId) {
 
 <div class="p-4 md:p-7 w-full max-w-5xl mx-auto space-y-6">
     
-    <!-- Executive Header Section -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Executive Header Section (Glassmorphic) -->
+    <div class="rounded-3xl p-6 md:p-7 bg-white/76 backdrop-blur-xl border border-white/85 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
                 <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>

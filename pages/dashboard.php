@@ -156,11 +156,11 @@ if (!function_exists('dashDocTypeInfo')) {
 
 /* Glassmorphism surface with specular highlight */
 .glass-surface {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(226, 232, 240, 0.9);
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     position: relative;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
@@ -172,10 +172,10 @@ if (!function_exists('dashDocTypeInfo')) {
 }
 
 .dash-stat-card {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(226, 232, 240, 0.85);
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     border-radius: 20px;
     padding: 18px 20px;
     display: flex;
@@ -185,7 +185,7 @@ if (!function_exists('dashDocTypeInfo')) {
     position: relative;
     overflow: hidden;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
+    box-shadow: 0 4px 18px -2px rgba(15, 23, 42, 0.04), 0 1px 3px rgba(15, 23, 42, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 .dark .dash-stat-card {
     background: rgba(15, 23, 42, 0.82);
@@ -194,8 +194,9 @@ if (!function_exists('dashDocTypeInfo')) {
 }
 .dash-stat-card:hover { 
     transform: translateY(-3px); 
-    border-color: #cbd5e1;
-    box-shadow: 0 12px 26px -4px rgba(15, 23, 42, 0.09); 
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 12px 30px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff; 
 }
 .dark .dash-stat-card:hover {
     border-color: #334155;

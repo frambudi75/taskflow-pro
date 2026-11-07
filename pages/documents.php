@@ -359,45 +359,68 @@ function docIconSvg($type, $color) {
 ?>
 
 <style>
-/* Modern Executive Document Management Styling */
+/* Modern Executive Frosted Glassmorphism Styling */
 .doc-card-kpi {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     border-radius: 20px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03), 0 6px 14px -3px rgba(15, 23, 42, 0.02);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 
+        0 4px 20px -2px rgba(15, 23, 42, 0.04),
+        0 1px 3px rgba(15, 23, 42, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .doc-card-kpi:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.07);
-    transform: translateY(-1.5px);
+    background: rgba(255, 255, 255, 0.92);
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
+    transform: translateY(-2px);
 }
 
 .doc-grid-card {
-    background: #ffffff;
-    border: 1px solid #e2e8f0;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
     border-radius: 20px;
-    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
+    box-shadow: 
+        0 4px 18px -2px rgba(15, 23, 42, 0.04),
+        0 1px 3px rgba(15, 23, 42, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .doc-grid-card:hover {
-    border-color: #cbd5e1;
-    box-shadow: 0 10px 28px -6px rgba(15, 23, 42, 0.08);
+    background: rgba(255, 255, 255, 0.94);
+    border-color: rgba(99, 102, 241, 0.35);
+    box-shadow: 0 12px 30px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
     transform: translateY(-2px);
+}
+
+.doc-glass-panel {
+    background: rgba(255, 255, 255, 0.76);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.85);
+    box-shadow: 
+        0 4px 20px -2px rgba(15, 23, 42, 0.04),
+        0 1px 3px rgba(15, 23, 42, 0.02),
+        inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
 
 .doc-table-row {
     transition: all 0.15s ease;
 }
 .doc-table-row:hover {
-    background-color: #f8fafc;
+    background-color: rgba(248, 250, 252, 0.85);
 }
 </style>
 
 <div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
 
-    <!-- Executive Header Section -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Executive Header Section (Glassmorphic) -->
+    <div class="rounded-3xl p-6 md:p-7 doc-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
                 <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
@@ -700,7 +723,7 @@ function docIconSvg($type, $color) {
             </div>
 
             <!-- ===================== VIEW 2: LIST / TABLE VIEW ===================== -->
-            <div id="docContainerList" class="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden hidden">
+            <div id="docContainerList" class="doc-glass-panel rounded-3xl overflow-hidden hidden">
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
@@ -813,7 +836,7 @@ function docIconSvg($type, $color) {
 
         <!-- Modern Upload Form Area (4 Columns Sticky) -->
         <div class="xl:col-span-4" id="uploadSection">
-            <div class="bg-white rounded-3xl border border-slate-200/90 p-6 sticky top-6 shadow-sm">
+            <div class="doc-glass-panel rounded-3xl p-6 sticky top-6">
                 
                 <div class="flex items-center gap-3 mb-5">
                     <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-600 text-white shadow-sm shadow-indigo-600/20">
