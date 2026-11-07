@@ -151,7 +151,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
 }
 </style>
 
-<div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
+<div class="p-4 md:p-8 w-full space-y-6">
 
     <!-- Executive Header Section (Glassmorphic) -->
     <div class="rounded-3xl p-6 md:p-7 kanban-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">

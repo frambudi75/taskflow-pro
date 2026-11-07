@@ -160,7 +160,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 }
 </style>
 
-<div class="p-4 md:p-7 pb-20 md:pb-24 w-full max-w-[1600px] mx-auto space-y-6">
+<div class="p-4 md:p-8 pb-20 md:pb-24 w-full space-y-6">
 
     <!-- Header Section (Executive Clean SaaS Frosted Glass Header) -->
     <div class="rounded-3xl p-6 md:p-7 cal-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">

@@ -287,7 +287,7 @@ if (!function_exists('formatActivityAction')) {
 .chart-container { position: relative; height: 230px; width: 100%; padding: 10px 16px 16px; }
 </style>
 
-<div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
+<div class="p-4 md:p-8 w-full space-y-6">
 
     <!-- WELCOME / DASHBOARD HERO BANNER (Functional SaaS Banner) -->
     <div class="p-5 md:p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">

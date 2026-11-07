@@ -200,7 +200,7 @@ function renderTimeline($activities, $tabId) {
 }
 ?>
 
-<div class="p-4 md:p-7 w-full max-w-5xl mx-auto space-y-6">
+<div class="p-4 md:p-8 w-full space-y-6">
     
     <!-- Executive Header Section (Glassmorphic) -->
     <div class="rounded-3xl p-6 md:p-7 bg-white/76 backdrop-blur-xl border border-white/85 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
