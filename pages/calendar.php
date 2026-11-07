@@ -148,46 +148,42 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 
 <div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
 
-    <!-- Header Section (Executive Night-Sky Banner with Month Navigation) -->
-    <div class="rounded-3xl p-6 md:p-7 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6 text-white">
-        <!-- Ambient lighting glow -->
-        <div class="pointer-events-none absolute -right-16 -top-16 w-72 h-72 rounded-full bg-indigo-500/20 blur-3xl"></div>
-        <div class="pointer-events-none absolute -left-16 -bottom-16 w-72 h-72 rounded-full bg-purple-600/15 blur-3xl"></div>
-
-        <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-200 text-xs font-extrabold uppercase tracking-widest mb-2.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+    <!-- Header Section (Executive Clean SaaS Header with Month Navigation) -->
+    <div class="rounded-3xl p-6 md:p-7 bg-white border border-slate-200/90 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Jadwal &amp; Agenda Kerja
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-white tracking-tight mb-1">Kalender Produktivitas</h1>
-            <p class="text-slate-300 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Kalender Produktivitas</h1>
+            <p class="text-slate-500 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
                 Pantau seluruh agenda, tenggat waktu harian, dan rencanakan aktivitas kerja Anda.
             </p>
         </div>
 
-        <div class="relative z-10 flex flex-wrap items-center gap-3 flex-shrink-0">
+        <div class="flex flex-wrap items-center gap-3 flex-shrink-0">
             <!-- Today Jump Button -->
             <a href="?page=calendar&month=<?php echo date('Y-m'); ?>&date=<?php echo $today_date; ?>" 
-               class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 text-white text-xs font-bold transition-all flex items-center gap-2 shadow-sm">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+               class="px-4 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 active:scale-95 border border-indigo-200/80 text-indigo-700 text-xs font-bold transition-all flex items-center gap-2 shadow-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                 Hari Ini
             </a>
 
             <!-- Month Controls -->
-            <div class="flex items-center rounded-xl bg-slate-800/95 border border-slate-700/80 p-1 shadow-inner">
+            <div class="flex items-center rounded-xl bg-slate-50 border border-slate-200 p-1 shadow-inner">
                 <a href="?page=calendar&month=<?php echo date('Y-m', strtotime($current_month . ' -1 month')); ?>"
                    aria-label="Bulan sebelumnya"
                    title="Bulan sebelumnya"
-                   class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 active:scale-95 transition-all">
+                   class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white active:scale-95 transition-all">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 </a>
-                <span class="px-4 md:px-6 font-extrabold text-white text-sm tracking-tight min-w-[140px] text-center">
+                <span class="px-4 md:px-6 font-extrabold text-slate-900 text-sm tracking-tight min-w-[140px] text-center">
                     <?php echo date('F Y', strtotime($current_month)); ?>
                 </span>
                 <a href="?page=calendar&month=<?php echo date('Y-m', strtotime($current_month . ' +1 month')); ?>"
                    aria-label="Bulan berikutnya"
                    title="Bulan berikutnya"
-                   class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-300 hover:text-white hover:bg-slate-700 active:scale-95 transition-all">
+                   class="w-9 h-9 flex items-center justify-center rounded-lg text-slate-600 hover:text-slate-900 hover:bg-white active:scale-95 transition-all">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 </a>
             </div>
