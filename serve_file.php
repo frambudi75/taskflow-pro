@@ -8,7 +8,12 @@ if (!isLoggedIn()) {
 }
 
 $user_id = (int)$_SESSION['user_id'];
-$file    = isset($_GET['file']) ? $_GET['file'] : '';
+$file    = isset($_GET['file']) ? trim($_GET['file']) : '';
+
+if (empty($file)) {
+    http_response_code(400);
+    exit('Bad Request: Parameter file tidak boleh kosong.');
+}
 
 // Security: normalize slashes, strip leading slash, prevent traversal
 $file = str_replace('\\', '/', $file);

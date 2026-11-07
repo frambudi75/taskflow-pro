@@ -688,15 +688,16 @@ function docIconSvg($type, $color) {
         <!-- ===================== VIEW 1: GRID VIEW (Full Width Responsive 1-2-3-4 Columns) ===================== -->
         <div id="docContainerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
             <?php foreach ($documents as $doc):
-                $clean_path         = str_replace('\\', '/', $doc['file_path']);
+                $clean_path         = !empty($doc['file_path']) ? str_replace('\\', '/', $doc['file_path']) : '';
+                $has_physical_file  = !empty($clean_path) && file_exists(__DIR__ . '/../' . $clean_path);
                 $info               = docInfo($doc['file_type'], $clean_path ?: $doc['name']);
                 $iconSvg            = docIconSvg($info['icon'], $info['color']);
-                $serve_view_url     = 'serve_file.php?file=' . rawurlencode($clean_path);
-                $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
+                $serve_view_url     = $has_physical_file ? ('serve_file.php?file=' . rawurlencode($clean_path)) : '';
+                $serve_download_url = $has_physical_file ? ('serve_file.php?file=' . rawurlencode($clean_path) . '&download=1') : '';
                 $tags               = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
                 $is_owner           = ((int)$doc['user_id'] === $user_id);
                 $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
-                $isImage            = !empty($info['is_image']);
+                $isImage            = !empty($info['is_image']) && $has_physical_file && !empty($serve_view_url);
             ?>
             <div class="doc-grid-card rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden flex flex-col justify-between group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-indigo-300"
                  data-name="<?php echo htmlspecialchars($doc['name']); ?>"
@@ -799,11 +800,17 @@ function docIconSvg($type, $color) {
                     <!-- Secondary Actions Group: Unduh, Bagikan, Hapus -->
                     <div class="flex items-center gap-1">
                         <!-- Unduh -->
+                        <?php if ($has_physical_file): ?>
                         <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
                            title="Unduh Berkas" aria-label="Unduh dokumen <?php echo htmlspecialchars($doc['name']); ?>"
                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200/80 flex items-center justify-center transition-colors">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         </a>
+                        <?php else: ?>
+                        <span title="Berkas fisik tidak ditemukan di server" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 border border-slate-200/80 flex items-center justify-center cursor-not-allowed">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </span>
+                        <?php endif; ?>
 
                         <!-- Bagikan (Only Owner) -->
                         <?php if ($is_owner): ?>
@@ -845,10 +852,11 @@ function docIconSvg($type, $color) {
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         <?php foreach ($documents as $doc):
-                            $clean_path         = str_replace('\\', '/', $doc['file_path']);
+                            $clean_path         = !empty($doc['file_path']) ? str_replace('\\', '/', $doc['file_path']) : '';
+                            $has_physical_file  = !empty($clean_path) && file_exists(__DIR__ . '/../' . $clean_path);
                             $info               = docInfo($doc['file_type'], $clean_path ?: $doc['name']);
                             $iconSvg            = docIconSvg($info['icon'], $info['color']);
-                            $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
+                            $serve_download_url = $has_physical_file ? ('serve_file.php?file=' . rawurlencode($clean_path) . '&download=1') : '';
                             $tags               = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
                             $is_owner           = ((int)$doc['user_id'] === $user_id);
                             $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
@@ -904,10 +912,16 @@ function docIconSvg($type, $color) {
                                             title="Lihat" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 flex items-center justify-center transition-colors">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
+                                    <?php if ($has_physical_file): ?>
                                     <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
                                        title="Unduh" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     </a>
+                                    <?php else: ?>
+                                    <span title="Berkas fisik tidak ditemukan di server" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-300 flex items-center justify-center cursor-not-allowed">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </span>
+                                    <?php endif; ?>
                                     <?php if ($is_owner): ?>
                                     <button type="button" 
                                             onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
@@ -1397,6 +1411,15 @@ function docIconSvg($type, $color) {
     // Preview Modal (Lightbox)
     // -------------------------------------------------------------
     window.viewDocument = function(filePath, fileType, fileName, downloadUrl) {
+        if (!filePath || filePath.trim() === '') {
+            if (typeof showToast === 'function') {
+                showToast('Berkas fisik dokumen ini tidak ditemukan di server.', 'error');
+            } else {
+                alert('Berkas fisik dokumen ini tidak ditemukan di server.');
+            }
+            return;
+        }
+
         const modal  = document.getElementById('viewModal');
         const viewer = document.getElementById('documentViewer');
         const title  = document.getElementById('viewModalTitle');
