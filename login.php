@@ -35,6 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
+            // Security hardening: Regenerate session ID to prevent session fixation attacks
+            session_regenerate_id(true);
+
             $_SESSION['user_id']       = (int)$user['id'];
             $_SESSION['email']         = $user['email'];
             $_SESSION['display_name']  = $user['display_name'];
@@ -269,9 +272,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 <!-- Action Button -->
                 <div class="pt-2">
-                    <button type="submit" class="btn-submit w-full py-3.5 px-6 rounded-2xl text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2.5 focus:outline-none focus:ring-4 focus:ring-indigo-500/20">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
-                        Masuk ke Aplikasi
+                    <button type="submit" id="submitBtn" class="btn-submit w-full py-3.5 px-6 rounded-2xl text-white font-extrabold text-sm shadow-md flex items-center justify-center gap-2.5 focus:outline-none focus:ring-4 focus:ring-indigo-500/20 active:scale-95 transition-all">
+                        <svg id="submitIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg>
+                        <span id="submitText">Masuk ke Aplikasi</span>
                     </button>
                 </div>
             </form>
@@ -294,6 +297,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             pw.type = 'password';
             icon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
         }
+    }
+
+    const loginForm = document.querySelector('form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', function() {
+            const btn = document.getElementById('submitBtn');
+            const txt = document.getElementById('submitText');
+            const icon = document.getElementById('submitIcon');
+            if (btn && txt) {
+                btn.style.pointerEvents = 'none';
+                btn.classList.add('opacity-85');
+                txt.innerText = 'Memverifikasi akun...';
+                if (icon) {
+                    icon.outerHTML = '<svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+                }
+            }
+        });
     }
     </script>
 </body>
