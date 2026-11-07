@@ -224,7 +224,7 @@ $smtp_crypto = getSetting('smtp_crypto', 'tls');
 $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
 ?>
 
-<div class="p-4 md:p-7 max-w-5xl mx-auto space-y-6">
+<div class="p-4 md:p-8 w-full space-y-6">
     
     <!-- Executive Compact Header -->
     <div class="rounded-3xl p-6 md:p-7 bg-white/76 backdrop-blur-xl border border-white/85 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -279,14 +279,14 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
         </button>
     </div>
 
-    <!-- Main Settings Form Card (Uniform Full-Width Across All Tabs) -->
-    <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-white/90 shadow-sm overflow-hidden">
-        <form method="POST" action="index.php?page=settings" enctype="multipart/form-data" data-no-ajax="true" id="settingsForm" class="p-6 md:p-8">
+    <!-- Main Settings Form Card (100% Full-Width Across All Tabs) -->
+    <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-white/90 shadow-sm overflow-hidden min-h-[560px] flex flex-col justify-between">
+        <form method="POST" action="index.php?page=settings" enctype="multipart/form-data" data-no-ajax="true" id="settingsForm" class="p-6 md:p-8 flex-1 flex flex-col justify-between">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <input type="hidden" name="active_tab" id="activeTabInput" value="<?php echo htmlspecialchars($active_tab); ?>">
             <input type="hidden" name="delete_logo" id="deleteLogoInput" value="0">
             
-            <div class="space-y-6">
+            <div class="space-y-6 flex-1 flex flex-col justify-between">
 
                 <!-- ============================================================== -->
                 <!-- TAB 1: KOP SURAT & LOGO PERUSAHAAN                             -->
@@ -605,7 +605,7 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
                 </div>
 
                 <!-- Global Action Footer Section -->
-                <div class="pt-5 border-t border-slate-100 flex items-center justify-end gap-3">
+                <div class="pt-6 mt-auto border-t border-slate-100 flex items-center justify-end gap-3">
                     <button type="submit" name="save_settings" value="1" class="px-7 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-md shadow-indigo-600/30 transition-all active:scale-95 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex items-center gap-2">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                         <span>Simpan Semua Pengaturan</span>
