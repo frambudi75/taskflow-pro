@@ -27,20 +27,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password'])) {
-            // Security hardening: Regenerate session ID to prevent session fixation attacks
-            session_regenerate_id(true);
+            if (($user['status'] ?? 'active') === 'inactive') {
+                $error = 'Akun Anda telah dinonaktifkan oleh Administrator. Hubungi admin untuk informasi lebih lanjut.';
+            } else {
+                // Security hardening: Regenerate session ID to prevent session fixation attacks
+                session_regenerate_id(true);
 
-            $_SESSION['user_id']       = (int)$user['id'];
-            $_SESSION['email']         = $user['email'];
-            $_SESSION['display_name']  = $user['display_name'];
-            $_SESSION['role']          = $user['role'];
-            $_SESSION['profile_photo'] = $user['profile_photo'] ?? null;
-            
-            // Log successful login
-            logActivity('Pengguna berhasil login', 'auth', $user['id']);
+                $_SESSION['user_id']       = (int)$user['id'];
+                $_SESSION['email']         = $user['email'];
+                $_SESSION['display_name']  = $user['display_name'];
+                $_SESSION['role']          = $user['role'];
+                $_SESSION['profile_photo'] = $user['profile_photo'] ?? null;
+                
+                // Log successful login
+                logActivity('Pengguna berhasil login', 'auth', $user['id']);
 
-            header('Location: ' . route('dashboard'));
-            exit;
+                header('Location: ' . route('dashboard'));
+                exit;
+            }
         } else {
             $error = 'Email atau password yang Anda masukkan salah.';
         }

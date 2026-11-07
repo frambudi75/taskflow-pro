@@ -3,6 +3,32 @@ if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/admin.php - Executive User & Cloud Storage Management
 
 // -------------------------------------------------------------
+// Helper: Consistent Pastel Avatar Styles & Initials
+// -------------------------------------------------------------
+function userAvatarStyles($name) {
+    $palettes = [
+        'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/60',
+        'bg-emerald-50 text-emerald-700 border-emerald-200/80 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800/60',
+        'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/60',
+        'bg-purple-50 text-purple-700 border-purple-200/80 dark:bg-purple-950/60 dark:text-purple-300 dark:border-purple-800/60',
+        'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/60',
+        'bg-rose-50 text-rose-700 border-rose-200/80 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800/60'
+    ];
+    $idx = abs(crc32($name)) % count($palettes);
+    return $palettes[$idx];
+}
+
+function getUserInitials($name) {
+    $clean = trim($name);
+    if (empty($clean)) return 'TF';
+    $parts = preg_split('/\s+/', $clean);
+    if (count($parts) >= 2) {
+        return strtoupper(mb_substr($parts[0], 0, 1) . mb_substr($parts[1], 0, 1));
+    }
+    return strtoupper(mb_substr($clean, 0, 2));
+}
+
+// -------------------------------------------------------------
 // 1. Data Retrieval: Users & Aggregated Storage
 // -------------------------------------------------------------
 $stmt = $pdo->query("
@@ -46,18 +72,94 @@ $current_tab = isset($_GET['tab']) && in_array($_GET['tab'], ['users', 'storage'
 // Add User
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
     if (validateCSRF($_POST['csrf_token'])) {
-        $email = trim($_POST['email']);
-        $name  = trim($_POST['name']);
-        $role  = $_POST['role'];
-        $quota = isset($_POST['storage_quota']) ? (int)$_POST['storage_quota'] : $default_system_quota;
-        $pass  = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $email  = trim($_POST['email']);
+        $name   = trim($_POST['name']);
+        $role   = $_POST['role'] === 'administrator' ? 'administrator' : 'user';
+        $status = $_POST['status'] === 'inactive' ? 'inactive' : 'active';
+        $quota  = isset($_POST['storage_quota']) ? (int)$_POST['storage_quota'] : $default_system_quota;
+        $pass   = password_hash($_POST['password'], PASSWORD_DEFAULT);
 
-        $stmt = $pdo->prepare("INSERT INTO users (email, password, display_name, role, storage_quota) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([$email, $pass, $name, $role, $quota]);
+        // Check duplicate email
+        $chk = $pdo->prepare("SELECT id FROM users WHERE email = ?");
+        $chk->execute([$email]);
+        if ($chk->fetch()) {
+            header("Location: index.php?page=admin&tab=users&error=email_exists");
+            exit;
+        }
+
+        $stmt = $pdo->prepare("INSERT INTO users (email, password, display_name, role, status, storage_quota) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$email, $pass, $name, $role, $status, $quota]);
         
         logActivity("Mendaftarkan pengguna baru: " . $name . " (" . $email . ")", "admin_user");
-        header("Location: index.php?page=admin&tab=users&success=user_added");
+        header("Location: index.php?page=admin&tab=users&success=user_added&name=" . urlencode($name));
         exit;
+    }
+}
+
+// Edit User
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $target_id = (int)$_POST['target_user_id'];
+        $name      = trim($_POST['name']);
+        $email     = trim($_POST['email']);
+        $role      = $_POST['role'] === 'administrator' ? 'administrator' : 'user';
+        $status    = $_POST['status'] === 'inactive' ? 'inactive' : 'active';
+
+        // Check if demoting or deactivating last admin
+        $stmt = $pdo->prepare("SELECT role, status FROM users WHERE id = ?");
+        $stmt->execute([$target_id]);
+        $current = $stmt->fetch();
+
+        $active_admins = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'administrator' AND status = 'active'")->fetchColumn();
+
+        if ($current && $current['role'] === 'administrator') {
+            if ($role !== 'administrator' && $active_admins <= 1) {
+                header("Location: index.php?page=admin&tab=users&error=cannot_demote_last_admin");
+                exit;
+            }
+            if ($status === 'inactive' && $active_admins <= 1) {
+                header("Location: index.php?page=admin&tab=users&error=cannot_suspend_last_admin");
+                exit;
+            }
+        }
+
+        $stmt = $pdo->prepare("UPDATE users SET display_name = ?, email = ?, role = ?, status = ? WHERE id = ?");
+        $stmt->execute([$name, $email, $role, $status, $target_id]);
+
+        logActivity("Memperbarui data pengguna: " . $name, "admin_user");
+        header("Location: index.php?page=admin&tab=users&success=user_updated&name=" . urlencode($name));
+        exit;
+    }
+}
+
+// Toggle User Status (Active / Inactive)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['toggle_user_status'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $target_id = (int)$_POST['target_user_id'];
+        $stmt = $pdo->prepare("SELECT role, status, display_name FROM users WHERE id = ?");
+        $stmt->execute([$target_id]);
+        $user_row = $stmt->fetch();
+
+        if ($user_row) {
+            $new_status = ($user_row['status'] === 'active') ? 'inactive' : 'active';
+            
+            // Check if deactivating last active admin
+            if ($user_row['role'] === 'administrator' && $new_status === 'inactive') {
+                $active_admins = (int)$pdo->query("SELECT COUNT(*) FROM users WHERE role = 'administrator' AND status = 'active'")->fetchColumn();
+                if ($active_admins <= 1) {
+                    header("Location: index.php?page=admin&tab=users&error=cannot_suspend_last_admin");
+                    exit;
+                }
+            }
+
+            $stmt = $pdo->prepare("UPDATE users SET status = ? WHERE id = ?");
+            $stmt->execute([$new_status, $target_id]);
+
+            $statusText = ($new_status === 'active') ? 'diaktifkan' : 'dinonaktifkan';
+            logActivity("Akun {$user_row['display_name']} berhasil {$statusText}", "admin_user");
+            header("Location: index.php?page=admin&tab=users&success=status_changed&name=" . urlencode($user_row['display_name']) . "&status=" . $new_status);
+            exit;
+        }
     }
 }
 
@@ -240,7 +342,7 @@ $user_count  = count($users) - $admin_count;
 <div class="p-5 md:p-8 max-w-7xl mx-auto space-y-6">
 
     <!-- ============================================================== -->
-    <!-- EXECUTIVE GLASSMORPHIC HEADER                                  -->
+    <!-- EXECUTIVE GLASSMORPHIC HEADER & UNIFIED METRIC CAPSULE         -->
     <!-- ============================================================== -->
     <div class="rounded-3xl p-6 md:p-8 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div>
@@ -259,51 +361,51 @@ $user_count  = count($users) - $admin_count;
                 <?php 
                 if ($current_tab === 'storage') echo "Kelola alokasi kuota penyimpanan untuk masing-masing pengguna dan pantau konsumsi disk server.";
                 elseif ($current_tab === 'database') echo "Pemeliharaan berkala tabel basis data, defragmentasi, dan indexing performa TaskFlow.";
-                else echo "Kelola akun pengguna, peran akses organisasi, dan hak istimewa sistem.";
+                else echo "Kelola akun pengguna, peran hak akses organisasi, status akun, dan alokasi penyimpanan.";
                 ?>
             </p>
         </div>
 
-        <!-- Global Header Stat Badges -->
-        <div class="flex items-center gap-3 flex-shrink-0">
-            <div class="px-4 py-2.5 rounded-2xl text-center bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 min-w-[76px]">
-                <div class="text-xl font-black text-slate-900 dark:text-white"><?php echo count($users); ?></div>
+        <!-- Unified Executive Metric Capsule (Thin vertical borders) -->
+        <div class="flex items-center rounded-2xl bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 shadow-xs divide-x divide-slate-200/80 dark:divide-slate-700 overflow-hidden flex-shrink-0">
+            <div class="px-5 py-2.5 text-center min-w-[76px]">
+                <div class="text-xl font-black text-slate-900 dark:text-white leading-tight"><?php echo count($users); ?></div>
                 <div class="text-slate-400 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Total User</div>
             </div>
-            <div class="px-4 py-2.5 rounded-2xl text-center bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 min-w-[76px]">
-                <div class="text-xl font-black text-indigo-600 dark:text-indigo-400"><?php echo $total_server_formatted; ?></div>
+            <div class="px-5 py-2.5 text-center min-w-[100px]">
+                <div class="text-xl font-black text-indigo-600 dark:text-indigo-400 leading-tight"><?php echo $total_server_formatted; ?></div>
                 <div class="text-slate-400 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Disk Terpakai</div>
             </div>
-            <div class="px-4 py-2.5 rounded-2xl text-center bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/80 dark:border-slate-700 min-w-[76px]">
-                <div class="text-xl font-black text-slate-900 dark:text-white"><?php echo $admin_count; ?></div>
+            <div class="px-5 py-2.5 text-center min-w-[76px]">
+                <div class="text-xl font-black text-slate-900 dark:text-white leading-tight"><?php echo $admin_count; ?></div>
                 <div class="text-slate-400 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">Admin</div>
             </div>
         </div>
     </div>
 
     <!-- ============================================================== -->
-    <!-- SEGMENTED NAVIGATION TABS                                      -->
+    <!-- MODERN SEGMENTED NAVIGATION TABS                               -->
     <!-- ============================================================== -->
-    <div class="flex items-center gap-2 p-1.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700/80 rounded-2xl w-fit">
-        <!-- Tab 1: Pengguna -->
+    <div class="inline-flex p-1.5 bg-slate-100/90 dark:bg-slate-800/80 rounded-2xl border border-slate-200/90 dark:border-slate-700/80 gap-1.5">
+        <!-- Tab 1: Pengguna & Peran -->
         <a href="index.php?page=admin&tab=users" 
-           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all <?php echo $current_tab === 'users' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'; ?>">
+           class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs transition-all <?php echo $current_tab === 'users' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-white font-black shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold hover:bg-white/50 dark:hover:bg-slate-800'; ?>">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
             <span>Pengguna &amp; Peran</span>
-            <span class="px-1.5 py-0.5 rounded-md text-[10px] <?php echo $current_tab === 'users' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300' : 'bg-slate-200/70 dark:bg-slate-700 text-slate-500'; ?>"><?php echo count($users); ?></span>
+            <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black <?php echo $current_tab === 'users' ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300' : 'bg-slate-200/70 dark:bg-slate-700 text-slate-500'; ?>"><?php echo count($users); ?></span>
         </a>
 
         <!-- Tab 2: Penyimpanan & Kuota -->
         <a href="index.php?page=admin&tab=storage" 
-           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all <?php echo $current_tab === 'storage' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'; ?>">
+           class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs transition-all <?php echo $current_tab === 'storage' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-white font-black shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold hover:bg-white/50 dark:hover:bg-slate-800'; ?>">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
             <span>Penyimpanan Cloud &amp; Kuota</span>
-            <span class="px-1.5 py-0.5 rounded-md text-[10px] font-bold <?php echo $current_tab === 'storage' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200/70 dark:bg-slate-700 text-slate-500'; ?>"><?php echo $total_server_formatted; ?></span>
+            <span class="px-1.5 py-0.5 rounded-md text-[10px] font-black <?php echo $current_tab === 'storage' ? 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300' : 'bg-slate-200/70 dark:bg-slate-700 text-slate-500'; ?>"><?php echo $total_server_formatted; ?></span>
         </a>
 
         <!-- Tab 3: Database & Performa -->
         <a href="index.php?page=admin&tab=database" 
-           class="flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-black transition-all <?php echo $current_tab === 'database' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-white shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200'; ?>">
+           class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs transition-all <?php echo $current_tab === 'database' ? 'bg-white dark:bg-slate-900 text-indigo-600 dark:text-white font-black shadow-sm' : 'text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-bold hover:bg-white/50 dark:hover:bg-slate-800'; ?>">
             <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
             <span>Database &amp; Performa</span>
         </a>
@@ -319,8 +421,10 @@ $user_count  = count($users) - $admin_count;
         </div>
         <p class="text-emerald-900 dark:text-emerald-200 text-xs font-bold">
             <?php 
-            if ($_GET['success'] === 'user_added') echo "Pengguna baru berhasil didaftarkan ke dalam sistem.";
-            elseif ($_GET['success'] === 'user_deleted') echo "Akun pengguna berhasil dihapus permanen.";
+            if ($_GET['success'] === 'user_added') echo "Pengguna baru <strong>" . htmlspecialchars($_GET['name'] ?? '') . "</strong> berhasil didaftarkan.";
+            elseif ($_GET['success'] === 'user_updated') echo "Data pengguna <strong>" . htmlspecialchars($_GET['name'] ?? '') . "</strong> berhasil diperbarui.";
+            elseif ($_GET['success'] === 'status_changed') echo "Status akun <strong>" . htmlspecialchars($_GET['name'] ?? '') . "</strong> berhasil diubah menjadi " . (($_GET['status'] ?? '') === 'active' ? 'Aktif' : 'Nonaktif') . ".";
+            elseif ($_GET['success'] === 'user_deleted') echo "Akun pengguna berhasil dihapus permanen dari sistem.";
             elseif ($_GET['success'] === 'password_reset') echo "Password pengguna berhasil direset ke sandi bawaan (password123).";
             elseif ($_GET['success'] === 'quota_updated') echo "Batas kuota penyimpanan untuk <strong>" . htmlspecialchars($_GET['name'] ?? 'Pengguna') . "</strong> berhasil diperbarui menjadi <strong>" . htmlspecialchars($_GET['quota'] ?? '') . "</strong>.";
             elseif ($_GET['success'] === 'default_updated') echo "Kebijakan kuota bawaan sistem berhasil diperbarui" . (isset($_GET['applied']) ? " dan langsung diterapkan ke seluruh pengguna." : ".");
@@ -330,194 +434,229 @@ $user_count  = count($users) - $admin_count;
     </div>
     <?php endif; ?>
 
-    <?php if (isset($_GET['error']) && $_GET['error'] === 'cannot_delete_last_admin'): ?>
+    <?php if (isset($_GET['error'])): ?>
     <div class="flex items-center gap-3 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/60 rounded-2xl px-5 py-3.5 shadow-xs">
         <svg class="w-5 h-5 flex-shrink-0 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <p class="text-rose-900 dark:text-rose-200 text-xs font-bold">Tindakan ditolak: Tidak dapat menghapus administrator terakhir di dalam sistem.</p>
+        <p class="text-rose-900 dark:text-rose-200 text-xs font-bold">
+            <?php 
+            if ($_GET['error'] === 'cannot_delete_last_admin') echo "Tindakan ditolak: Tidak dapat menghapus administrator terakhir di dalam sistem.";
+            elseif ($_GET['error'] === 'cannot_demote_last_admin') echo "Tindakan ditolak: Tidak dapat menurunkan peran administrator terakhir menjadi pengguna biasa.";
+            elseif ($_GET['error'] === 'cannot_suspend_last_admin') echo "Tindakan ditolak: Tidak dapat menonaktifkan akun administrator aktif terakhir di dalam sistem.";
+            elseif ($_GET['error'] === 'email_exists') echo "Pendaftaran gagal: Alamat email tersebut sudah terdaftar untuk pengguna lain.";
+            else echo "Terjadi kesalahan dalam memproses permintaan Anda.";
+            ?>
+        </p>
     </div>
     <?php endif; ?>
 
     <!-- ============================================================== -->
-    <!-- TAB 1: PENGGUNA & PERAN (USER MANAGEMENT)                       -->
+    <!-- TAB 1: PENGGUNA & PERAN (100% FULL-WIDTH RESTRUCTURED TABLE)   -->
     <!-- ============================================================== -->
     <?php if ($current_tab === 'users'): ?>
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    
+    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm">
+        
+        <!-- Table Toolbar with Proximity Button -->
+        <div class="px-6 py-5 border-b border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Daftar Pengguna</h3>
+                <p class="text-slate-400 text-xs">Total <?php echo count($users); ?> pengguna terdaftar di sistem</p>
+            </div>
+            
+            <div class="flex items-center gap-3 flex-wrap">
+                <!-- Search Bar -->
+                <div class="relative w-full sm:w-64">
+                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input id="searchUsers" type="text" placeholder="Cari user..." aria-label="Cari pengguna" oninput="filterUsers(this.value)"
+                           class="w-full pl-9 pr-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                </div>
 
-        <!-- User Table -->
-        <div class="lg:col-span-8">
-            <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 overflow-hidden shadow-sm">
-                <div class="px-6 py-5 border-b border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-4">
-                    <div>
-                        <h3 class="font-extrabold text-slate-900 dark:text-white text-base">Daftar Pengguna</h3>
-                        <p class="text-slate-400 text-xs">Total <?php echo count($users); ?> pengguna terdaftar di sistem</p>
-                    </div>
-                    <div class="relative">
-                        <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                        <input id="searchUsers" type="text" placeholder="Cari user..." aria-label="Cari pengguna" oninput="filterUsers(this.value)"
-                               class="pl-8 pr-4 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
-                    </div>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left" id="usersTable">
-                        <thead>
-                            <tr class="bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-800">
-                                <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Pengguna</th>
-                                <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden md:table-cell">Email</th>
-                                <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Peran</th>
-                                <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Penyimpanan</th>
-                                <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                            <?php foreach($users as $u):
-                                $initials = strtoupper(substr($u['display_name'], 0, 2));
-                                $isAdmin  = $u['role'] === 'administrator';
-                                $hasPhoto = !empty($u['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $u['profile_photo']);
-                                $usedBytes = (int)$u['used_bytes'];
-                                $quotaBytes = (int)($u['storage_quota'] ?? 5368709120);
-                                $isUnlimited = ($quotaBytes === 0);
-                                $quotaLabel = $isUnlimited ? 'Tanpa Batas' : formatSize($quotaBytes);
-                                $usedLabel  = formatSize($usedBytes);
-                                $pct = $isUnlimited ? 0 : round(($usedBytes / max(1, $quotaBytes)) * 100, 1);
-                            ?>
-                            <tr class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors user-row"
-                                data-name="<?php echo strtolower(htmlspecialchars($u['display_name'])); ?>"
-                                data-email="<?php echo strtolower(htmlspecialchars($u['email'])); ?>">
-                                <td class="px-6 py-4">
-                                    <div class="flex items-center gap-3">
-                                        <!-- Avatar -->
-                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex-shrink-0 overflow-hidden shadow-sm">
-                                            <?php if ($hasPhoto): ?>
-                                                <img src="uploads/avatars/<?php echo htmlspecialchars($u['profile_photo']); ?>" alt="<?php echo htmlspecialchars($u['display_name']); ?>" class="w-full h-full object-cover">
-                                            <?php else: ?>
-                                                <?php echo $initials; ?>
-                                            <?php endif; ?>
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-bold text-slate-900 dark:text-white"><?php echo htmlspecialchars($u['display_name']); ?></div>
-                                            <div class="text-xs text-slate-500 md:hidden"><?php echo htmlspecialchars($u['email']); ?></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400 hidden md:table-cell">
-                                    <?php echo htmlspecialchars($u['email']); ?>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider <?php echo $isAdmin ? 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800/50' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'; ?>">
-                                        <?php echo $isAdmin ? 'Administrator' : 'User'; ?>
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="flex flex-col gap-1 min-w-[130px]">
-                                        <div class="flex items-center justify-between text-[11px] font-bold">
-                                            <span class="text-slate-800 dark:text-slate-200"><?php echo $usedLabel; ?></span>
-                                            <span class="text-slate-400 text-[10px]">/ <?php echo $quotaLabel; ?></span>
-                                        </div>
-                                        <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden">
-                                            <div class="h-full rounded-full <?php echo $isUnlimited ? 'bg-indigo-500' : ($pct >= 90 ? 'bg-rose-500' : ($pct >= 75 ? 'bg-amber-500' : 'bg-emerald-500')); ?>" 
-                                                 style="width: <?php echo $isUnlimited ? '100' : max(3, min(100, $pct)); ?>%"></div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-1.5">
-                                        <!-- Edit Quota Quick Button -->
-                                        <button type="button" 
-                                                onclick="openQuotaModal(<?php echo $u['id']; ?>, '<?php echo addslashes(htmlspecialchars($u['display_name'])); ?>', '<?php echo addslashes(htmlspecialchars($u['email'])); ?>', <?php echo $usedBytes; ?>, <?php echo $quotaBytes; ?>, 'users')"
-                                                title="Atur Kuota Penyimpanan" aria-label="Atur kuota untuk <?php echo htmlspecialchars($u['display_name']); ?>"
-                                                class="w-7 h-7 flex items-center justify-center rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 border border-slate-200 dark:border-slate-700">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-                                        </button>
-                                        <!-- Reset password -->
-                                        <button type="button" onclick="resetPassword(<?php echo $u['id']; ?>)"
-                                                title="Reset Password ke password123" aria-label="Reset password untuk <?php echo htmlspecialchars($u['display_name']); ?>"
-                                                class="w-7 h-7 flex items-center justify-center rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 border border-slate-200 dark:border-slate-700">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                                        </button>
-                                        <!-- Delete -->
-                                        <form method="POST" class="inline" onsubmit="return confirm('Hapus user <?php echo htmlspecialchars($u['email']); ?>?')">
-                                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                                            <input type="hidden" name="delete_user" value="<?php echo $u['id']; ?>">
-                                            <button type="submit"
-                                                    title="Hapus User" aria-label="Hapus user <?php echo htmlspecialchars($u['display_name']); ?>"
-                                                    class="w-7 h-7 flex items-center justify-center rounded-lg transition-all text-slate-500 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-red-950/40 border border-slate-200 dark:border-slate-700">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-                </div>
+                <!-- Primary Action: + Tambah Pengguna (Opens Drawer) -->
+                <button type="button" onclick="openAddUserDrawer()"
+                        class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 shadow-sm shadow-indigo-600/20 active:scale-95 transition-all">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>Tambah Pengguna</span>
+                </button>
             </div>
         </div>
 
-        <!-- Add User Form -->
-        <div class="lg:col-span-4">
-            <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sticky top-6 shadow-sm">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-slate-900 dark:text-white text-sm">Tambah Pengguna</h3>
-                        <p class="text-slate-400 text-xs">Pendaftaran akun &amp; alokasi kuota awal</p>
-                    </div>
-                </div>
-                <form method="POST" class="space-y-4">
-                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                    <input type="hidden" name="add_user" value="1">
+        <!-- Full-Width Data Table -->
+        <div class="overflow-x-auto">
+            <table class="w-full text-left" id="usersTable">
+                <thead>
+                    <tr class="bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-200/80 dark:border-slate-800">
+                        <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Pengguna</th>
+                        <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest hidden md:table-cell">Email</th>
+                        <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Peran</th>
+                        <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest">Penyimpanan</th>
+                        <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-center">Status</th>
+                        <th class="px-6 py-3.5 text-[10px] font-extrabold text-slate-500 dark:text-slate-400 uppercase tracking-widest text-right">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <?php foreach($users as $u):
+                        $initials    = getUserInitials($u['display_name']);
+                        $avatarClass = userAvatarStyles($u['display_name']);
+                        $isAdmin     = $u['role'] === 'administrator';
+                        $isActive    = ($u['status'] ?? 'active') === 'active';
+                        $hasPhoto    = !empty($u['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $u['profile_photo']);
+                        $usedBytes   = (int)$u['used_bytes'];
+                        $quotaBytes  = (int)($u['storage_quota'] ?? 5368709120);
+                        $isUnlimited = ($quotaBytes === 0);
+                        $quotaLabel  = $isUnlimited ? 'Tanpa Batas' : formatSize($quotaBytes);
+                        $usedLabel   = formatSize($usedBytes);
+                        $pct         = $isUnlimited ? 0 : round(($usedBytes / max(1, $quotaBytes)) * 100, 1);
+                        
+                        // Progress bar color
+                        if ($isUnlimited) {
+                            $barColor = 'bg-indigo-500';
+                        } elseif ($pct >= 90) {
+                            $barColor = 'bg-rose-500';
+                        } elseif ($pct >= 75) {
+                            $barColor = 'bg-amber-500';
+                        } else {
+                            $barColor = 'bg-emerald-500';
+                        }
+                    ?>
+                    <tr class="group hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors user-row"
+                        data-name="<?php echo strtolower(htmlspecialchars($u['display_name'])); ?>"
+                        data-email="<?php echo strtolower(htmlspecialchars($u['email'])); ?>">
+                        
+                        <!-- Pengguna & Avatar Hashed Pastel -->
+                        <td class="px-6 py-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs border flex-shrink-0 overflow-hidden shadow-xs <?php echo $avatarClass; ?>">
+                                    <?php if ($hasPhoto): ?>
+                                        <img src="uploads/avatars/<?php echo htmlspecialchars($u['profile_photo']); ?>" alt="<?php echo htmlspecialchars($u['display_name']); ?>" class="w-full h-full object-cover">
+                                    <?php else: ?>
+                                        <?php echo $initials; ?>
+                                    <?php endif; ?>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-900 dark:text-white leading-snug"><?php echo htmlspecialchars($u['display_name']); ?></div>
+                                    <div class="text-xs text-slate-400 font-medium md:hidden"><?php echo htmlspecialchars($u['email']); ?></div>
+                                </div>
+                            </div>
+                        </td>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
-                        <input type="text" name="name" placeholder="Nama pengguna" required
-                               class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
-                    </div>
+                        <!-- Email -->
+                        <td class="px-6 py-4 text-xs font-medium text-slate-600 dark:text-slate-400 hidden md:table-cell">
+                            <?php echo htmlspecialchars($u['email']); ?>
+                        </td>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
-                        <input type="email" name="email" placeholder="email@domain.com" required
-                               class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
-                    </div>
+                        <!-- Role Badge (Distinct Indigo vs Slate) -->
+                        <td class="px-6 py-4">
+                            <?php if ($isAdmin): ?>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/60 dark:border-indigo-800/60">
+                                    Administrator
+                                </span>
+                            <?php else: ?>
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                                    User
+                                </span>
+                            <?php endif; ?>
+                        </td>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Password</label>
-                        <input type="password" name="password" placeholder="••••••••" required
-                               class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
-                    </div>
+                        <!-- Penyimpanan & Kuota with Mini Progress Bar (4px height) -->
+                        <td class="px-6 py-4">
+                            <div class="flex flex-col gap-1.5 min-w-[150px]">
+                                <div class="flex items-baseline justify-between text-[11px] leading-tight">
+                                    <span class="font-bold text-slate-900 dark:text-white"><?php echo $usedLabel; ?></span>
+                                    <span class="text-slate-400 font-medium text-[10px]">/ <?php echo $quotaLabel; ?></span>
+                                </div>
+                                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-200/60 dark:border-slate-700">
+                                    <div class="h-full rounded-full transition-all duration-300 <?php echo $barColor; ?>" 
+                                         style="width: <?php echo $isUnlimited ? '100' : max(3, min(100, $pct)); ?>%"></div>
+                                </div>
+                            </div>
+                        </td>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Peran Sistem</label>
-                        <select name="role"
-                                class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
-                            <option value="user">User Biasa</option>
-                            <option value="administrator">Administrator</option>
-                        </select>
-                    </div>
+                        <!-- Status Akun (Aktif / Nonaktif) -->
+                        <td class="px-6 py-4 text-center">
+                            <?php if ($isActive): ?>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 border border-emerald-200/60 dark:border-emerald-800/60">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                    Aktif
+                                </span>
+                            <?php else: ?>
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    Nonaktif
+                                </span>
+                            <?php endif; ?>
+                        </td>
 
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Batas Kuota Penyimpanan</label>
-                        <select name="storage_quota"
-                                class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
-                            <option value="1073741824">1 GB (Kecil)</option>
-                            <option value="2147483648">2 GB (Standar Ringan)</option>
-                            <option value="5368709120" selected>5 GB (Bawaan Sistem)</option>
-                            <option value="10737418240">10 GB (Eksekutif)</option>
-                            <option value="26843545600">25 GB (Kapasitas Besar)</option>
-                            <option value="53687091200">50 GB (Enterprise)</option>
-                            <option value="0">♾️ Tanpa Batas (Unlimited)</option>
-                        </select>
-                    </div>
+                        <!-- Aksi Dropdown (Three Dots Menu) -->
+                        <td class="px-6 py-4 text-right">
+                            <div class="relative inline-block text-left action-dropdown-container">
+                                <button type="button" onclick="toggleActionMenu(event, 'actionMenu-<?php echo $u['id']; ?>')"
+                                        aria-label="Menu aksi untuk <?php echo htmlspecialchars($u['display_name']); ?>"
+                                        class="w-8 h-8 rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 transition-all active:scale-95 shadow-xs">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+                                </button>
+                                
+                                <div id="actionMenu-<?php echo $u['id']; ?>" 
+                                     class="action-menu-dropdown hidden absolute right-0 mt-1.5 w-48 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xl py-1.5 z-40 text-left transition-all backdrop-blur-md">
+                                    
+                                    <!-- Edit User Profile & Role -->
+                                    <button type="button" 
+                                            onclick="openEditUserModal(<?php echo htmlspecialchars(json_encode([
+                                                'id'           => $u['id'],
+                                                'display_name' => $u['display_name'],
+                                                'email'        => $u['email'],
+                                                'role'         => $u['role'],
+                                                'status'       => $u['status'] ?? 'active'
+                                            ]), ENT_QUOTES, 'UTF-8'); ?>)" 
+                                            class="w-full px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                                        Edit Akun
+                                    </button>
 
-                    <button type="submit"
-                            class="w-full py-2.5 rounded-xl font-bold text-white transition-all text-sm flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-sm active:scale-95">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        Daftarkan Pengguna
-                    </button>
-                </form>
-            </div>
+                                    <!-- Adjust Quota -->
+                                    <button type="button" 
+                                            onclick="openQuotaModal(<?php echo $u['id']; ?>, '<?php echo addslashes(htmlspecialchars($u['display_name'])); ?>', '<?php echo addslashes(htmlspecialchars($u['email'])); ?>', <?php echo $usedBytes; ?>, <?php echo $quotaBytes; ?>, 'users')" 
+                                            class="w-full px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                                        Atur Kuota
+                                    </button>
+
+                                    <!-- Reset Password -->
+                                    <button type="button" 
+                                            onclick="resetPassword(<?php echo $u['id']; ?>, '<?php echo addslashes(htmlspecialchars($u['display_name'])); ?>')" 
+                                            class="w-full px-3.5 py-2 text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                                        Reset Password
+                                    </button>
+
+                                    <!-- Toggle Status (Activate / Suspend) -->
+                                    <button type="button" 
+                                            onclick="toggleUserStatus(<?php echo $u['id']; ?>, '<?php echo addslashes(htmlspecialchars($u['display_name'])); ?>', '<?php echo $isActive ? 'nonaktifkan' : 'aktifkan'; ?>')" 
+                                            class="w-full px-3.5 py-2 text-xs font-bold <?php echo $isActive ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'; ?> hover:bg-slate-50 dark:hover:bg-slate-800/80 flex items-center gap-2.5 transition-colors">
+                                        <?php if ($isActive): ?>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="10" y1="15" x2="10" y2="9"/><line x1="14" y1="15" x2="14" y2="9"/></svg>
+                                            Nonaktifkan Akun
+                                        <?php else: ?>
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                                            Aktifkan Akun
+                                        <?php endif; ?>
+                                    </button>
+
+                                    <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+
+                                    <!-- Delete User -->
+                                    <button type="button" 
+                                            onclick="confirmDeleteUser(<?php echo $u['id']; ?>, '<?php echo addslashes(htmlspecialchars($u['display_name'])); ?>')" 
+                                            class="w-full px-3.5 py-2 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center gap-2.5 transition-colors">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                        Hapus Pengguna
+                                    </button>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
     <?php endif; ?>
@@ -639,15 +778,16 @@ $user_count  = count($users) - $admin_count;
                 </thead>
                 <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                     <?php foreach($users as $u):
-                        $initials = strtoupper(substr($u['display_name'], 0, 2));
-                        $isAdmin  = $u['role'] === 'administrator';
-                        $hasPhoto = !empty($u['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $u['profile_photo']);
-                        $usedBytes = (int)$u['used_bytes'];
-                        $quotaBytes = (int)($u['storage_quota'] ?? 5368709120);
+                        $initials    = getUserInitials($u['display_name']);
+                        $avatarClass = userAvatarStyles($u['display_name']);
+                        $isAdmin     = $u['role'] === 'administrator';
+                        $hasPhoto    = !empty($u['profile_photo']) && file_exists(__DIR__ . '/../uploads/avatars/' . $u['profile_photo']);
+                        $usedBytes   = (int)$u['used_bytes'];
+                        $quotaBytes  = (int)($u['storage_quota'] ?? 5368709120);
                         $isUnlimited = ($quotaBytes === 0);
-                        $quotaLabel = $isUnlimited ? 'Tanpa Batas' : formatSize($quotaBytes);
-                        $usedLabel  = formatSize($usedBytes);
-                        $pct = $isUnlimited ? 0 : round(($usedBytes / max(1, $quotaBytes)) * 100, 1);
+                        $quotaLabel  = $isUnlimited ? 'Tanpa Batas' : formatSize($quotaBytes);
+                        $usedLabel   = formatSize($usedBytes);
+                        $pct         = $isUnlimited ? 0 : round(($usedBytes / max(1, $quotaBytes)) * 100, 1);
                         
                         // Status badge logic
                         if ($isUnlimited) {
@@ -667,7 +807,7 @@ $user_count  = count($users) - $admin_count;
                         <!-- User Name & Email -->
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 flex-shrink-0 overflow-hidden shadow-sm">
+                                <div class="w-9 h-9 rounded-xl flex items-center justify-center font-black text-xs border flex-shrink-0 overflow-hidden shadow-xs <?php echo $avatarClass; ?>">
                                     <?php if ($hasPhoto): ?>
                                         <img src="uploads/avatars/<?php echo htmlspecialchars($u['profile_photo']); ?>" alt="<?php echo htmlspecialchars($u['display_name']); ?>" class="w-full h-full object-cover">
                                     <?php else: ?>
@@ -714,7 +854,7 @@ $user_count  = count($users) - $admin_count;
                                     <span class="text-slate-500"><?php echo $isUnlimited ? 'Unlimited' : $pct . '%'; ?></span>
                                     <span class="text-slate-400"><?php echo $isUnlimited ? 'Bebas' : formatSize(max(0, $quotaBytes - $usedBytes)) . ' sisa'; ?></span>
                                 </div>
-                                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-200/60 dark:border-slate-700">
+                                <div class="w-full bg-slate-100 dark:bg-slate-800 rounded-full h-1.5 overflow-hidden border border-slate-200/60 dark:border-slate-700">
                                     <div class="h-full rounded-full transition-all duration-300 <?php echo $isUnlimited ? 'bg-indigo-500' : ($pct >= 90 ? 'bg-rose-500' : ($pct >= 75 ? 'bg-amber-500' : 'bg-emerald-500')); ?>" 
                                          style="width: <?php echo $isUnlimited ? '100' : max(3, min(100, $pct)); ?>%"></div>
                                 </div>
@@ -873,7 +1013,177 @@ $user_count  = count($users) - $admin_count;
 </div>
 
 <!-- ============================================================== -->
-<!-- USER QUOTA ADJUSTMENT MODAL (Frosted Glass Dialog)             -->
+<!-- 1. SLIDE-OVER SHEET (DRAWER): TAMBAH PENGGUNA BARU            -->
+<!-- ============================================================== -->
+<div id="addUserDrawerOverlay" class="fixed inset-0 hidden z-50 bg-slate-950/60 backdrop-blur-sm transition-opacity" onclick="closeAddUserDrawer()">
+    <div id="addUserDrawer" 
+         class="fixed right-0 top-0 bottom-0 w-full max-w-md bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 shadow-2xl flex flex-col z-50 transform translate-x-full transition-transform duration-300 ease-in-out" 
+         onclick="event.stopPropagation()">
+        
+        <!-- Drawer Header -->
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white">Tambah Pengguna Baru</h3>
+                    <p class="text-xs text-slate-400">Pendaftaran akun &amp; alokasi kuota awal</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeAddUserDrawer()" aria-label="Tutup form" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Drawer Form Body -->
+        <form method="POST" class="p-6 space-y-4 overflow-y-auto flex-1">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="add_user" value="1">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                <input type="text" name="name" placeholder="Nama pengguna" required
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
+                <input type="email" name="email" placeholder="email@domain.com" required
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Password</label>
+                <input type="password" name="password" placeholder="••••••••" required
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Peran</label>
+                    <select name="role"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                        <option value="user">User Biasa</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Status Akun</label>
+                    <select name="status"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                        <option value="active" selected>● Aktif</option>
+                        <option value="inactive">● Nonaktif</option>
+                    </select>
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Batas Kuota Penyimpanan</label>
+                <select name="storage_quota"
+                        class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                    <option value="1073741824">1 GB (Kecil)</option>
+                    <option value="2147483648">2 GB (Standar Ringan)</option>
+                    <option value="5368709120" selected>5 GB (Bawaan Sistem)</option>
+                    <option value="10737418240">10 GB (Eksekutif)</option>
+                    <option value="26843545600">25 GB (Kapasitas Besar)</option>
+                    <option value="53687091200">50 GB (Enterprise)</option>
+                    <option value="0">♾️ Tanpa Batas (Unlimited)</option>
+                </select>
+            </div>
+
+            <!-- Action Buttons in Drawer -->
+            <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end gap-2.5">
+                <button type="button" onclick="closeAddUserDrawer()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-xs">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl font-bold text-white transition-all text-xs flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 active:scale-95">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Daftarkan Pengguna
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 2. EDIT USER MODAL DIALOG                                      -->
+<!-- ============================================================== -->
+<div id="editUserModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="editUserModalTitle">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800" onclick="event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/70 dark:bg-slate-800/50">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white" id="editUserModalTitle">Edit Akun Pengguna</h3>
+                    <p class="text-xs text-slate-400">Perbarui identitas, peran akses, dan status</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEditUserModal()" aria-label="Tutup modal" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Form -->
+        <form method="POST" class="p-6 space-y-4">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="edit_user" value="1">
+            <input type="hidden" name="target_user_id" id="editTargetUserId" value="">
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                <input type="text" name="name" id="editUserName" required
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
+                <input type="email" name="email" id="editUserEmail" required
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Peran</label>
+                    <select name="role" id="editUserRole"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                        <option value="user">User Biasa</option>
+                        <option value="administrator">Administrator</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Status Akun</label>
+                    <select name="status" id="editUserStatus"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                        <option value="active">● Aktif</option>
+                        <option value="inactive">● Nonaktif</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-2.5 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <button type="button" onclick="closeEditUserModal()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-xs">
+                    Batal
+                </button>
+                <button type="submit"
+                        class="px-5 py-2.5 rounded-xl font-bold text-white transition-all text-xs flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 active:scale-95">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Simpan Perubahan
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 3. USER QUOTA ADJUSTMENT MODAL                                 -->
 <!-- ============================================================== -->
 <div id="quotaModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="quotaModalTitle">
     <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800" onclick="event.stopPropagation()">
@@ -961,10 +1271,123 @@ $user_count  = count($users) - $admin_count;
     </div>
 </div>
 
+<!-- ============================================================== -->
+<!-- HIDDEN FORMS FOR STATUS TOGGLE & DELETE                        -->
+<!-- ============================================================== -->
+<form id="toggleStatusForm" method="POST" class="hidden">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    <input type="hidden" name="toggle_user_status" value="1">
+    <input type="hidden" name="target_user_id" id="toggleStatusUserId" value="">
+</form>
+
+<form id="deleteUserForm" method="POST" class="hidden">
+    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+    <input type="hidden" name="delete_user" id="deleteUserId" value="">
+</form>
+
 <script>
+// -------------------------------------------------------------
+// Drawer: Tambah Pengguna
+// -------------------------------------------------------------
+function openAddUserDrawer() {
+    const overlay = document.getElementById('addUserDrawerOverlay');
+    const drawer  = document.getElementById('addUserDrawer');
+    if (overlay && drawer) {
+        overlay.classList.remove('hidden');
+        setTimeout(() => {
+            drawer.classList.remove('translate-x-full');
+        }, 10);
+    }
+}
+
+function closeAddUserDrawer() {
+    const overlay = document.getElementById('addUserDrawerOverlay');
+    const drawer  = document.getElementById('addUserDrawer');
+    if (overlay && drawer) {
+        drawer.classList.add('translate-x-full');
+        setTimeout(() => {
+            overlay.classList.add('hidden');
+        }, 280);
+    }
+}
+
+// -------------------------------------------------------------
+// Modal: Edit User
+// -------------------------------------------------------------
+function openEditUserModal(data) {
+    closeAllActionMenus();
+    document.getElementById('editTargetUserId').value = data.id;
+    document.getElementById('editUserName').value     = data.display_name;
+    document.getElementById('editUserEmail').value    = data.email;
+    document.getElementById('editUserRole').value     = data.role;
+    document.getElementById('editUserStatus').value   = data.status || 'active';
+
+    const modal = document.getElementById('editUserModal');
+    if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.display = 'flex';
+    }
+}
+
+function closeEditUserModal() {
+    const modal = document.getElementById('editUserModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+}
+
+// -------------------------------------------------------------
+// Action Dropdowns Logic (··· menu)
+// -------------------------------------------------------------
+function toggleActionMenu(event, menuId) {
+    event.stopPropagation();
+    const menu = document.getElementById(menuId);
+    if (!menu) return;
+    const isCurrentlyOpen = !menu.classList.contains('hidden');
+
+    closeAllActionMenus();
+
+    if (!isCurrentlyOpen) {
+        menu.classList.remove('hidden');
+    }
+}
+
+function closeAllActionMenus() {
+    document.querySelectorAll('.action-menu-dropdown').forEach(m => {
+        m.classList.add('hidden');
+    });
+}
+
+// Close dropdown on outside click
+document.addEventListener('click', function(e) {
+    if (!e.target.closest('.action-dropdown-container')) {
+        closeAllActionMenus();
+    }
+});
+
+// Toggle User Status Confirmation
+function toggleUserStatus(userId, userName, actionName) {
+    closeAllActionMenus();
+    if (confirm(`Yakin ingin ${actionName} akun "${userName}"?`)) {
+        document.getElementById('toggleStatusUserId').value = userId;
+        document.getElementById('toggleStatusForm').submit();
+    }
+}
+
+// Delete User Confirmation
+function confirmDeleteUser(userId, userName) {
+    closeAllActionMenus();
+    if (confirm(`Hapus permanen akun pengguna "${userName}"? Seluruh berkas dan data terkait akan dihapus.`)) {
+        document.getElementById('deleteUserId').value = userId;
+        document.getElementById('deleteUserForm').submit();
+    }
+}
+
 // Password reset helper
-function resetPassword(userId) {
-    if (confirm('Reset password user ini ke "password123"?')) {
+function resetPassword(userId, userName) {
+    closeAllActionMenus();
+    if (confirm(`Reset password user "${userName}" ke "password123"?`)) {
         const csrfToken = "<?php echo htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES); ?>";
         var form = document.createElement('form');
         form.method = 'POST';
@@ -1006,7 +1429,9 @@ function filterStorageUsers(q) {
     });
 }
 
+// -------------------------------------------------------------
 // Storage Quota Modal Logic
+// -------------------------------------------------------------
 function formatBytesJs(bytes) {
     if (bytes === 0) return '0 B';
     const k = 1024;
@@ -1016,6 +1441,7 @@ function formatBytesJs(bytes) {
 }
 
 function openQuotaModal(userId, userName, userEmail, currentUsedBytes, currentQuotaBytes, redirectTab) {
+    closeAllActionMenus();
     const modal = document.getElementById('quotaModal');
     if (!modal) return;
 
@@ -1090,8 +1516,13 @@ function onCustomQuotaInput() {
     }
 }
 
-// Close on backdrop click & escape key
+// Global ESC key closes all overlays
 document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') closeQuotaModal();
+    if (e.key === 'Escape') {
+        closeAddUserDrawer();
+        closeEditUserModal();
+        closeQuotaModal();
+        closeAllActionMenus();
+    }
 });
 </script>

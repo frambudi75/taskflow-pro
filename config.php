@@ -178,10 +178,14 @@ try {
         INDEX idx_public_expires (expires_at)
     )");
 
-    // Ensure storage_quota column exists in users
+    // Ensure storage_quota and status columns exist in users
     $checkCol = $pdo->query("SHOW COLUMNS FROM users LIKE 'storage_quota'")->fetchAll();
     if (empty($checkCol)) {
         $pdo->exec("ALTER TABLE users ADD COLUMN storage_quota BIGINT UNSIGNED NOT NULL DEFAULT 5368709120 AFTER role");
+    }
+    $checkStatus = $pdo->query("SHOW COLUMNS FROM users LIKE 'status'")->fetchAll();
+    if (empty($checkStatus)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN status ENUM('active', 'inactive') NOT NULL DEFAULT 'active' AFTER role");
     }
 } catch (\Throwable $e) {}
 
