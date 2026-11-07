@@ -158,7 +158,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 }
 </style>
 
-<div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
+<div class="p-4 md:p-7 pb-20 md:pb-24 w-full max-w-[1600px] mx-auto space-y-6">
 
     <!-- Header Section (Executive Clean SaaS Frosted Glass Header) -->
     <div class="rounded-3xl p-6 md:p-7 cal-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -298,13 +298,26 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                 <?php
                 $start_date = date('Y-m-01', strtotime($current_month));
                 $start_day  = (int)date('w', strtotime($start_date));
+                $days_in_month = (int)date('t', strtotime($current_month));
 
-                // Previous month padding cells
+                // Previous month timestamps & days count
+                $prev_month_ts = strtotime($current_month . ' -1 month');
+                $days_in_prev_month = (int)date('t', $prev_month_ts);
+                $prev_month_str = date('Y-m', $prev_month_ts);
+
+                // 1. Previous month leading padding cells (complete with dates)
                 for ($i = 0; $i < $start_day; $i++) {
-                    echo '<div class="min-h-[110px] md:min-h-[125px] p-2 bg-slate-50/50 select-none"></div>';
+                    $p_day = $days_in_prev_month - ($start_day - 1 - $i);
+                    $p_date_str = $prev_month_str . '-' . sprintf('%02d', $p_day);
+                    echo '<a href="?page=calendar&month=' . $prev_month_str . '&date=' . $p_date_str . '" class="cal-cell min-h-[85px] md:min-h-[96px] p-2 flex flex-col justify-between opacity-35 hover:opacity-75 bg-slate-50/70 transition-all select-none">';
+                    echo '<div class="flex items-center justify-between w-full">';
+                    echo '<span class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-slate-400">' . $p_day . '</span>';
+                    echo '</div>';
+                    echo '<div class="text-[9px] text-slate-400 font-semibold truncate">' . date('M', $prev_month_ts) . '</div>';
+                    echo '</a>';
                 }
 
-                $days_in_month = (int)date('t', strtotime($current_month));
+                // 2. Current month active days
                 for ($day = 1; $day <= $days_in_month; $day++) {
                     $date_str    = date('Y-m-', strtotime($current_month)) . sprintf('%02d', $day);
                     $is_today    = $date_str === $today_date;
@@ -321,7 +334,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                     $day_link  = '?page=calendar&month=' . $current_month . '&date=' . $date_str;
 
                     // Container styling (Clean Crisp White Surface)
-                    $cell_classes = 'cal-cell min-h-[110px] md:min-h-[125px] p-2 md:p-2.5 flex flex-col justify-between relative group ';
+                    $cell_classes = 'cal-cell min-h-[85px] md:min-h-[96px] p-2 md:p-2.5 flex flex-col justify-between relative group ';
                     if ($is_selected) {
                         $cell_classes .= 'bg-indigo-50/90 ring-2 ring-indigo-600 z-10 shadow-sm';
                     } elseif ($is_today) {
@@ -401,18 +414,29 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                     echo '</a>';
                 }
 
-                // Next month padding to fill complete grid
-                $total_cells = $start_day + $days_in_month;
-                $remaining   = (7 - ($total_cells % 7)) % 7;
-                for ($i = 0; $i < $remaining; $i++) {
-                    echo '<div class="min-h-[110px] md:min-h-[125px] p-2 bg-slate-50/50 select-none"></div>';
+                // 3. Next month trailing padding cells (fills out to 35 or 42 cells seamlessly)
+                $total_rendered = $start_day + $days_in_month;
+                $target_cells   = ($total_rendered <= 35) ? 35 : 42;
+                $remaining      = $target_cells - $total_rendered;
+
+                $next_month_ts  = strtotime($current_month . ' +1 month');
+                $next_month_str = date('Y-m', $next_month_ts);
+
+                for ($i = 1; $i <= $remaining; $i++) {
+                    $n_date_str = $next_month_str . '-' . sprintf('%02d', $i);
+                    echo '<a href="?page=calendar&month=' . $next_month_str . '&date=' . $n_date_str . '" class="cal-cell min-h-[85px] md:min-h-[96px] p-2 flex flex-col justify-between opacity-35 hover:opacity-75 bg-slate-50/70 transition-all select-none">';
+                    echo '<div class="flex items-center justify-between w-full">';
+                    echo '<span class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-bold text-slate-400">' . $i . '</span>';
+                    echo '</div>';
+                    echo '<div class="text-[9px] text-slate-400 font-semibold truncate">' . date('M', $next_month_ts) . '</div>';
+                    echo '</a>';
                 }
                 ?>
             </div>
         </div>
 
         <!-- Right Side Panel: Day Agenda & Tasks (Always active, defaults to Today) -->
-        <div class="xl:col-span-4 cal-glass-panel rounded-3xl p-6 flex flex-col min-h-[580px]">
+        <div class="xl:col-span-4 cal-glass-panel rounded-3xl p-6 flex flex-col min-h-[500px]">
             
             <!-- Panel Header -->
             <div class="border-b border-slate-200/80 pb-4 mb-4">

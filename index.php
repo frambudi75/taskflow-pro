@@ -594,15 +594,116 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 default: include 'pages/dashboard.php';
             }
             ?>
-        </div>
-        <footer class="bg-white border-t border-slate-200 py-3 px-6 flex-shrink-0">
-            <div class="text-center">
+            <footer class="py-6 px-6 mt-auto text-center border-t border-slate-200/60 bg-transparent flex-shrink-0">
                 <p class="text-slate-400 text-xs font-medium">© 2026 TaskFlow. Dibuat oleh Habib Frambudi</p>
-            </div>
-        </footer>
+            </footer>
+        </div>
     </main>
 
     </div>
+
+    <!-- ============================================================== -->
+    <!-- GLOBAL COMMAND PALETTE MODAL (Ctrl + K / Cmd + K) -->
+    <!-- ============================================================== -->
+    <div id="cmdPaletteModal" class="fixed inset-0 hidden z-50 items-start justify-center pt-20 md:pt-28 p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true">
+        <div class="bg-white/95 backdrop-blur-2xl rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col transition-all">
+            <!-- Search bar -->
+            <div class="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50/60">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="cmdInput" placeholder="Ketik perintah atau cari halaman... (cth: kalender, dokumen, tambah)" 
+                       class="flex-1 bg-transparent border-none text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-medium"
+                       oninput="filterCmdList(this.value)" autocomplete="off">
+                <kbd class="px-2 py-0.5 text-[10px] font-black uppercase text-slate-400 bg-white border border-slate-200 rounded-lg shadow-2xs">ESC</kbd>
+            </div>
+
+            <!-- Command items list -->
+            <div id="cmdItemsList" class="p-2 max-h-80 overflow-y-auto space-y-1 custom-scrollbar text-xs">
+                <!-- Group: Navigasi -->
+                <div class="cmd-group-label px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Navigasi Halaman</div>
+                <a href="index.php?page=dashboard" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">📊</span>
+                        Dashboard Utama
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+                <a href="index.php?page=calendar" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">📅</span>
+                        Kalender Produktivitas
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+                <a href="index.php?page=documents" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">📂</span>
+                        Pusat Dokumen &amp; Berkas
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+                <a href="index.php?page=notes" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">📝</span>
+                        Catatan &amp; Ide Kerja
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+                <a href="index.php?page=projects" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">📌</span>
+                        Papan Kanban Proyek
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+                <a href="index.php?page=activities" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">⚡</span>
+                        Audit Log &amp; Aktivitas
+                    </span>
+                    <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
+                </a>
+
+                <!-- Group: Aksi Cepat -->
+                <div class="cmd-group-label px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Aksi Cepat</div>
+                <a href="index.php?page=calendar" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">➕</span>
+                        Tambah Tugas Baru
+                    </span>
+                    <span class="text-[10px] text-emerald-600 font-bold">Aksi Cepat</span>
+                </a>
+                <a href="index.php?page=documents#uploadSection" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-sky-50 text-slate-700 hover:text-sky-700 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">⬆️</span>
+                        Unggah Dokumen Berkas
+                    </span>
+                    <span class="text-[10px] text-sky-600 font-bold">Aksi Cepat</span>
+                </a>
+                <a href="index.php?page=notes" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center text-xs">✍️</span>
+                        Tulis Draf Catatan Baru
+                    </span>
+                    <span class="text-[10px] text-violet-600 font-bold">Aksi Cepat</span>
+                </a>
+            </div>
+
+            <!-- Footer instructions -->
+            <div class="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                <div class="flex items-center gap-2">
+                    <span>Gunakan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">↑</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">↓</kbd> untuk memilih</span>
+                    <span>·</span>
+                    <span><kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">Enter</kbd> untuk buka</span>
+                </div>
+                <span>Tekan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">ESC</kbd> untuk menutup</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================== -->
+    <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
+    <!-- ============================================================== -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2.5 pointer-events-none" style="min-width: 320px; max-width: 420px;"></div>
 
 <script>
 // AJAX Navigation System
@@ -787,6 +888,134 @@ function toggleDesktopSidebar() {
         }
     } catch(e) {}
 })();
+
+// ==============================================================
+// 1. FLOATING TOAST NOTIFICATION SYSTEM
+// ==============================================================
+window.showToast = function(message, type = 'success', duration = 3800) {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'pointer-events-auto transform transition-all duration-300 translate-y-4 opacity-0 flex items-center gap-3 p-4 rounded-2xl shadow-xl border text-xs font-bold';
+    
+    if (type === 'error' || type === 'danger') {
+        toast.className += ' bg-white/95 border-rose-200 text-rose-900 shadow-rose-500/10';
+        toast.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center text-rose-600 flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            </div>
+            <div class="flex-1 leading-snug">${message}</div>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+        `;
+    } else {
+        toast.className += ' bg-white/95 border-emerald-200 text-slate-900 shadow-emerald-500/10';
+        toast.innerHTML = `
+            <div class="w-8 h-8 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div class="flex-1 leading-snug">${message}</div>
+            <button onclick="this.parentElement.remove()" class="text-slate-400 hover:text-slate-600 p-1">✕</button>
+        `;
+    }
+
+    container.appendChild(toast);
+
+    // Slide in
+    setTimeout(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+    }, 20);
+
+    // Auto dismiss
+    setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
+};
+
+// Check URL query parameters for feedback messages and show toast
+function checkUrlNotifications() {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('success');
+    const error = params.get('error');
+
+    if (success) {
+        let msg = 'Operasi berhasil dilakukan!';
+        if (success === 'uploaded') msg = 'Dokumen berhasil diunggah dengan kompresi optimal!';
+        if (success === 'deleted') msg = 'Data berhasil dihapus dari sistem.';
+        if (success === 'shared') msg = 'Hak akses dokumen berhasil dibagikan!';
+        if (success === 'revoked') msg = 'Hak akses berbagi telah dicabut.';
+        if (success === 'public_shared') msg = 'Tautan publik siap dibagikan!';
+        if (success === 'public_revoked') msg = 'Tautan publik telah dinonaktifkan.';
+        showToast(msg, 'success');
+
+        // Clean up URL without reload
+        params.delete('success');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    } else if (error) {
+        let msg = 'Terjadi kesalahan sistem.';
+        if (error === 'upload_failed') msg = 'Gagal mengunggah file. Periksa format dan batas ukuran.';
+        showToast(msg, 'error');
+
+        params.delete('error');
+        const newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+        window.history.replaceState({}, '', newUrl);
+    }
+}
+document.addEventListener('DOMContentLoaded', checkUrlNotifications);
+
+// ==============================================================
+// 2. COMMAND PALETTE LOGIC (Ctrl + K / Cmd + K)
+// ==============================================================
+window.openCmdPalette = function() {
+    const modal = document.getElementById('cmdPaletteModal');
+    const input = document.getElementById('cmdInput');
+    if (!modal || !input) return;
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    input.value = '';
+    filterCmdList('');
+    setTimeout(() => input.focus(), 50);
+};
+
+window.closeCmdPalette = function() {
+    const modal = document.getElementById('cmdPaletteModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+    }
+};
+
+window.filterCmdList = function(query) {
+    const q = (query || '').toLowerCase().trim();
+    const items = document.querySelectorAll('#cmdItemsList .cmd-item');
+    items.forEach(el => {
+        const text = el.textContent.toLowerCase();
+        el.style.display = (!q || text.includes(q)) ? 'flex' : 'none';
+    });
+};
+
+// Global Hotkeys: Ctrl+K / Cmd+K / Escape
+document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
+        e.preventDefault();
+        const modal = document.getElementById('cmdPaletteModal');
+        if (modal && !modal.classList.contains('hidden') && modal.style.display === 'flex') {
+            closeCmdPalette();
+        } else {
+            openCmdPalette();
+        }
+    } else if (e.key === 'Escape') {
+        closeCmdPalette();
+    }
+});
+
+// Close command palette on outer click
+document.getElementById('cmdPaletteModal')?.addEventListener('click', function(e) {
+    if (e.target === this) closeCmdPalette();
+});
 
 
 </script>
