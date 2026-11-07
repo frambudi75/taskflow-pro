@@ -91,32 +91,50 @@ if ($isAdmin) {
 function getActionStyle($action) {
     $action = strtolower($action);
     if (strpos($action, 'dokumen') !== false || strpos($action, 'upload') !== false) 
-        return ['📁', 'bg-emerald-50 text-emerald-600 border-emerald-100'];
+        return [
+            '<svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>',
+            'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-200/80 dark:border-indigo-800/60'
+        ];
     if (strpos($action, 'catatan') !== false || strpos($action, 'note') !== false) 
-        return ['📝', 'bg-indigo-50 text-indigo-600 border-indigo-100'];
+        return [
+            '<svg class="w-5 h-5 text-indigo-600 dark:text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+            'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+        ];
     if (strpos($action, 'tugas') !== false || strpos($action, 'todo') !== false || strpos($action, 'status') !== false) 
-        return ['✅', 'bg-blue-50 text-blue-600 border-blue-100'];
+        return [
+            '<svg class="w-5 h-5 text-emerald-600 dark:text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+            'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-800/60'
+        ];
     if (strpos($action, 'profil') !== false || strpos($action, 'password') !== false) 
-        return ['👤', 'bg-amber-50 text-amber-600 border-amber-100'];
+        return [
+            '<svg class="w-5 h-5 text-slate-700 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+            'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+        ];
     if (strpos($action, 'login') !== false || strpos($action, 'logout') !== false) 
-        return ['🔑', 'bg-rose-50 text-rose-600 border-rose-100'];
-    return ['✨', 'bg-slate-50 text-slate-600 border-slate-100'];
+        return [
+            '<svg class="w-5 h-5 text-slate-700 dark:text-slate-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+            'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+        ];
+    return [
+        '<svg class="w-5 h-5 text-slate-600 dark:text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+        'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700'
+    ];
 }
 
 function renderTimeline($activities, $currentPage, $totalPages, $pageParam, $activeTab) {
     if (empty($activities)) {
         echo '
-        <div class="bg-white rounded-[2.5rem] p-16 text-center border border-slate-100 shadow-sm">
-            <div class="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-16 text-center border border-slate-200/90 dark:border-slate-800 shadow-sm">
+            <div class="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-400 dark:text-slate-500">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <h3 class="text-xl font-black text-slate-900 mb-1">Belum Ada Aktivitas</h3>
-            <p class="text-slate-500 font-medium text-sm max-w-xs mx-auto">Sistem belum mencatat aktivitas apa pun untuk kategori ini.</p>
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-1">Belum Ada Aktivitas</h3>
+            <p class="text-slate-500 dark:text-slate-400 font-medium text-sm max-w-xs mx-auto">Sistem belum mencatat aktivitas apa pun untuk kategori ini.</p>
         </div>';
         return;
     }
     
-    echo '<div class="flex flex-col gap-10">';
+    echo '<div class="flex flex-col gap-6">';
     $currentDate = '';
     foreach ($activities as $act) {
         $dateLabel = date('d F Y', strtotime($act['created_at']));
@@ -130,50 +148,46 @@ function renderTimeline($activities, $currentPage, $totalPages, $pageParam, $act
         
         if ($displayDate) {
             echo '
-            <div class="relative flex items-center gap-4 mb-4">
-                <div class="h-px flex-1 bg-slate-200"></div>
-                <span class="bg-white px-6 py-2 rounded-2xl text-[11px] font-black text-slate-500 uppercase tracking-[0.2em] border border-slate-100 shadow-sm">' . htmlspecialchars($dateLabel) . '</span>
-                <div class="h-px flex-1 bg-slate-200"></div>
+            <div class="relative flex items-center gap-4 my-2">
+                <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                <span class="bg-white dark:bg-slate-900 px-5 py-1.5 rounded-full text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider border border-slate-200/90 dark:border-slate-800 shadow-sm">' . htmlspecialchars($dateLabel) . '</span>
+                <div class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
             </div>';
         }
         
         $photoHtml = $hasPhoto 
             ? '<img src="uploads/avatars/' . htmlspecialchars($act['profile_photo']) . '" alt="' . htmlspecialchars($act['display_name']) . '" class="w-full h-full object-cover">'
-            : '<span class="text-[8px] font-black text-slate-400">' . htmlspecialchars($initials) . '</span>';
+            : '<span class="text-[9px] font-bold text-slate-500 dark:text-slate-400">' . htmlspecialchars($initials) . '</span>';
             
         echo '
-        <div class="group relative flex gap-6 md:gap-8 items-start">
-            <div class="hidden md:flex flex-col items-end w-20 pt-1.5 flex-shrink-0">
-                <span class="text-xs font-black text-slate-900 leading-none">' . htmlspecialchars($timeLabel) . '</span>
-                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-1">WIB</span>
+        <div class="group relative flex gap-4 md:gap-6 items-start">
+            <div class="hidden md:flex flex-col items-end w-16 pt-2 flex-shrink-0">
+                <span class="text-xs font-bold text-slate-900 dark:text-white leading-none">' . htmlspecialchars($timeLabel) . '</span>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider mt-1">WIB</span>
             </div>
-            <div class="relative z-10 flex flex-col items-center flex-shrink-0 pt-1">
-                <div class="w-5 h-5 rounded-full border-4 border-white shadow-md transition-all group-hover:scale-125 ' . $style[1] . '"></div>
-                <div class="w-0.5 flex-1 bg-slate-100 mt-2 rounded-full absolute top-7 -bottom-14 hidden md:block"></div>
-            </div>
-            <div class="flex-1 bg-white rounded-[1.75rem] p-5 md:p-6 border border-slate-100 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5 flex flex-col md:flex-row md:items-center gap-5">
-                <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl border flex-shrink-0 ' . $style[1] . '">
+            <div class="flex-1 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-2xl p-4 md:p-5 border border-slate-200/90 dark:border-slate-800 shadow-sm transition-all hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700 flex flex-col md:flex-row md:items-center gap-4">
+                <div class="w-11 h-11 rounded-xl flex items-center justify-center border flex-shrink-0 ' . $style[1] . '">
                     ' . $style[0] . '
                 </div>
-                <div class="flex-1">
-                    <p class="text-slate-800 font-bold leading-snug text-[15px] mb-2">' . htmlspecialchars($act['action']) . '</p>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-50 border border-slate-100 rounded-lg">
-                            <div class="w-5 h-5 rounded-md overflow-hidden bg-white border border-slate-200 flex items-center justify-center">
+                <div class="flex-1 min-w-0">
+                    <p class="text-slate-900 dark:text-white font-bold leading-snug text-sm mb-2">' . htmlspecialchars($act['action']) . '</p>
+                    <div class="flex flex-wrap items-center gap-2.5">
+                        <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-lg">
+                            <div class="w-5 h-5 rounded-md overflow-hidden bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center">
                                 ' . $photoHtml . '
                             </div>
-                            <span class="text-[11px] font-bold text-slate-600">' . htmlspecialchars($act['display_name']) . '</span>
-                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                            <span class="text-[9px] font-black text-indigo-500 uppercase tracking-widest">' . htmlspecialchars($act['user_role']) . '</span>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200">' . htmlspecialchars($act['display_name']) . '</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                            <span class="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">' . htmlspecialchars($act['user_role']) . '</span>
                         </div>
-                        <div class="md:hidden flex items-center gap-1.5 text-[11px] font-bold text-slate-500 bg-slate-50 px-2.5 py-1 rounded-lg border border-slate-100">
+                        <div class="md:hidden flex items-center gap-1.5 text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2.5 py-1 rounded-lg border border-slate-200/80 dark:border-slate-700">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             <span>' . htmlspecialchars($timeLabel) . ' WIB</span>
                         </div>
                     </div>
                 </div>
                 <div class="hidden md:block">
-                    <div class="px-4 py-2 bg-slate-50 text-slate-500 text-[10px] font-black uppercase tracking-[0.15em] rounded-xl border border-slate-200">Aktivitas Terverifikasi</div>
+                    <div class="px-3.5 py-1.5 bg-slate-50 dark:bg-slate-800/60 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider rounded-xl border border-slate-200/80 dark:border-slate-700">Tercatat</div>
                 </div>
             </div>
         </div>';
@@ -182,34 +196,34 @@ function renderTimeline($activities, $currentPage, $totalPages, $pageParam, $act
     
     // Pagination Controls
     if ($totalPages > 1) {
-        echo '<div class="mt-12 flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white rounded-2xl border border-slate-200 shadow-sm">';
+        echo '<div class="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 shadow-sm">';
         
         // Prev button
         if ($currentPage > 1) {
             $prev = $currentPage - 1;
-            echo "<a href=\"?page=activities&{$pageParam}={$prev}&tab={$activeTab}\" aria-label=\"Halaman sebelumnya\" class=\"flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\">
-                <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"15 18 9 12 15 6\"/></svg> Sebelumnya
+            echo "<a href=\"?page=activities&{$pageParam}={$prev}&tab={$activeTab}\" aria-label=\"Halaman sebelumnya\" class=\"flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-sm\">
+                <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"15 18 9 12 15 6\"/></svg> Sebelumnya
             </a>";
         } else {
-            echo "<span class=\"flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-400 cursor-not-allowed\">
-                <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"15 18 9 12 15 6\"/></svg> Sebelumnya
+            echo "<span class=\"flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 text-xs font-bold text-slate-400 cursor-not-allowed\">
+                <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"15 18 9 12 15 6\"/></svg> Sebelumnya
             </span>";
         }
 
         echo "<div class=\"flex flex-col items-center\">
-                <span class=\"text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]\">Halaman</span>
-                <span class=\"text-sm font-bold text-slate-700\">{$currentPage} <span class=\"text-slate-400 mx-1\">/</span> {$totalPages}</span>
+                <span class=\"text-[10px] font-bold text-slate-400 uppercase tracking-widest\">Halaman</span>
+                <span class=\"text-xs font-bold text-slate-700 dark:text-slate-300\">{$currentPage} <span class=\"text-slate-400 mx-1\">/</span> {$totalPages}</span>
               </div>";
 
         // Next button
         if ($currentPage < $totalPages) {
             $next = $currentPage + 1;
-            echo "<a href=\"?page=activities&{$pageParam}={$next}&tab={$activeTab}\" aria-label=\"Halaman selanjutnya\" class=\"flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white border border-slate-200 text-sm font-bold text-slate-700 hover:text-indigo-600 hover:border-indigo-200 hover:bg-indigo-50 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500\">
-                Selanjutnya <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"9 18 15 12 9 6\"/></svg>
+            echo "<a href=\"?page=activities&{$pageParam}={$next}&tab={$activeTab}\" aria-label=\"Halaman selanjutnya\" class=\"flex items-center gap-2 px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all shadow-sm\">
+                Selanjutnya <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"9 18 15 12 9 6\"/></svg>
             </a>";
         } else {
-            echo "<span class=\"flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-50 border border-slate-200 text-sm font-bold text-slate-400 cursor-not-allowed\">
-                Selanjutnya <svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"9 18 15 12 9 6\"/></svg>
+            echo "<span class=\"flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-700/60 text-xs font-bold text-slate-400 cursor-not-allowed\">
+                Selanjutnya <svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\"><polyline points=\"9 18 15 12 9 6\"/></svg>
             </span>";
         }
         
@@ -218,26 +232,31 @@ function renderTimeline($activities, $currentPage, $totalPages, $pageParam, $act
 }
 ?>
 
-<div class="p-6 md:p-10 max-w-5xl mx-auto min-h-screen">
+<div class="p-5 md:p-8 w-full max-w-5xl mx-auto min-h-screen">
     
-    <!-- PREMIUM LIGHT HEADER -->
-    <div class="mb-12 flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <!-- Executive Glassmorphic Header -->
+    <div class="rounded-3xl p-6 md:p-8 mb-7 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div>
-            <div class="flex items-center gap-2 mb-3">
-                <span class="px-3 py-1 bg-white border border-slate-200 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Audit Log</span>
-                <div class="h-px w-8 bg-slate-200"></div>
-                <span class="text-[10px] font-bold text-indigo-500 uppercase tracking-widest">Real-time Tracking</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-widest mb-3">
+                <svg class="w-3.5 h-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                Audit Log &amp; Timeline
             </div>
-            <h1 class="text-4xl font-black text-slate-900 tracking-tight mb-2">Aktivitas Sistem</h1>
-            <p class="text-slate-500 font-medium max-w-md">Pantau semua jejak digital, perubahan tugas, dan interaksi dokumen dalam satu timeline terpadu.</p>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1">Aktivitas Sistem</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Pantau semua rekaman aktivitas, tugas, dan interaksi dokumen dalam satu timeline.</p>
         </div>
         
         <div class="flex items-center gap-3">
-            <div class="bg-white px-5 py-3 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+            <div class="bg-white dark:bg-slate-800/80 px-5 py-3 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-sm flex items-center gap-4">
                 <div class="text-right">
-                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Sesi</div>
-                    <div class="text-xl font-black text-slate-900"><?php echo $total_activities; ?></div>
+                    <div class="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest">Total Sesi</div>
+                    <div class="text-xl font-black text-slate-900 dark:text-white"><?php echo $total_activities; ?></div>
                 </div>
+                <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-950/50 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/60">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                </div>
+            </div>
+        </div>
+    </div>
                 <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 </div>

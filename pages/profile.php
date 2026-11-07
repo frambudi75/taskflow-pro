@@ -112,22 +112,24 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
 
 <div class="p-5 md:p-8 max-w-5xl mx-auto">
 
-    <!-- Hero Header -->
-    <div class="rounded-3xl p-7 md:p-10 mb-7 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-br from-slate-950 via-slate-900 to-sky-950">
-        <div class="relative z-10 flex items-center gap-5">
+    <!-- Executive Glassmorphic Header -->
+    <div class="rounded-3xl p-6 md:p-8 mb-7 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div class="flex items-center gap-4">
             <!-- Avatar preview in hero -->
-            <div class="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-white/20 shadow-sm">
+            <div class="w-14 h-14 rounded-2xl overflow-hidden flex-shrink-0 border-2 border-slate-200 dark:border-slate-700 shadow-sm">
                 <img id="avatarPreview" src="<?php echo $avatarUrl; ?>" alt="Avatar" class="w-full h-full object-cover">
             </div>
             <div>
-                <div class="text-sky-300 text-[10px] font-black uppercase tracking-widest mb-1">Akun Saya</div>
-                <h1 class="text-2xl md:text-3xl font-black text-white leading-tight">Profil Pengguna</h1>
-                <p class="text-sky-200 text-sm font-medium mt-1"><?php echo htmlspecialchars($user['email']); ?></p>
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-[10px] font-bold uppercase tracking-wider mb-1">
+                    Akun Saya
+                </div>
+                <h1 class="text-2xl font-black text-slate-900 dark:text-white leading-tight"><?php echo htmlspecialchars($user['display_name']); ?></h1>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-medium"><?php echo htmlspecialchars($user['email']); ?></p>
             </div>
         </div>
-        <div class="relative z-10 flex-shrink-0">
+        <div class="flex-shrink-0">
             <a href="?page=reset-password"
-               class="flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold text-white transition-all bg-white/10 hover:bg-white/15 border border-white/20 focus:outline-none focus:ring-2 focus:ring-sky-400">
+               class="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-indigo-400 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all shadow-sm">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                 Ubah Password
             </a>
@@ -154,44 +156,41 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
 
         <!-- LEFT: Avatar section -->
         <div class="lg:col-span-4">
-            <div class="bg-white rounded-[2rem] border border-slate-100 p-7 text-center" style="box-shadow:0 4px 24px rgba(0,0,0,0.06)">
+            <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 p-7 text-center shadow-sm">
                 <!-- Big avatar display -->
                 <div class="relative inline-block mb-5">
-                    <div class="w-28 h-28 rounded-3xl overflow-hidden border-4 mx-auto"
-                         style="border-color:#f1f5f9;box-shadow:0 12px 32px rgba(0,0,0,0.1)">
+                    <div class="w-28 h-28 rounded-3xl overflow-hidden border-4 border-slate-100 dark:border-slate-800 shadow-md mx-auto">
                         <img id="avatarBig" src="<?php echo $avatarUrl; ?>" alt="Avatar" class="w-full h-full object-cover">
                     </div>
                     <!-- Camera badge -->
-                    <label for="photoInput" class="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all hover:scale-110 active:scale-95"
-                           style="background:linear-gradient(135deg,#0ea5e9,#0284c7);box-shadow:0 4px 12px rgba(14,165,233,0.4)">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                    <label for="photoInput" class="absolute -bottom-2 -right-2 w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer transition-all hover:scale-105 active:scale-95 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                     </label>
                 </div>
 
-                <h3 class="font-black text-slate-900 text-xl"><?php echo htmlspecialchars($user['display_name']); ?></h3>
-                <p class="text-slate-400 text-sm font-medium mt-1 mb-1"><?php echo htmlspecialchars($user['email']); ?></p>
-                <span class="inline-block text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest"
-                      style="background:#e0f2fe;color:#0369a1">
+                <h3 class="font-extrabold text-slate-900 dark:text-white text-lg"><?php echo htmlspecialchars($user['display_name']); ?></h3>
+                <p class="text-slate-500 dark:text-slate-400 text-xs font-medium mt-0.5 mb-2"><?php echo htmlspecialchars($user['email']); ?></p>
+                <span class="inline-block text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-wider bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300">
                     <?php echo $_SESSION['role'] ?? 'user'; ?>
                 </span>
 
-                <div class="mt-7 pt-6 border-t border-slate-100 text-left space-y-3">
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#e0f2fe">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2.3"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+                <div class="mt-6 pt-5 border-t border-slate-100 dark:border-slate-800 text-left space-y-2.5">
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         </div>
-                        <div>
-                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Email</div>
-                            <div class="text-xs font-bold text-slate-700 truncate"><?php echo htmlspecialchars($user['email']); ?></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Email Terdaftar</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate"><?php echo htmlspecialchars($user['email']); ?></div>
                         </div>
                     </div>
-                    <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50">
-                        <div class="w-8 h-8 rounded-lg flex items-center justify-center" style="background:#f0fdf4">
-                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#15803d" stroke-width="2.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
-                        <div>
-                            <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Nama</div>
-                            <div class="text-xs font-bold text-slate-700"><?php echo htmlspecialchars($user['display_name']); ?></div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Nama Lengkap</div>
+                            <div class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate"><?php echo htmlspecialchars($user['display_name']); ?></div>
                         </div>
                     </div>
                 </div>
@@ -200,52 +199,86 @@ $initials     = strtoupper(substr($user['display_name'] ?? 'U', 0, 2));
 
         <!-- RIGHT: Form -->
         <div class="lg:col-span-8">
-            <div class="bg-white rounded-[2rem] border border-slate-100 p-7 md:p-9" style="box-shadow:0 4px 24px rgba(0,0,0,0.06)">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 md:p-8 shadow-sm">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                     </div>
                     <div>
-                        <h3 class="font-black text-slate-900">Edit Informasi</h3>
-                        <p class="text-slate-400 text-xs font-bold uppercase tracking-widest">Perbarui Data Akun</p>
+                        <h3 class="font-bold text-slate-900 dark:text-white text-base">Edit Informasi</h3>
+                        <p class="text-slate-400 text-xs">Perbarui data profil &amp; notifikasi Anda</p>
                     </div>
                 </div>
 
-                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                <form method="POST" enctype="multipart/form-data" class="space-y-5">
                     <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                     <input type="hidden" name="update_profile" value="1">
 
-                    <!-- Photo upload (hidden, triggered by camera badge) -->
+                    <!-- Photo upload -->
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Foto Profil</label>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">Foto Profil</label>
                         <label for="photoInput"
-                               class="flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed cursor-pointer transition-all hover:border-sky-400 hover:bg-sky-50"
-                               style="border-color:#e2e8f0" id="photoDropZone">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#e0f2fe">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0369a1" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                               class="flex items-center gap-4 p-4 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500/60 bg-slate-50/70 dark:bg-slate-800/40 cursor-pointer transition-all"
+                               id="photoDropZone">
+                            <div class="w-10 h-10 rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-300 flex items-center justify-center flex-shrink-0">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
                             </div>
                             <div>
-                                <div class="text-slate-700 font-bold text-sm">Klik untuk pilih foto</div>
-                                <div class="text-slate-400 text-xs">JPG, PNG, WEBP · Maks. 2MB</div>
+                                <div class="text-slate-800 dark:text-slate-200 font-bold text-sm">Klik untuk ganti foto</div>
+                                <div class="text-slate-400 text-xs">JPG, PNG, WEBP · Maksimal 2MB</div>
                             </div>
                             <input type="file" name="profile_photo" id="photoInput" accept="image/png,image/jpeg,image/webp" class="hidden"
                                    onchange="previewPhoto(this)">
                         </label>
-                        <p id="photoName" class="text-xs text-sky-600 font-bold mt-2 hidden"></p>
+                        <p id="photoName" class="text-xs text-indigo-600 dark:text-indigo-400 font-bold mt-2 hidden"></p>
                     </div>
 
                     <!-- Display Name -->
                     <div>
-                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Nama Lengkap</label>
-                        <div class="relative">
-                            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                            </span>
-                            <input type="text" name="display_name"
-                                    value="<?php echo htmlspecialchars($user['display_name']); ?>" required
-                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-11 pr-5 py-4 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all">
-                        </div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Nama Lengkap</label>
+                        <input type="text" name="display_name"
+                                value="<?php echo htmlspecialchars($user['display_name']); ?>" required
+                                class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
                     </div>
+
+                    <!-- Email -->
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">Email</label>
+                        <input type="email" name="email"
+                                value="<?php echo htmlspecialchars($user['email']); ?>" required
+                                class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                    </div>
+
+                    <!-- Telegram Chat ID -->
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Telegram Chat ID</label>
+                            <a href="https://t.me/userinfobot" target="_blank" class="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline">Dapatkan ID Anda ↗</a>
+                        </div>
+                        <input type="text" name="telegram_chat_id"
+                                value="<?php echo htmlspecialchars($user['telegram_chat_id'] ?? ''); ?>"
+                                placeholder="Contoh: 12345678"
+                                class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 transition-all">
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1.5">Untuk menerima notifikasi sistem di Telegram secara langsung.</p>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-3 rounded-xl font-bold text-white transition-all active:scale-95 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-sm text-sm">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Simpan Perubahan
+                    </button>
+                    
+                    <?php if (!empty($user['telegram_chat_id'])): ?>
+                    <button type="submit" name="test_telegram"
+                            class="w-full py-2.5 rounded-xl font-bold text-xs text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all flex items-center justify-center gap-2 mt-2">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
+                        Test Notifikasi Telegram
+                    </button>
+                    <?php endif; ?>
+                </form>
+            </div>
+        </div>
+    </div>
 
                     <!-- Email -->
                     <div>

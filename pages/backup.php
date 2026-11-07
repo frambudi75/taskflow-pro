@@ -176,85 +176,84 @@ if (isset($_POST['run_full_backup'])) {
     }
 }
 ?>
-<div class="p-6 md:p-10 max-w-4xl mx-auto">
-    <header class="mb-10">
-        <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">Backup Sistem</h2>
-        <p class="text-slate-500 font-medium">Ekspor data database dan file sistem ke format ZIP atau SQL.</p>
-    </header>
+<div class="p-5 md:p-8 max-w-5xl mx-auto">
+    <!-- Executive Glassmorphic Header -->
+    <div class="rounded-3xl p-6 md:p-8 mb-7 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-widest mb-3">
+                <svg class="w-3.5 h-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Pemulihan &amp; Backup
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1">Backup Sistem</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Ekspor data database dan berkas fisik ke format SQL atau ZIP terkompresi.</p>
+        </div>
+    </div>
 
     <?php if ($message): ?>
-        <div class="mb-8 p-4 bg-red-50 border border-red-100 text-red-700 rounded-2xl text-sm font-bold">
+        <div class="mb-6 p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/60 text-red-700 dark:text-red-300 rounded-2xl text-sm font-bold">
             <?php echo $message; ?>
         </div>
     <?php endif; ?>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Backup SQL -->
-        <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8 md:p-10 text-center">
-            <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-7 md:p-8 text-center flex flex-col">
+            <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
             </div>
-            <h3 class="text-xl font-black text-slate-900 mb-3">Backup Database</h3>
-            <p class="text-slate-500 mb-8 max-w-md mx-auto text-sm">
-                Ekspor semua data dari tabel Users, Todos, Notes, dan Documents ke dalam file SQL.
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Backup Database (SQL)</h3>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 text-xs leading-relaxed">
+                Ekspor semua struktur dan record data dari tabel Users, Todos, Notes, dan Documents ke berkas SQL murni.
             </p>
             
-            <form method="POST">
+            <form method="POST" class="mt-auto">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <button type="submit" name="run_backup" class="bg-blue-600 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-blue-700 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center gap-3 mx-auto active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    Unduh Backup SQL
+                <button type="submit" name="run_backup" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 active:scale-95">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Unduh File SQL
                 </button>
             </form>
         </div>
 
         <!-- Backup ZIP Lengkap -->
-        <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8 md:p-10 text-center">
-            <div class="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-7 md:p-8 text-center flex flex-col">
+            <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </div>
-            <h3 class="text-xl font-black text-slate-900 mb-3">Backup Lengkap</h3>
-            <p class="text-slate-500 mb-8 max-w-md mx-auto text-sm">
-                Ekspor database SQL, seluruh file upload, serta konfigurasi sistem dalam format ZIP.
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2">Full Backup (ZIP)</h3>
+            <p class="text-slate-500 dark:text-slate-400 mb-6 text-xs leading-relaxed">
+                Ekspor basis data SQL, seluruh file fisik dokumen upload, serta file konfigurasi ke dalam arsip ZIP lengkap.
             </p>
             
-            <form method="POST">
+            <form method="POST" class="mt-auto">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <button type="submit" name="run_full_backup" class="bg-emerald-600 text-white px-8 py-3.5 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 flex items-center gap-3 mx-auto active:scale-95">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Unduh Backup ZIP
+                <button type="submit" name="run_full_backup" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-xl font-bold text-sm transition-all shadow-sm flex items-center justify-center gap-2 active:scale-95">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Unduh Arsip ZIP Lengkap
                 </button>
             </form>
         </div>
     </div>
 
-    <div class="mt-10 p-6 bg-slate-50 rounded-2xl border border-slate-200">
-        <h4 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-3">Informasi Backup</h4>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="mt-8 p-6 bg-white/60 dark:bg-slate-900/40 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+        <h4 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">Informasi Backup &amp; Keamanan</h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs text-slate-600 dark:text-slate-400">
             <div>
-                <h5 class="text-sm font-bold text-slate-800 mb-2">Backup SQL</h5>
-                <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
-                    <li>Hanya data tabel database</li>
+                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Backup Database (SQL)</h5>
+                <ul class="space-y-1 list-disc list-inside">
+                    <li>Hanya tabel basis data dan struktur relasi</li>
                     <li>Menyimpan hash password terenkripsi</li>
-                    <li>Ukuran file ringan</li>
+                    <li>Ukuran file ringan &amp; cepat dibuat</li>
                 </ul>
             </div>
             <div>
-                <h5 class="text-sm font-bold text-slate-800 mb-2">Backup ZIP Lengkap</h5>
-                <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
-                    <li>Database, dokumen upload, dan konfigurasi</li>
-                    <li>Menyimpan berkas fisik pengguna</li>
-                    <li>Format arsip mandiri</li>
+                <h5 class="text-xs font-bold text-slate-800 dark:text-slate-200 mb-1.5">Full Backup (ZIP)</h5>
+                <ul class="space-y-1 list-disc list-inside">
+                    <li>Database SQL + seluruh folder uploads</li>
+                    <li>Menyimpan dokumen dan avatar pengguna</li>
+                    <li>Dapat digunakan untuk pemulihan total server</li>
                 </ul>
             </div>
-        </div>
-        <div class="mt-4 pt-4 border-t border-slate-200">
-            <h5 class="text-xs font-black text-slate-500 uppercase tracking-widest mb-2">Keamanan</h5>
-            <ul class="text-xs text-slate-600 space-y-1 list-disc list-inside">
-                <li>Simpan file backup di media penyimpanan yang aman</li>
-                <li>Fitur ini dibatasi khusus untuk level Administrator</li>
-                <li>Jaga kerahasiaan arsip cadangan sistem</li>
-            </ul>
         </div>
     </div>
 </div>

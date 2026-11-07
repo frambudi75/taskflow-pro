@@ -116,48 +116,52 @@ for ($i = 6; $i >= 0; $i--) {
 }
 
 .dash-stat {
-    border-radius: 22px; padding: 22px;
-    display: flex; flex-direction: column; gap: 14px;
-    position: relative; overflow: hidden;
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    cursor: default;
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.08);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+}
+.dark .dash-stat {
+    background: #0f172a;
+    border-color: #1e293b;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 .dash-stat:hover { 
-    transform: translateY(-5px) scale(1.01); 
-    box-shadow: 0 20px 35px -8px rgba(0,0,0,0.18); 
+    transform: translateY(-3px); 
+    border-color: #cbd5e1;
+    box-shadow: 0 12px 26px -4px rgba(15, 23, 42, 0.08); 
 }
-.dash-stat::after {
-    content: ''; position: absolute;
-    width: 150px; height: 150px; border-radius: 50%;
-    right: -30px; top: -30px;
-    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0) 70%);
-    pointer-events: none;
-    transition: transform 0.4s ease;
+.dark .dash-stat:hover {
+    border-color: #334155;
+    box-shadow: 0 12px 26px -4px rgba(0, 0, 0, 0.4);
 }
-.dash-stat:hover::after {
-    transform: scale(1.2);
-}
+
 .stat-icon {
-    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transition: transform 0.25s ease;
 }
 .dash-stat:hover .stat-icon {
-    transform: scale(1.15) rotate(5deg);
+    transform: scale(1.08);
 }
 
 .d-section {
     background: #ffffff; border: 1px solid #e2e8f0;
-    border-radius: 22px; overflow: hidden;
-    box-shadow: 0 2px 10px -2px rgba(15, 23, 42, 0.05);
+    border-radius: 20px; overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
     transition: all 0.25s ease;
 }
 .dark .d-section {
     background: #0f172a; border-color: #1e293b;
-    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 .d-section:hover {
     border-color: #cbd5e1;
-    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.06);
 }
 .dark .d-section:hover {
     border-color: #334155;
@@ -182,47 +186,51 @@ for ($i = 6; $i >= 0; $i--) {
 .d-row {
     display: flex; align-items: center; gap: 14px;
     padding: 14px 24px; border-bottom: 1px solid #f1f5f9;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .d-row { border-color: #1e293b; }
 .d-row:last-child { border-bottom: none; }
 .d-row:hover { 
-    background: rgba(99, 102, 241, 0.04); 
+    background: #f8fafc; 
     transform: translateX(4px);
 }
 .dark .d-row:hover { 
-    background: rgba(255, 255, 255, 0.03); 
+    background: rgba(255, 255, 255, 0.02); 
 }
 
 .q-btn {
-    display: flex; align-items: center; gap: 14px;
+    display: flex; align-items: center; justify-content: space-between;
     padding: 14px 18px; border-radius: 16px;
     text-decoration: none; 
-    border-width: 1.5px; border-style: solid;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-    position: relative;
-    overflow: hidden;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.dark .q-btn {
+    background: #1e293b;
+    border-color: #334155;
 }
 .q-btn:hover { 
-    transform: translateX(6px) translateY(-1px); 
-    box-shadow: 0 8px 20px -4px rgba(0,0,0,0.08);
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    transform: translateX(4px); 
+    box-shadow: 0 4px 12px -2px rgba(15, 23, 42, 0.06);
+}
+.dark .q-btn:hover {
+    border-color: #475569;
+    background: #273549;
 }
 .q-btn:active {
-    transform: scale(0.98);
-}
-.q-icon {
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.q-btn:hover .q-icon {
-    transform: scale(1.12) rotate(6deg);
+    transform: scale(0.99);
 }
 
 .pb-bg { 
-    background: rgba(255,255,255,0.22); 
-    border-radius: 100px; height: 6px; margin-top: 4px; overflow: hidden;
+    background: #f1f5f9; 
+    border-radius: 100px; height: 5px; margin-top: 4px; overflow: hidden;
 }
+.dark .pb-bg { background: #1e293b; }
 .pb-fill { 
-    height: 6px; border-radius: 100px; background: #ffffff; 
+    height: 5px; border-radius: 100px; background: #4f46e5; 
     transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     animation: barFill 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -233,94 +241,90 @@ for ($i = 6; $i >= 0; $i--) {
 
 <div class="p-5 md:p-8 w-full max-w-[1600px] mx-auto">
 
-    <!-- WELCOME BANNER -->
-    <div class="relative overflow-hidden rounded-3xl p-6 md:p-9 mb-7 bg-slate-900 text-white flex flex-col md:flex-row md:items-center justify-between gap-5 shadow-xl shadow-slate-950/20 border border-slate-800">
-        <!-- Ambient lighting glow -->
-        <div class="pointer-events-none absolute -right-20 -top-20 w-80 h-80 rounded-full bg-indigo-500/15 blur-3xl"></div>
-        <div class="pointer-events-none absolute -left-20 -bottom-20 w-80 h-80 rounded-full bg-violet-600/15 blur-3xl"></div>
-
-        <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-950/70 border border-indigo-500/30 text-indigo-300 text-xs font-bold uppercase tracking-widest mb-3">
-                <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+    <!-- WELCOME / DASHBOARD HEADER (Airy Executive Style) -->
+    <div class="mb-7 p-6 md:p-8 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-extrabold uppercase tracking-widest mb-3">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 <?php echo date('l, d F Y'); ?>
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-white leading-tight mb-2 tracking-tight">
-                <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?> 👋
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1.5">
+                <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?>
             </h1>
-            <p class="text-slate-300 text-sm font-medium">
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">
                 <?php echo ($total_todos - $completed_todos) > 0
-                    ? ($total_todos - $completed_todos) . ' tugas masih menunggu diselesaikan. Tetap semangat produktif hari ini!'
-                    : 'Semua tugas telah selesai dikerjakan dengan sangat baik!'; ?>
+                    ? ($total_todos - $completed_todos) . ' tugas menunggu untuk diselesaikan hari ini. Terus produktif!'
+                    : 'Semua tugas telah diselesaikan dengan sangat baik.'; ?>
             </p>
         </div>
-        <div class="relative z-10 flex items-center gap-3.5 flex-shrink-0">
-            <div class="text-right hidden md:block">
-                <div class="text-white font-bold text-sm tracking-wide"><?php echo htmlspecialchars($_SESSION['display_name'] ?? ''); ?></div>
-                <div class="text-indigo-300 text-xs font-semibold uppercase tracking-wider"><?php echo $_SESSION['role'] ?? ''; ?></div>
+        <div class="flex items-center gap-3.5 self-start md:self-center flex-shrink-0">
+            <div class="text-right hidden sm:block">
+                <div class="text-slate-900 dark:text-white font-extrabold text-sm tracking-wide"><?php echo htmlspecialchars($_SESSION['display_name'] ?? ''); ?></div>
+                <div class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider"><?php echo $_SESSION['role'] ?? ''; ?></div>
             </div>
             <img src="<?php echo $avatarSrc; ?>" alt="Avatar Pengguna"
-                 class="w-12 h-12 rounded-2xl object-cover border-2 border-indigo-400/30 shadow-lg shadow-indigo-900/30 transition-transform duration-300 hover:scale-105">
+                 class="w-12 h-12 rounded-2xl object-cover border-2 border-slate-200 dark:border-slate-700 shadow-sm">
         </div>
     </div>
 
-    <!-- STAT CARDS (4 Columns) -->
+    <!-- STAT CARDS (Executive Clean 4-Columns) -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-7">
         <!-- TUGAS -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#6366f1 0%,#4338ca 100%)">
+        <div class="dash-stat">
             <div class="flex items-center justify-between">
-                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tugas</span>
+                <div class="stat-icon w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200/60 dark:border-slate-700/60">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </div>
-                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">TUGAS</span>
             </div>
             <div>
-                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $total_todos; ?></div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?> selesai · <?php echo $pct; ?>%</div>
+                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_todos; ?></div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2"><?php echo $completed_todos; ?> selesai · <?php echo $pct; ?>%</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- PROGRESS -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#f59e0b 0%,#b45309 100%)">
+        <div class="dash-stat">
             <div class="flex items-center justify-between">
-                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Penyelesaian</span>
+                <div class="stat-icon w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200/60 dark:border-slate-700/60">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">PROGRESS</span>
             </div>
             <div>
-                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $pct; ?>%</div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?> Selesai</div>
+                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $pct; ?>%</div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> selesai</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- CATATAN -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#8b5cf6 0%,#6d28d9 100%)">
+        <div class="dash-stat">
             <div class="flex items-center justify-between">
-                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Catatan</span>
+                <div class="stat-icon w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200/60 dark:border-slate-700/60">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
                 </div>
-                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">CATATAN</span>
             </div>
             <div>
-                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $total_notes; ?></div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95">Ide &amp; Dokumentasi</div>
+                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_notes; ?></div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2">Ide &amp; Dokumentasi</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo min(100, $total_notes * 10); ?>%"></div></div>
         </div>
 
         <!-- DOKUMEN -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#10b981 0%,#047857 100%)">
+        <div class="dash-stat">
             <div class="flex items-center justify-between">
-                <div class="stat-icon w-10 h-10 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2);box-shadow:inset 0 1px 1px rgba(255,255,255,0.3)">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dokumen</span>
+                <div class="stat-icon w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-200/60 dark:border-slate-700/60">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 </div>
-                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">DOKUMEN</span>
             </div>
             <div>
-                <div style="font-size:2.1rem;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.03em"><?php echo $total_docs; ?></div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95">File Tersimpan</div>
+                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_docs; ?></div>
+                <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2">Berkas Tersimpan</div>
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo min(100, $total_docs * 10); ?>%"></div></div>
         </div>
@@ -399,22 +403,27 @@ for ($i = 6; $i >= 0; $i--) {
                         <a href="?page=notes" style="color:#4f46e5;text-decoration:underline;font-weight:800;margin-left:4px">Tulis catatan</a>
                     </p>
                 </div>
-                <?php else:
-                    $nc_list = [
-                        ['#fef9c3','#713f12'],['#dbeafe','#1e3a8a'],
-                        ['#dcfce7','#14532d'],['#fce7f3','#831843'],['#ede9fe','#4c1d95']
-                    ];
-                ?>
-                <div style="padding:18px;display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px">
-                    <?php foreach($recent_notes as $i => $note):
-                        $nc = $nc_list[$i % count($nc_list)]; ?>
-                    <a href="?page=notes" style="display:block;border-radius:14px;padding:15px;text-decoration:none;background:<?php echo $nc[0]; ?>;border:1px solid rgba(0,0,0,0.08);transition:all .2s" class="hover:shadow-md hover:-translate-y-0.5">
-                        <div style="font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:<?php echo $nc[1]; ?>;margin-bottom:6px">
-                            <?php echo date('d M Y', strtotime($note['updated_at'])); ?>
+                <?php else: ?>
+                <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <?php foreach($recent_notes as $note): ?>
+                    <a href="?page=notes" class="group flex flex-col justify-between p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                        <div>
+                            <div class="flex items-center justify-between gap-2 mb-2">
+                                <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                                    <?php echo date('d M Y', strtotime($note['updated_at'])); ?>
+                                </span>
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500/80"></span>
+                            </div>
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1 mb-1.5">
+                                <?php echo htmlspecialchars($note['title']); ?>
+                            </h4>
+                            <p class="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                                <?php echo htmlspecialchars(substr($note['content'], 0, 90)); ?>
+                            </p>
                         </div>
-                        <div style="font-weight:900;color:#0f172a;font-size:13.5px;line-height:1.3;margin-bottom:6px"><?php echo htmlspecialchars($note['title']); ?></div>
-                        <div style="font-size:12px;color:<?php echo $nc[1]; ?>;font-weight:500;line-height:1.4;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical">
-                            <?php echo htmlspecialchars(substr($note['content'], 0, 80)); ?>
+                        <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                            <span>Buka Catatan</span>
+                            <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
                     </a>
                     <?php endforeach; ?>
@@ -431,35 +440,44 @@ for ($i = 6; $i >= 0; $i--) {
                 <div class="d-section-head">
                     <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aksi Cepat</h3>
                 </div>
-                <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
-                    <a href="?page=calendar" class="q-btn" style="background:#eef2ff; border-color: #a5b4fc;">
-                        <div class="q-icon" style="width:38px;height:38px;border-radius:12px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(79,70,229,0.35)">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div class="p-3.5 flex flex-col gap-2.5">
+                    <a href="?page=calendar" class="group flex items-center justify-between p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0 group-hover:border-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors shadow-sm">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Buat Tugas Baru</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">Atur jadwal dan deadline</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="color:#1e1b4b;font-weight:800;font-size:13.5px">Buat Tugas Baru</div>
-                            <div style="color:#4338ca;font-size:12px;font-weight:600">Atur jadwal dan deadline</div>
-                        </div>
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
 
-                    <a href="?page=notes" class="q-btn" style="background:#f5f3ff; border-color: #c4b5fd;">
-                        <div class="q-icon" style="width:38px;height:38px;border-radius:12px;background:#7c3aed;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(124,58,237,0.35)">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <a href="?page=notes" class="group flex items-center justify-between p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0 group-hover:border-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors shadow-sm">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Tulis Catatan</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">Simpan ide dan dokumen</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="color:#2e1065;font-weight:800;font-size:13.5px">Tulis Catatan</div>
-                            <div style="color:#6d28d9;font-size:12px;font-weight:600">Simpan ide dan dokumen</div>
-                        </div>
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
 
-                    <a href="?page=documents" class="q-btn" style="background:#ecfdf5; border-color: #6ee7b7;">
-                        <div class="q-icon" style="width:38px;height:38px;border-radius:12px;background:#059669;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(5,150,105,0.35)">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                    <a href="?page=documents" class="group flex items-center justify-between p-3 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-lg bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center shrink-0 group-hover:border-indigo-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors shadow-sm">
+                                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-[13px] font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Upload Dokumen</div>
+                                <div class="text-xs text-slate-500 dark:text-slate-400">Simpan file arsip</div>
+                            </div>
                         </div>
-                        <div>
-                            <div style="color:#064e3b;font-weight:800;font-size:13.5px">Upload Dokumen</div>
-                            <div style="color:#047857;font-size:12px;font-weight:600">Simpan file arsip</div>
-                        </div>
+                        <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
                 </div>
             </div>
@@ -477,11 +495,11 @@ for ($i = 6; $i >= 0; $i--) {
                 <?php else: ?>
                     <?php foreach($recent_docs as $doc): ?>
                     <div class="d-row">
-                        <div style="width:36px;height:36px;border-radius:10px;background:#fef3c7;border:1px solid #fde68a;flex-shrink:0;display:flex;align-items:center;justify-content:center">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#b45309" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <div class="w-9 h-9 rounded-lg bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/80 text-slate-700 dark:text-slate-300 flex-shrink-0 flex items-center justify-center">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                         </div>
                         <div style="flex:1;min-width:0">
-                            <p style="font-weight:800;color:#0f172a;font-size:13px;margin:0" class="truncate"><?php echo htmlspecialchars($doc['name']); ?></p>
+                            <p style="font-weight:800;color:#0f172a;font-size:13px;margin:0" class="truncate dark:text-white"><?php echo htmlspecialchars($doc['name']); ?></p>
                             <p style="color:#64748b;font-size:12px;font-weight:600;margin:2px 0 0"><?php echo date('d M Y', strtotime($doc['upload_date'])); ?></p>
                         </div>
                     </div>

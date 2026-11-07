@@ -52,109 +52,116 @@ usort($cache_items, function($a, $b) {
 });
 ?>
 
-<div class="p-6 md:p-10 max-w-7xl mx-auto">
-    <header class="mb-10">
-        <h2 class="text-3xl md:text-4xl font-black text-slate-900 tracking-tight mb-2">Manajemen Cache</h2>
-        <p class="text-slate-500 font-medium">Kelola cache sistem untuk performa optimal.</p>
-    </header>
+<div class="p-5 md:p-8 max-w-6xl mx-auto">
+    <!-- Executive Glassmorphic Header -->
+    <div class="rounded-3xl p-6 md:p-8 mb-7 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-widest mb-3">
+                <svg class="w-3.5 h-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                Performa &amp; Memori
+            </div>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1">Manajemen Cache</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Pantau file cache, status TTL, dan bersihkan memori sementara sistem.</p>
+        </div>
+    </div>
 
     <?php if ($message): ?>
-        <div class="mb-8 p-4 bg-blue-50 border border-blue-100 text-blue-700 rounded-2xl text-sm font-bold">
+        <div class="mb-6 p-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-2xl text-sm font-bold">
             <?php echo htmlspecialchars($message); ?>
         </div>
     <?php endif; ?>
 
     <!-- Cache Controls -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-7">
         <!-- Clear All Cache -->
-        <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8">
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-6 sm:p-7">
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-11 h-11 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-black text-slate-900">Hapus Semua Cache</h3>
-                    <p class="text-xs text-slate-500">Bersihkan seluruh sistem cache</p>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Hapus Semua Cache</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Bersihkan seluruh sistem cache sementara</p>
                 </div>
             </div>
             <form method="POST">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <input type="hidden" name="clear_all_cache" value="1">
-                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-2xl font-bold hover:bg-red-700 transition-all focus:outline-none focus:ring-2 focus:ring-red-500 active:scale-95 shadow-sm">
-                    Clear All Cache
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 dark:bg-slate-800 dark:hover:bg-slate-700 text-white py-2.5 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-sm">
+                    Bersihkan Semua Cache
                 </button>
             </form>
         </div>
 
         <!-- Clear Database Cache -->
-        <div class="bg-white rounded-[2rem] border border-slate-200 shadow-sm p-8">
-            <div class="flex items-center gap-4 mb-6">
-                <div class="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-6 sm:p-7">
+            <div class="flex items-center gap-4 mb-5">
+                <div class="w-11 h-11 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl flex items-center justify-center">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                 </div>
                 <div>
-                    <h3 class="text-lg font-black text-slate-900">Hapus Query Cache</h3>
-                    <p class="text-xs text-slate-500">Cache query database saja</p>
+                    <h3 class="text-base font-bold text-slate-900 dark:text-white">Hapus Query Cache</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Hanya bersihkan cache query database</p>
                 </div>
             </div>
             <form method="POST">
                 <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                 <input type="hidden" name="clear_db_cache" value="1">
-                <button type="submit" class="w-full bg-amber-600 text-white py-3 rounded-2xl font-bold hover:bg-amber-700 transition-all focus:outline-none focus:ring-2 focus:ring-amber-500 active:scale-95 shadow-sm">
-                    Clear Query Cache
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2.5 rounded-xl font-bold text-xs transition-all active:scale-95 shadow-sm">
+                    Bersihkan Query Cache
                 </button>
             </form>
         </div>
     </div>
 
     <!-- Cache Statistics -->
-    <div class="bg-slate-50 rounded-[2rem] border border-slate-200 shadow-sm p-8 md:p-10 mb-10">
-        <h3 class="text-xl font-black text-slate-900 mb-6">Statistik Cache</h3>
+    <div class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-6 sm:p-8 mb-7">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white mb-5">Statistik Cache</h3>
         
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
             <!-- Total Cache Files -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <div class="text-3xl font-black text-blue-600 mb-1"><?php echo $cache_count; ?></div>
-                <p class="text-slate-800 font-bold text-sm">Cache Files</p>
-                <p class="text-xs text-slate-500 mt-1">File cache aktif</p>
+            <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700">
+                <div class="text-2xl font-black text-slate-900 dark:text-white mb-1"><?php echo $cache_count; ?></div>
+                <p class="text-slate-800 dark:text-slate-200 font-bold text-xs">File Aktif</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Jumlah file cache</p>
             </div>
 
             <!-- Cache Size -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <div class="text-3xl font-black text-emerald-600 mb-1"><?php echo formatSize($cache_size); ?></div>
-                <p class="text-slate-800 font-bold text-sm">Ukuran Cache</p>
-                <p class="text-xs text-slate-500 mt-1">Total memori cache</p>
+            <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700">
+                <div class="text-2xl font-black text-slate-900 dark:text-white mb-1"><?php echo formatSize($cache_size); ?></div>
+                <p class="text-slate-800 dark:text-slate-200 font-bold text-xs">Ukuran Cache</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Total memori digunakan</p>
             </div>
 
             <!-- Cache Enabled -->
-            <div class="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm">
-                <div class="text-base font-bold text-emerald-600 mb-1">
+            <div class="bg-slate-50 dark:bg-slate-800/60 rounded-2xl p-5 border border-slate-200/80 dark:border-slate-700">
+                <div class="text-base font-bold text-indigo-600 dark:text-indigo-400 mb-1">
                     <?php echo CACHE_ENABLED ? '✓ Aktif' : '✗ Nonaktif'; ?>
                 </div>
-                <p class="text-slate-800 font-bold text-sm">Status Cache</p>
-                <p class="text-xs text-slate-500 mt-1">TTL: <?php echo CACHE_TTL_DEFAULT / 60; ?> menit</p>
+                <p class="text-slate-800 dark:text-slate-200 font-bold text-xs">Status Sistem</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">TTL: <?php echo CACHE_TTL_DEFAULT / 60; ?> menit</p>
             </div>
         </div>
 
         <!-- Recent Cache Files -->
         <?php if (!empty($cache_items)): ?>
-            <div class="mt-8 pt-6 border-t border-slate-200">
-                <h4 class="font-bold text-slate-900 mb-4">File Cache Terbaru (25 paling baru):</h4>
-                <div class="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                    <table class="w-full text-sm">
-                        <thead class="bg-slate-50 border-b border-slate-200">
+            <div class="pt-5 border-t border-slate-100 dark:border-slate-800">
+                <h4 class="font-bold text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-3">File Cache Terbaru (25 paling baru):</h4>
+                <div class="rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700">
+                    <table class="w-full text-xs">
+                        <thead class="bg-slate-50 dark:bg-slate-800/60 border-b border-slate-200 dark:border-slate-700">
                             <tr>
-                                <th class="px-6 py-3 text-left font-bold text-slate-800">File</th>
-                                <th class="px-6 py-3 text-left font-bold text-slate-800">Ukuran</th>
-                                <th class="px-6 py-3 text-left font-bold text-slate-800">Dimodifikasi</th>
+                                <th class="px-5 py-3 text-left font-bold text-slate-700 dark:text-slate-300">File</th>
+                                <th class="px-5 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Ukuran</th>
+                                <th class="px-5 py-3 text-left font-bold text-slate-700 dark:text-slate-300">Dimodifikasi</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-slate-100">
+                        <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                             <?php foreach (array_slice($cache_items, 0, 25) as $item): ?>
-                                <tr class="hover:bg-slate-50">
-                                    <td class="px-6 py-3 text-slate-700 font-mono text-xs"><?php echo htmlspecialchars($item['file']); ?></td>
-                                    <td class="px-6 py-3 text-slate-700"><?php echo formatSize($item['size']); ?></td>
-                                    <td class="px-6 py-3 text-slate-700"><?php echo date('d/m/Y H:i:s', $item['modified']); ?></td>
+                                <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40">
+                                    <td class="px-5 py-3 text-slate-700 dark:text-slate-300 font-mono text-[11px]"><?php echo htmlspecialchars($item['file']); ?></td>
+                                    <td class="px-5 py-3 text-slate-600 dark:text-slate-400"><?php echo formatSize($item['size']); ?></td>
+                                    <td class="px-5 py-3 text-slate-600 dark:text-slate-400"><?php echo date('d/m/Y H:i:s', $item['modified']); ?></td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -162,21 +169,19 @@ usort($cache_items, function($a, $b) {
                 </div>
             </div>
         <?php else: ?>
-            <div class="mt-8 p-6 bg-white rounded-2xl border border-slate-200 text-center text-slate-500 text-sm">
+            <div class="mt-4 p-5 bg-slate-50 dark:bg-slate-800/40 rounded-xl border border-slate-200 dark:border-slate-700 text-center text-slate-400 text-xs">
                 Tidak ada file cache saat ini
             </div>
         <?php endif; ?>
     </div>
 
     <!-- Cache Info -->
-    <div class="bg-blue-50 rounded-[2rem] border border-blue-200 p-6 md:p-8">
-        <h4 class="font-black text-blue-900 mb-3">Informasi Cache</h4>
-        <ul class="text-sm text-blue-900 space-y-2 list-disc list-inside">
-            <li><strong>Sistem Cache:</strong> File-based caching dengan serialisasi</li>
-            <li><strong>TTL Default:</strong> <?php echo CACHE_TTL_DEFAULT / 60; ?> menit (dapat disesuaikan per query)</li>
-            <li><strong>Lokasi Cache:</strong> <code class="bg-blue-100 px-2 py-0.5 rounded text-blue-950 font-mono text-xs">cache/</code></li>
-            <li><strong>Otomatis Cleanup:</strong> Cache expired dihapus saat diakses atau diperbarui</li>
-            <li><strong>Penggunaan:</strong> Dashboard, statistik, dan query frequently-accessed dioptimalkan dengan cache</li>
+    <div class="bg-white/60 dark:bg-slate-900/40 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-6">
+        <h4 class="font-bold text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2.5">Arsitektur Caching</h4>
+        <ul class="text-xs text-slate-600 dark:text-slate-400 space-y-1.5 list-disc list-inside">
+            <li><strong>Sistem Cache:</strong> File-based caching dengan serialisasi aman</li>
+            <li><strong>TTL Default:</strong> <?php echo CACHE_TTL_DEFAULT / 60; ?> menit (disesuaikan otomatis per query)</li>
+            <li><strong>Otomatis Cleanup:</strong> Cache kedaluwarsa dibersihkan saat diakses atau diperbarui</li>
         </ul>
     </div>
 </div>

@@ -284,29 +284,29 @@ function docSvgIcon($type, $color) {
 <div class="p-4 md:p-8 w-full max-w-7xl mx-auto space-y-6">
 
     <!-- Hero Header -->
-    <div class="rounded-3xl p-6 md:p-9 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 bg-gradient-to-r from-emerald-950 via-teal-900 to-slate-900 text-white shadow-lg border border-emerald-900/50">
-        <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-400/20 text-emerald-300 text-xs font-bold uppercase tracking-wider mb-3">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                Penyimpanan Aman &amp; Kolaborasi
+    <div class="rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 shadow-sm">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-widest mb-3">
+                <svg class="w-3.5 h-3.5 text-indigo-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                Penyimpanan &amp; Berbagi Dokumen
             </div>
-            <h1 class="text-2xl md:text-3xl font-extrabold text-white leading-tight mb-1">Manajemen Dokumen</h1>
-            <p class="text-emerald-200 text-sm max-w-xl">Simpan berkas terkompresi berkualitas tinggi, terisolasi aman per user, dan bagikan dengan rekan kerja.</p>
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white leading-tight tracking-tight mb-1">Manajemen Dokumen</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Unggah berkas terkompresi berkualitas tinggi, pratinjau aman, dan bagikan tautan berbatas waktu.</p>
         </div>
 
         <!-- Search in hero -->
-        <div class="relative z-10 flex items-center gap-3 flex-shrink-0">
+        <div class="flex items-center gap-3 flex-shrink-0">
             <form method="GET" class="flex items-center gap-2">
                 <input type="hidden" name="page" value="documents">
                 <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
                 <div class="relative">
-                    <svg class="absolute left-3 top-1/2 -translate-y-1/2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari dokumen..." aria-label="Cari dokumen"
-                           class="pl-9 pr-4 py-2.5 text-sm font-medium w-44 md:w-56 rounded-xl text-white transition-all bg-white/10 border border-white/15 focus:outline-none focus:ring-2 focus:ring-emerald-400 placeholder:text-white/40">
+                           class="pl-9 pr-4 py-2 text-sm font-medium w-44 md:w-56 rounded-xl transition-all text-slate-900 dark:text-white bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
                 </div>
-                <button type="submit" class="px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all active:scale-95 bg-emerald-600 hover:bg-emerald-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">Cari</button>
+                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all active:scale-95 bg-indigo-600 hover:bg-indigo-700 shadow-sm">Cari</button>
                 <?php if ($search): ?>
-                    <a href="?page=documents&tab=<?php echo $tab; ?>" aria-label="Reset pencarian" class="px-3 py-2.5 rounded-xl text-sm font-bold transition-all text-white/70 hover:text-white bg-white/10">✕</a>
+                    <a href="?page=documents&tab=<?php echo $tab; ?>" aria-label="Reset pencarian" class="px-3 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-900 bg-slate-100 dark:bg-slate-800">✕</a>
                 <?php endif; ?>
             </form>
         </div>
