@@ -129,17 +129,17 @@ if (!function_exists('getNoteCategoryBadge')) {
     }
 }
 
-// Helper border color class
+// Helper border and accent color class
+if (!function_exists('getNoteAccentClass')) {
+    function getNoteAccentClass($color) {
+        $c = strtolower(trim($color ?? 'violet'));
+        $valid = ['violet', 'indigo', 'sky', 'emerald', 'amber', 'rose'];
+        return in_array($c, $valid) ? 'note-accent-' . $c : 'note-accent-violet';
+    }
+}
 if (!function_exists('getNoteBorderColor')) {
     function getNoteBorderColor($color) {
-        switch($color) {
-            case 'indigo': return 'border-t-indigo-500';
-            case 'sky': return 'border-t-sky-500';
-            case 'emerald': return 'border-t-emerald-500';
-            case 'amber': return 'border-t-amber-500';
-            case 'rose': return 'border-t-rose-500';
-            default: return 'border-t-violet-500';
-        }
+        return getNoteAccentClass($color);
     }
 }
 ?>
@@ -161,22 +161,98 @@ if (!function_exists('getNoteBorderColor')) {
     border-color: rgba(30, 41, 59, 0.85);
     box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.35);
 }
-.note-glass-card:hover {
-    transform: translateY(-2.5px);
-    border-color: rgba(99, 102, 241, 0.4);
-    box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.12);
+
+/* Note Accent Color System (Enforced with high specificity and soft gradient tint) */
+.note-accent-violet {
+    border-top: 4px solid #8B5CF6 !important;
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.09) 0%, #FFFFFF 36%) !important;
 }
-.dark .note-glass-card:hover {
-    border-color: #475569;
-    box-shadow: 0 12px 26px -4px rgba(0, 0, 0, 0.45);
+.note-accent-violet:hover {
+    border-color: rgba(139, 92, 246, 0.45);
+    border-top-color: #8B5CF6 !important;
+    box-shadow: 0 14px 30px -4px rgba(139, 92, 246, 0.22);
+}
+.note-accent-violet .note-accent-dot { background-color: #8B5CF6 !important; }
+.dark .note-accent-violet {
+    background: linear-gradient(180deg, rgba(139, 92, 246, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
 }
 
+.note-accent-indigo {
+    border-top: 4px solid #6366F1 !important;
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.09) 0%, #FFFFFF 36%) !important;
+}
+.note-accent-indigo:hover {
+    border-color: rgba(99, 102, 241, 0.45);
+    border-top-color: #6366F1 !important;
+    box-shadow: 0 14px 30px -4px rgba(99, 102, 241, 0.22);
+}
+.note-accent-indigo .note-accent-dot { background-color: #6366F1 !important; }
+.dark .note-accent-indigo {
+    background: linear-gradient(180deg, rgba(99, 102, 241, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
+}
+
+.note-accent-sky {
+    border-top: 4px solid #0EA5E9 !important;
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.09) 0%, #FFFFFF 36%) !important;
+}
+.note-accent-sky:hover {
+    border-color: rgba(14, 165, 233, 0.45);
+    border-top-color: #0EA5E9 !important;
+    box-shadow: 0 14px 30px -4px rgba(14, 165, 233, 0.22);
+}
+.note-accent-sky .note-accent-dot { background-color: #0EA5E9 !important; }
+.dark .note-accent-sky {
+    background: linear-gradient(180deg, rgba(14, 165, 233, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
+}
+
+.note-accent-emerald {
+    border-top: 4px solid #10B981 !important;
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.09) 0%, #FFFFFF 36%) !important;
+}
+.note-accent-emerald:hover {
+    border-color: rgba(16, 185, 129, 0.45);
+    border-top-color: #10B981 !important;
+    box-shadow: 0 14px 30px -4px rgba(16, 185, 129, 0.22);
+}
+.note-accent-emerald .note-accent-dot { background-color: #10B981 !important; }
+.dark .note-accent-emerald {
+    background: linear-gradient(180deg, rgba(16, 185, 129, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
+}
+
+.note-accent-amber {
+    border-top: 4px solid #F59E0B !important;
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.10) 0%, #FFFFFF 36%) !important;
+}
+.note-accent-amber:hover {
+    border-color: rgba(245, 158, 11, 0.45);
+    border-top-color: #F59E0B !important;
+    box-shadow: 0 14px 30px -4px rgba(245, 158, 11, 0.22);
+}
+.note-accent-amber .note-accent-dot { background-color: #F59E0B !important; }
+.dark .note-accent-amber {
+    background: linear-gradient(180deg, rgba(245, 158, 11, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
+}
+
+.note-accent-rose {
+    border-top: 4px solid #F43F5E !important;
+    background: linear-gradient(180deg, rgba(244, 63, 94, 0.09) 0%, #FFFFFF 36%) !important;
+}
+.note-accent-rose:hover {
+    border-color: rgba(244, 63, 94, 0.45);
+    border-top-color: #F43F5E !important;
+    box-shadow: 0 14px 30px -4px rgba(244, 63, 94, 0.22);
+}
+.note-accent-rose .note-accent-dot { background-color: #F43F5E !important; }
+.dark .note-accent-rose {
+    background: linear-gradient(180deg, rgba(244, 63, 94, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
+}
+
+/* Pinned Note Styling - Adds golden halo ring while preserving chosen top accent color */
 .note-glass-card.is-pinned-card {
-    border-color: rgba(245, 158, 11, 0.4) !important;
-    background: linear-gradient(180deg, rgba(254, 243, 199, 0.18) 0%, #FFFFFF 28%);
+    box-shadow: 0 0 0 1.5px rgba(245, 158, 11, 0.5), 0 6px 18px -2px rgba(245, 158, 11, 0.16) !important;
 }
 .dark .note-glass-card.is-pinned-card {
-    background: linear-gradient(180deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.85) 30%);
+    box-shadow: 0 0 0 1.5px rgba(245, 158, 11, 0.4), 0 6px 20px -2px rgba(0, 0, 0, 0.5) !important;
 }
 
 .notes-glass-panel {
@@ -341,11 +417,11 @@ if (!function_exists('getNoteBorderColor')) {
             <?php foreach($notes as $note):
                 $preview = strip_tags($note['content']);
                 $catInfo = getNoteCategoryBadge($note['category'] ?? 'Ide');
-                $borderClass = getNoteBorderColor($note['color'] ?? 'violet');
+                $accentClass = getNoteAccentClass($note['color'] ?? 'violet');
                 $isPinned = !empty($note['is_pinned']);
                 $updatedTimestamp = strtotime($note['updated_at']);
             ?>
-                <div class="note-glass-card p-5 border-t-[3px] <?php echo $borderClass; ?> <?php echo $isPinned ? 'is-pinned-card' : ''; ?> group flex flex-col justify-between"
+                <div class="note-glass-card p-5 <?php echo $accentClass; ?> <?php echo $isPinned ? 'is-pinned-card' : ''; ?> group flex flex-col justify-between"
                      data-id="<?php echo $note['id']; ?>"
                      data-title="<?php echo strtolower(htmlspecialchars($note['title'])); ?>"
                      data-content="<?php echo strtolower(htmlspecialchars($note['content'])); ?>"
@@ -360,7 +436,7 @@ if (!function_exists('getNoteBorderColor')) {
                             <!-- Left: Date pill & Tag badge -->
                             <div class="flex items-center gap-2 flex-wrap">
                                 <span class="inline-flex items-center gap-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md">
-                                    <span class="w-1.5 h-1.5 rounded-full <?php echo $isPinned ? 'bg-amber-500' : 'bg-violet-500'; ?>"></span>
+                                    <span class="note-accent-dot w-2 h-2 rounded-full inline-block flex-shrink-0"></span>
                                     <?php echo date('d M Y', $updatedTimestamp); ?>
                                 </span>
                                 <span class="text-[10px] font-bold px-2 py-0.5 rounded-md border <?php echo $catInfo[1]; ?>">
@@ -472,16 +548,18 @@ if (!function_exists('getNoteBorderColor')) {
                     </select>
                 </div>
                 <div>
-                    <label for="newNoteColor" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Warna Aksen</label>
-                    <select name="color" id="newNoteColor"
-                            class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                        <option value="violet">Ungu (Violet)</option>
-                        <option value="indigo">Biru Indigo</option>
-                        <option value="sky">Biru Langit (Sky)</option>
-                        <option value="emerald">Hijau Emerald</option>
-                        <option value="amber">Kuning Amber</option>
-                        <option value="rose">Merah Rose</option>
-                    </select>
+                    <label class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Warna Aksen</label>
+                    <input type="hidden" name="color" id="newNoteColor" value="violet">
+                    <div class="flex items-center gap-2 pt-1" id="newColorPicker">
+                        <button type="button" onclick="selectNewColor('violet')" data-color="violet" title="Ungu (Violet)" class="new-swatch-btn w-7 h-7 rounded-full bg-[#8B5CF6] transition-transform flex items-center justify-center text-white ring-2 ring-offset-2 ring-[#8B5CF6] scale-110">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        <button type="button" onclick="selectNewColor('indigo')" data-color="indigo" title="Biru Indigo" class="new-swatch-btn w-7 h-7 rounded-full bg-[#6366F1] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectNewColor('sky')" data-color="sky" title="Biru Langit" class="new-swatch-btn w-7 h-7 rounded-full bg-[#0EA5E9] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectNewColor('emerald')" data-color="emerald" title="Hijau Emerald" class="new-swatch-btn w-7 h-7 rounded-full bg-[#10B981] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectNewColor('amber')" data-color="amber" title="Kuning Amber" class="new-swatch-btn w-7 h-7 rounded-full bg-[#F59E0B] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectNewColor('rose')" data-color="rose" title="Merah Rose" class="new-swatch-btn w-7 h-7 rounded-full bg-[#F43F5E] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                    </div>
                 </div>
             </div>
 
@@ -561,16 +639,18 @@ if (!function_exists('getNoteBorderColor')) {
                     </select>
                 </div>
                 <div>
-                    <label for="editNoteColor" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Warna Aksen</label>
-                    <select name="color" id="editNoteColor"
-                            class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
-                        <option value="violet">Ungu (Violet)</option>
-                        <option value="indigo">Biru Indigo</option>
-                        <option value="sky">Biru Langit (Sky)</option>
-                        <option value="emerald">Hijau Emerald</option>
-                        <option value="amber">Kuning Amber</option>
-                        <option value="rose">Merah Rose</option>
-                    </select>
+                    <label class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Warna Aksen</label>
+                    <input type="hidden" name="color" id="editNoteColor" value="violet">
+                    <div class="flex items-center gap-2 pt-1" id="editColorPicker">
+                        <button type="button" onclick="selectEditColor('violet')" data-color="violet" title="Ungu (Violet)" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#8B5CF6] transition-transform flex items-center justify-center text-white ring-2 ring-offset-2 ring-[#8B5CF6] scale-110">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                        </button>
+                        <button type="button" onclick="selectEditColor('indigo')" data-color="indigo" title="Biru Indigo" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#6366F1] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectEditColor('sky')" data-color="sky" title="Biru Langit" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#0EA5E9] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectEditColor('emerald')" data-color="emerald" title="Hijau Emerald" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#10B981] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectEditColor('amber')" data-color="amber" title="Kuning Amber" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#F59E0B] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectEditColor('rose')" data-color="rose" title="Merah Rose" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#F43F5E] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                    </div>
                 </div>
             </div>
 
@@ -630,7 +710,49 @@ if (!function_exists('getNoteBorderColor')) {
 <script>
 let currentCategoryFilter = 'all';
 
+const NOTE_COLOR_MAP = {
+    'violet': '#8B5CF6',
+    'indigo': '#6366F1',
+    'sky': '#0EA5E9',
+    'emerald': '#10B981',
+    'amber': '#F59E0B',
+    'rose': '#F43F5E'
+};
+
+function selectNewColor(color) {
+    const input = document.getElementById('newNoteColor');
+    if (input) input.value = color;
+    document.querySelectorAll('#newColorPicker .new-swatch-btn').forEach(btn => {
+        const c = btn.getAttribute('data-color');
+        const hex = NOTE_COLOR_MAP[c] || '#8B5CF6';
+        if (c === color) {
+            btn.className = `new-swatch-btn w-7 h-7 rounded-full bg-[${hex}] transition-transform flex items-center justify-center text-white ring-2 ring-offset-2 ring-[${hex}] scale-110`;
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+        } else {
+            btn.className = `new-swatch-btn w-7 h-7 rounded-full bg-[${hex}] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100`;
+            btn.innerHTML = '';
+        }
+    });
+}
+
+function selectEditColor(color) {
+    const input = document.getElementById('editNoteColor');
+    if (input) input.value = color;
+    document.querySelectorAll('#editColorPicker .edit-swatch-btn').forEach(btn => {
+        const c = btn.getAttribute('data-color');
+        const hex = NOTE_COLOR_MAP[c] || '#8B5CF6';
+        if (c === color) {
+            btn.className = `edit-swatch-btn w-7 h-7 rounded-full bg-[${hex}] transition-transform flex items-center justify-center text-white ring-2 ring-offset-2 ring-[${hex}] scale-110`;
+            btn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+        } else {
+            btn.className = `edit-swatch-btn w-7 h-7 rounded-full bg-[${hex}] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100`;
+            btn.innerHTML = '';
+        }
+    });
+}
+
 function openAddModal() {
+    selectNewColor('violet');
     const m = document.getElementById('addModal');
     m.classList.remove('hidden'); m.classList.add('flex');
     const input = m.querySelector('input[name="title"]');
@@ -646,7 +768,7 @@ function openEditModal(id, title, content, category, color, isPinned) {
     document.getElementById('editNoteTitle').value    = title;
     document.getElementById('editNoteContent').value  = content;
     document.getElementById('editNoteCategory').value = category || 'Ide';
-    document.getElementById('editNoteColor').value    = color || 'violet';
+    selectEditColor(color || 'violet');
     document.getElementById('editNotePinned').checked = (parseInt(isPinned, 10) === 1);
     updateCount(content, 'editWordCount');
     const m = document.getElementById('editModal');
