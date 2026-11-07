@@ -261,26 +261,31 @@ foreach ($public_shares_raw as $ps) {
 // Active documents by tab
 $documents = $tab === 'shared' ? $shared_documents : $my_documents;
 
-// Calculate storage stats
+// Calculate storage stats & quota progress
 $my_storage_bytes = 0;
 foreach ($my_documents as $md) {
     $my_storage_bytes += (int)($md['file_size'] ?? 0);
 }
 $my_storage_formatted = formatSize($my_storage_bytes);
+$max_storage_bytes    = 5 * 1024 * 1024 * 1024; // 5 GB standard quota
+$storage_pct          = round(($my_storage_bytes / $max_storage_bytes) * 100, 1);
+$storage_bar_pct      = min(100, max(1, $storage_pct));
 
 // -------------------------------------------------------------
 // Helper: File Type Format & Icon Info
 // -------------------------------------------------------------
 function docInfo($mime, $filename = '') {
     $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-    if (strncmp($mime, 'image/', 6) === 0 || in_array($ext, ['jpg','jpeg','png','webp','gif','svg'])) {
+    $is_img = (strncmp($mime, 'image/', 6) === 0 || in_array($ext, ['jpg','jpeg','png','webp','gif','svg']));
+    if ($is_img) {
         return [
             'color'    => '#0284c7', 
             'bg'       => '#f0f9ff', 
             'badge_bg' => '#0284c7', 
             'border'   => '#bae6fd',
             'label'    => strtoupper($ext ?: 'IMG'), 
-            'icon'     => 'image'
+            'icon'     => 'image',
+            'is_image' => true
         ];
     }
     if ($mime === 'application/pdf' || $ext === 'pdf') {
@@ -290,7 +295,8 @@ function docInfo($mime, $filename = '') {
             'badge_bg' => '#dc2626', 
             'border'   => '#fecaca',
             'label'    => 'PDF', 
-            'icon'     => 'pdf'
+            'icon'     => 'pdf',
+            'is_image' => false
         ];
     }
     if (strpos($mime, 'word') !== false || in_array($ext, ['doc','docx'])) {
@@ -300,7 +306,8 @@ function docInfo($mime, $filename = '') {
             'badge_bg' => '#2563eb', 
             'border'   => '#bfdbfe',
             'label'    => 'DOC', 
-            'icon'     => 'doc'
+            'icon'     => 'doc',
+            'is_image' => false
         ];
     }
     if (strpos($mime, 'sheet') !== false || strpos($mime, 'excel') !== false || in_array($ext, ['xls','xlsx','csv'])) {
@@ -310,7 +317,8 @@ function docInfo($mime, $filename = '') {
             'badge_bg' => '#059669', 
             'border'   => '#a7f3d0',
             'label'    => 'XLS', 
-            'icon'     => 'sheet'
+            'icon'     => 'sheet',
+            'is_image' => false
         ];
     }
     if ($mime === 'text/plain' || $ext === 'txt') {
@@ -320,7 +328,8 @@ function docInfo($mime, $filename = '') {
             'badge_bg' => '#475569', 
             'border'   => '#e2e8f0',
             'label'    => 'TXT', 
-            'icon'     => 'text'
+            'icon'     => 'text',
+            'is_image' => false
         ];
     }
     if (in_array($ext, ['zip','rar','7z','tar','gz'])) {
@@ -330,7 +339,8 @@ function docInfo($mime, $filename = '') {
             'badge_bg' => '#d97706', 
             'border'   => '#fde68a',
             'label'    => 'ZIP', 
-            'icon'     => 'archive'
+            'icon'     => 'archive',
+            'is_image' => false
         ];
     }
     return [
@@ -339,7 +349,8 @@ function docInfo($mime, $filename = '') {
         'badge_bg' => '#7c3aed', 
         'border'   => '#ddd6fe',
         'label'    => strtoupper($ext ?: 'FILE'), 
-        'icon'     => 'file'
+        'icon'     => 'file',
+        'is_image' => false
     ];
 }
 
@@ -417,7 +428,7 @@ function docIconSvg($type, $color) {
 }
 </style>
 
-<div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
+<div class="p-4 md:p-8 w-full max-w-[1600px] mx-auto space-y-6">
 
     <!-- Executive Header Section (Glassmorphic) -->
     <div class="rounded-3xl p-6 md:p-7 doc-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -428,32 +439,26 @@ function docIconSvg($type, $color) {
             </div>
             <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Manajemen Dokumen</h1>
             <p class="text-slate-500 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
-                Simpan berkas kerja terkompresi berkualitas tinggi, pratinjau instan, dan kolaborasi dengan tautan publik berbatas waktu.
+                Simpan berkas kerja terkompresi berkualitas tinggi, pratinjau instan visual, dan kelola kolaborasi tim secara terpadu.
             </p>
         </div>
 
-        <!-- Search Bar & Upload CTA in Header -->
+        <!-- Search Bar with Instant Debounce & Upload CTA -->
         <div class="flex flex-wrap items-center gap-3 flex-shrink-0">
-            <form method="GET" class="flex items-center gap-2">
-                <input type="hidden" name="page" value="documents">
-                <input type="hidden" name="tab" value="<?php echo htmlspecialchars($tab); ?>">
-                <div class="relative">
-                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari nama / tag..." aria-label="Cari dokumen"
-                           class="pl-9 pr-4 py-2 text-xs font-bold w-48 md:w-60 rounded-xl text-slate-900 bg-slate-50 border border-slate-200/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400">
-                </div>
-                <button type="submit" class="px-4 py-2 rounded-xl text-xs font-bold text-white transition-transform active:scale-95 bg-indigo-600 hover:bg-indigo-700 shadow-sm shadow-indigo-600/20">
-                    Cari
-                </button>
-                <?php if ($search): ?>
-                    <a href="?page=documents&tab=<?php echo $tab; ?>" aria-label="Reset pencarian" class="px-3 py-2 rounded-xl text-xs font-bold text-slate-500 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 transition-colors">✕</a>
-                <?php endif; ?>
-            </form>
+            <!-- Instant Search Input -->
+            <div class="relative w-full sm:w-64 md:w-72">
+                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="docSearchInput" oninput="handleDocSearch(this.value)" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari nama berkas atau tag..." aria-label="Cari dokumen"
+                       class="w-full pl-9 pr-8 py-2.5 text-xs font-bold rounded-xl text-slate-900 bg-slate-50 border border-slate-200/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400">
+                <button type="button" id="docSearchClear" onclick="clearDocSearch()" class="<?php echo $search ? '' : 'hidden'; ?> absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold w-5 h-5 flex items-center justify-center">✕</button>
+            </div>
 
-            <a href="#uploadSection" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-2 shadow-sm shadow-emerald-600/20">
+            <!-- Single Primary Upload Action (Opens Upload Modal) -->
+            <button type="button" onclick="openUploadModal()"
+                    class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-2 shadow-sm shadow-indigo-600/20">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Unggah Berkas
-            </a>
+                <span>+ Unggah Berkas</span>
+            </button>
         </div>
     </div>
 
@@ -483,71 +488,84 @@ function docIconSvg($type, $color) {
     </div>
     <?php endif; ?>
 
-    <!-- Document Summary KPI Stats (4 Cards) -->
+    <!-- Document Summary KPI Stats (4 Standard Cards with Storage Quota Bar) -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1: Total Dokumen Saya -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-indigo-500">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dokumen Saya</span>
-                <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        <!-- Card 1: Dokumen Saya -->
+        <div class="doc-card-kpi p-5 border-t-[3px] border-t-indigo-500 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dokumen Saya</span>
+                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none"><?php echo count($my_documents); ?></span>
                 </div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none"><?php echo count($my_documents); ?></span>
-                <span class="text-xs text-slate-400 font-semibold">berkas tersimpan</span>
-            </div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-2">berkas tersimpan</div>
         </div>
 
-        <!-- Card 2: Kapasitas Digunakan -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-emerald-500">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Penyimpanan Terpakai</span>
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <!-- Card 2: Kapasitas Penyimpanan Terpakai -->
+        <div class="doc-card-kpi p-5 border-t-[3px] border-t-emerald-500 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Penyimpanan Terpakai</span>
+                    <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-1.5 flex-wrap">
+                    <span class="text-2xl md:text-3xl font-black text-emerald-600 tracking-tight leading-none"><?php echo $my_storage_formatted; ?></span>
+                    <span class="text-xs font-bold text-slate-400">/ 5 GB</span>
+                </div>
+                <!-- Storage progress bar -->
+                <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2.5 overflow-hidden">
+                    <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: <?php echo $storage_bar_pct; ?>%"></div>
                 </div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-emerald-600 tracking-tight leading-none"><?php echo $my_storage_formatted; ?></span>
-                <span class="text-xs text-slate-400 font-semibold">terkompresi optimal</span>
-            </div>
+            <div class="text-[10px] text-slate-400 font-semibold mt-2"><?php echo $storage_pct; ?>% kuota terpakai</div>
         </div>
 
-        <!-- Card 3: Dokumen Dibagikan -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-sky-500">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dibagikan ke Saya</span>
-                <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <!-- Card 3: Dibagikan ke Saya (Neutral zero state) -->
+        <div class="doc-card-kpi p-5 border-t-[3px] border-t-sky-500 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dibagikan ke Saya</span>
+                    <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl md:text-3xl font-black tracking-tight leading-none <?php echo count($shared_documents) > 0 ? 'text-sky-600' : 'text-slate-400'; ?>"><?php echo count($shared_documents); ?></span>
                 </div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-sky-600 tracking-tight leading-none"><?php echo count($shared_documents); ?></span>
-                <span class="text-xs text-slate-400 font-semibold">dari rekan kerja</span>
-            </div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-2">dari rekan kerja</div>
         </div>
 
-        <!-- Card 4: Tautan Publik Aktif -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-amber-500">
-            <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tautan Publik Aktif</span>
-                <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <!-- Card 4: Tautan Publik Aktif (Neutral zero state) -->
+        <div class="doc-card-kpi p-5 border-t-[3px] border-t-amber-500 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tautan Publik Aktif</span>
+                    <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                    </div>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-2xl md:text-3xl font-black tracking-tight leading-none <?php echo count($public_shares_raw) > 0 ? 'text-amber-600' : 'text-slate-400'; ?>"><?php echo count($public_shares_raw); ?></span>
                 </div>
             </div>
-            <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-amber-600 tracking-tight leading-none"><?php echo count($public_shares_raw); ?></span>
-                <span class="text-xs text-slate-400 font-semibold">siap diakses luar</span>
-            </div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-2">siap diakses luar</div>
         </div>
     </div>
 
     <!-- Navigation Tabs & View Mode Switcher -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-3">
-        <!-- Tabs -->
+        <!-- Tabs with Clean Pill Styles (Fixed Typo: DIBAGIKAN KE SAYA) -->
         <div class="flex items-center gap-2">
             <a href="?page=documents&tab=my" 
-               class="px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'my' ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'; ?>">
+               class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'my' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'; ?>">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Dokumen Saya
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?php echo $tab === 'my' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-600'; ?>">
@@ -555,7 +573,7 @@ function docIconSvg($type, $color) {
                 </span>
             </a>
             <a href="?page=documents&tab=shared" 
-               class="px-5 py-2.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'shared' ? 'bg-indigo-600 text-white shadow-sm shadow-indigo-600/20' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'; ?>">
+               class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'shared' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'; ?>">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Dibagikan ke Saya
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?php echo $tab === 'shared' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-600'; ?>">
@@ -579,81 +597,94 @@ function docIconSvg($type, $color) {
         </div>
     </div>
 
-    <!-- Main Content Area: Document View (8 Cols) + Upload Zone (4 Cols) -->
-    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+    <!-- Main Content Area: Document View (Full Width 3 or 4 Columns) -->
+    <div class="w-full space-y-4">
 
-        <!-- Documents View Container (8 Columns) -->
-        <div class="xl:col-span-8 space-y-4">
-
-            <?php if (empty($documents)): ?>
-            <!-- Empty State Card -->
-            <div class="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-12 md:p-16 text-center">
-                <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
-                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
-                </div>
-                <h3 class="text-slate-900 font-black text-base mb-1.5">
-                    <?php echo $tab === 'shared' ? 'Belum Ada Dokumen Dibagikan' : 'Belum Ada Dokumen Tersimpan'; ?>
-                </h3>
-                <p class="text-slate-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed font-medium mb-6">
-                    <?php echo $tab === 'shared' 
-                        ? 'Ketika rekan kerja membagikan berkas ke akun Anda, berkas akan muncul di panel ini secara instan.' 
-                        : 'Unggah berkas foto, PDF, laporan dokumen, atau spreadsheet Anda menggunakan formulir di samping untuk mulai mengelola berkas.'; ?>
-                </p>
-                <?php if ($tab === 'my'): ?>
-                <a href="#uploadSection" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-transform active:scale-95 shadow-sm shadow-indigo-600/20">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                    Unggah Berkas Sekarang
-                </a>
-                <?php endif; ?>
+        <?php if (empty($documents)): ?>
+        <!-- Empty State Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-12 md:p-16 text-center">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
             </div>
+            <h3 class="text-slate-900 font-black text-base mb-1.5">
+                <?php echo $tab === 'shared' ? 'Belum Ada Dokumen Dibagikan' : 'Belum Ada Dokumen Tersimpan'; ?>
+            </h3>
+            <p class="text-slate-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed font-medium mb-6">
+                <?php echo $tab === 'shared' 
+                    ? 'Ketika rekan kerja membagikan berkas ke akun Anda, berkas akan muncul di panel ini secara instan.' 
+                    : 'Unggah berkas foto, PDF, laporan dokumen, atau spreadsheet Anda untuk mulai mengelola dokumen kerja secara terorganisir.'; ?>
+            </p>
+            <?php if ($tab === 'my'): ?>
+            <button type="button" onclick="openUploadModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-transform active:scale-95 shadow-sm shadow-indigo-600/20">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Unggah Berkas Sekarang
+            </button>
+            <?php endif; ?>
+        </div>
 
-            <?php else: ?>
+        <?php else: ?>
 
-            <!-- ===================== VIEW 1: GRID VIEW ===================== -->
-            <div id="docContainerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4">
-                <?php foreach ($documents as $doc):
-                    $clean_path         = str_replace('\\', '/', $doc['file_path']);
-                    $info               = docInfo($doc['file_type'], $clean_path ?: $doc['name']);
-                    $iconSvg            = docIconSvg($info['icon'], $info['color']);
-                    $serve_view_url     = 'serve_file.php?file=' . rawurlencode($clean_path);
-                    $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
-                    $tags               = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
-                    $is_owner           = ((int)$doc['user_id'] === $user_id);
-                    $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
-                ?>
-                <div class="doc-grid-card p-5 flex flex-col justify-between group">
-                    <div>
-                        <!-- Card Top: File Format Icon + Quick Actions -->
-                        <div class="flex items-start justify-between gap-3 mb-3.5">
-                            <div class="relative w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 border shadow-xs"
-                                 style="background:<?php echo $info['bg']; ?>; border-color:<?php echo $info['border']; ?>;">
-                                <?php echo $iconSvg; ?>
-                                <span class="absolute -bottom-1 -right-1 text-[8px] font-black text-white px-1.5 py-0.5 rounded-md tracking-wider shadow-xs"
-                                      style="background:<?php echo $info['badge_bg']; ?>;">
-                                    <?php echo $info['label']; ?>
-                                </span>
-                            </div>
+        <!-- ===================== VIEW 1: GRID VIEW (Full Width Responsive 1-2-3-4 Columns) ===================== -->
+        <div id="docContainerGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+            <?php foreach ($documents as $doc):
+                $clean_path         = str_replace('\\', '/', $doc['file_path']);
+                $info               = docInfo($doc['file_type'], $clean_path ?: $doc['name']);
+                $iconSvg            = docIconSvg($info['icon'], $info['color']);
+                $serve_view_url     = 'serve_file.php?file=' . rawurlencode($clean_path);
+                $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
+                $tags               = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
+                $is_owner           = ((int)$doc['user_id'] === $user_id);
+                $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
+                $isImage            = !empty($info['is_image']);
+            ?>
+            <div class="doc-grid-card rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden flex flex-col justify-between group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-indigo-300"
+                 data-name="<?php echo htmlspecialchars($doc['name']); ?>"
+                 data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>"
+                 onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')">
+                
+                <div>
+                    <!-- Visual Thumbnail for Images or Hero Icon Header for Documents -->
+                    <?php if ($isImage): ?>
+                    <div class="h-32 w-full overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                        <img src="<?php echo htmlspecialchars($serve_view_url); ?>" 
+                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+                             loading="lazy" 
+                             alt="<?php echo htmlspecialchars($doc['name']); ?>">
+                        <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase text-white shadow-xs"
+                              style="background:<?php echo $info['badge_bg']; ?>;">
+                            <?php echo $info['label']; ?>
+                        </span>
+                    </div>
+                    <?php else: ?>
+                    <div class="h-28 w-full flex flex-col items-center justify-center relative border-b border-slate-100/90 transition-colors"
+                         style="background: linear-gradient(180deg, <?php echo $info['bg']; ?> 0%, #FFFFFF 100%);">
+                        <div class="w-12 h-12 rounded-2xl flex items-center justify-center border shadow-xs group-hover:scale-110 transition-transform duration-200"
+                             style="background:<?php echo $info['bg']; ?>; border-color:<?php echo $info['border']; ?>;">
+                            <?php echo $iconSvg; ?>
+                        </div>
+                        <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase text-white shadow-xs"
+                              style="background:<?php echo $info['badge_bg']; ?>;">
+                            <?php echo $info['label']; ?>
+                        </span>
+                    </div>
+                    <?php endif; ?>
 
-                            <!-- Header Chips (Size + Date) -->
-                            <div class="text-right">
-                                <span class="inline-block text-[11px] font-black text-slate-700 bg-slate-100 px-2 py-0.5 rounded-md border border-slate-200/60 mb-1">
-                                    <?php echo formatSize($doc['file_size']); ?>
-                                </span>
-                                <div class="text-[10px] font-semibold text-slate-400">
-                                    <?php echo date('d M Y', strtotime($doc['upload_date'])); ?>
-                                </div>
-                            </div>
+                    <!-- Card Body Content -->
+                    <div class="p-4">
+                        <!-- Document Name -->
+                        <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug mb-1.5">
+                            <?php echo htmlspecialchars($doc['name']); ?>
+                        </h3>
+
+                        <!-- Meta Info: Size • Date -->
+                        <div class="text-[11px] font-semibold text-slate-400 mb-2.5 flex items-center gap-1.5">
+                            <span><?php echo formatSize($doc['file_size']); ?></span>
+                            <span>•</span>
+                            <span><?php echo date('d M Y', strtotime($doc['upload_date'])); ?></span>
                         </div>
 
-                        <!-- Document Name (Click to Preview) -->
-                        <button type="button" 
-                                onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                class="text-left font-black text-slate-900 text-sm hover:text-indigo-600 transition-colors line-clamp-2 mb-2 block leading-snug">
-                            <?php echo htmlspecialchars($doc['name']); ?>
-                        </button>
-
-                        <!-- Tags / Collaboration Chips -->
-                        <div class="flex flex-wrap items-center gap-1.5 mb-3">
+                        <!-- Tags / Collaboration Chips in Neat Pill Badges -->
+                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
                             <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
                             <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
                                 👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
@@ -680,233 +711,250 @@ function docIconSvg($type, $color) {
                             <?php endforeach; ?>
                         </div>
                     </div>
-
-                    <!-- Footer Action Buttons -->
-                    <div class="pt-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto">
-                        <!-- Preview Button -->
-                        <button type="button" 
-                                onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                class="flex-1 py-2 px-3 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 border border-slate-200/80">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                            <span>Lihat</span>
-                        </button>
-
-                        <!-- Download Button -->
-                        <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
-                           title="Unduh Berkas" aria-label="Unduh dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                           class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                        </a>
-
-                        <!-- Share Button (Only Owner) -->
-                        <?php if ($is_owner): ?>
-                        <button type="button" 
-                                onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
-                                title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-600 hover:text-sky-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                        </button>
-                        <?php endif; ?>
-
-                        <!-- Delete Button (Owner or Admin) -->
-                        <?php if ($is_owner || isAdmin()): ?>
-                        <button type="button" 
-                                onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
-                                title="Hapus Dokumen" aria-label="Hapus dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                        </button>
-                        <?php endif; ?>
-                    </div>
                 </div>
-                <?php endforeach; ?>
-            </div>
 
-            <!-- ===================== VIEW 2: LIST / TABLE VIEW ===================== -->
-            <div id="docContainerList" class="doc-glass-panel rounded-3xl overflow-hidden hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
-                        <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
-                            <tr>
-                                <th class="px-5 py-3.5">Dokumen</th>
-                                <th class="px-4 py-3.5">Ukuran</th>
-                                <th class="px-4 py-3.5">Tanggal</th>
-                                <th class="px-4 py-3.5">Kolaborasi</th>
-                                <th class="px-5 py-3.5 text-right">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-slate-100">
-                            <?php foreach ($documents as $doc):
-                                $clean_path         = str_replace('\\', '/', $doc['file_path']);
-                                $info               = docInfo($doc['file_type'], $clean_path ?: $doc['name']);
-                                $iconSvg            = docIconSvg($info['icon'], $info['color']);
-                                $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
-                                $tags               = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
-                                $is_owner           = ((int)$doc['user_id'] === $user_id);
-                                $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
-                            ?>
-                            <tr class="doc-table-row">
-                                <td class="px-5 py-3.5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border"
-                                             style="background:<?php echo $info['bg']; ?>; border-color:<?php echo $info['border']; ?>;">
-                                            <?php echo $iconSvg; ?>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <button type="button" 
-                                                    onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                                    class="font-black text-slate-900 text-xs hover:text-indigo-600 transition-colors truncate block max-w-xs text-left">
-                                                <?php echo htmlspecialchars($doc['name']); ?>
-                                            </button>
-                                            <span class="text-[10px] font-extrabold uppercase" style="color:<?php echo $info['color']; ?>;">
-                                                <?php echo $info['label']; ?>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3.5 font-bold text-slate-600 whitespace-nowrap">
-                                    <?php echo formatSize($doc['file_size']); ?>
-                                </td>
-                                <td class="px-4 py-3.5 text-slate-500 font-medium whitespace-nowrap">
-                                    <?php echo date('d M Y', strtotime($doc['upload_date'])); ?>
-                                </td>
-                                <td class="px-4 py-3.5">
-                                    <div class="flex items-center gap-1.5 flex-wrap">
-                                        <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
-                                        <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
-                                            👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
-                                        </span>
-                                        <?php endif; ?>
-                                        <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
-                                        <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
-                                            🔗 <?php echo $doc['share_count']; ?>
-                                        </span>
-                                        <?php endif; ?>
-                                        <?php if (!empty($pubShare)): ?>
-                                        <span class="text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
-                                            🌐 <?php echo $pubShare['remaining_text']; ?>
-                                        </span>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                                <td class="px-5 py-3.5 text-right whitespace-nowrap">
-                                    <div class="inline-flex items-center gap-1.5">
-                                        <button type="button" 
-                                                onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                                class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-600 text-indigo-700 hover:text-white font-bold text-[11px] transition-colors">
-                                            Lihat
-                                        </button>
-                                        <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
-                                           title="Unduh" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                                        </a>
-                                        <?php if ($is_owner): ?>
-                                        <button type="button" 
-                                                onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
-                                                title="Bagikan" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 flex items-center justify-center transition-colors">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                                        </button>
-                                        <?php endif; ?>
-                                        <?php if ($is_owner || isAdmin()): ?>
-                                        <button type="button" 
-                                                onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
-                                                title="Hapus" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                        </button>
-                                        <?php endif; ?>
-                                    </div>
-                                </td>
-                            </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                <!-- Footer Action Buttons (Clean Balanced Icon Buttons) -->
+                <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-1.5 mt-auto" onclick="event.stopPropagation()">
+                    <!-- Preview / Mata -->
+                    <button type="button" 
+                            onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
+                            title="Pratinjau Berkas" aria-label="Lihat dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </button>
+
+                    <!-- Download -->
+                    <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
+                       title="Unduh Berkas" aria-label="Unduh dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                       class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    </a>
+
+                    <!-- Share (Only Owner) -->
+                    <?php if ($is_owner): ?>
+                    <button type="button" 
+                            onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
+                            title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-500 hover:text-sky-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                    </button>
+                    <?php endif; ?>
+
+                    <!-- Delete (Owner or Admin) -->
+                    <?php if ($is_owner || isAdmin()): ?>
+                    <button type="button" 
+                            onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
+                            title="Hapus Dokumen" aria-label="Hapus dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    </button>
+                    <?php endif; ?>
                 </div>
             </div>
-
-            <!-- Hidden Delete Form -->
-            <form id="deleteForm" method="POST" class="hidden">
-                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <input type="hidden" name="delete_doc" value="1">
-                <input type="hidden" name="doc_id" id="deleteDocId">
-            </form>
-
-            <?php endif; ?>
-
+            <?php endforeach; ?>
         </div>
 
-        <!-- Modern Upload Form Area (4 Columns Sticky) -->
-        <div class="xl:col-span-4" id="uploadSection">
-            <div class="doc-glass-panel rounded-3xl p-6 sticky top-6">
-                
-                <div class="flex items-center gap-3 mb-5">
-                    <div class="w-10 h-10 rounded-2xl flex items-center justify-center bg-indigo-600 text-white shadow-sm shadow-indigo-600/20">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="font-black text-slate-900 text-base">Unggah Dokumen</h2>
+        <!-- ===================== VIEW 2: LIST / TABLE VIEW ===================== -->
+        <div id="docContainerList" class="doc-glass-panel rounded-3xl overflow-hidden hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                    <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+                        <tr>
+                            <th class="px-5 py-3.5">Dokumen</th>
+                            <th class="px-4 py-3.5">Ukuran</th>
+                            <th class="px-4 py-3.5">Tanggal</th>
+                            <th class="px-4 py-3.5">Kolaborasi</th>
+                            <th class="px-5 py-3.5 text-right">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <?php foreach ($documents as $doc):
+                            $clean_path         = str_replace('\\', '/', $doc['file_path']);
+                            $info               = docInfo($doc['file_type'], $clean_path ?: $doc['name']);
+                            $iconSvg            = docIconSvg($info['icon'], $info['color']);
+                            $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
+                            $tags               = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
+                            $is_owner           = ((int)$doc['user_id'] === $user_id);
+                            $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
+                        ?>
+                        <tr class="doc-table-row" data-name="<?php echo htmlspecialchars($doc['name']); ?>" data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>">
+                            <td class="px-5 py-3.5">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border"
+                                         style="background:<?php echo $info['bg']; ?>; border-color:<?php echo $info['border']; ?>;">
+                                        <?php echo $iconSvg; ?>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <button type="button" 
+                                                onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
+                                                class="font-black text-slate-900 text-xs hover:text-indigo-600 transition-colors truncate block max-w-xs text-left">
+                                            <?php echo htmlspecialchars($doc['name']); ?>
+                                        </button>
+                                        <span class="text-[10px] font-extrabold uppercase" style="color:<?php echo $info['color']; ?>;">
+                                            <?php echo $info['label']; ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 py-3.5 font-bold text-slate-600 whitespace-nowrap">
+                                <?php echo formatSize($doc['file_size']); ?>
+                            </td>
+                            <td class="px-4 py-3.5 text-slate-500 font-medium whitespace-nowrap">
+                                <?php echo date('d M Y', strtotime($doc['upload_date'])); ?>
+                            </td>
+                            <td class="px-4 py-3.5">
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
+                                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
+                                        👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
+                                    <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                        🔗 <?php echo $doc['share_count']; ?>
+                                    </span>
+                                    <?php endif; ?>
+                                    <?php if (!empty($pubShare)): ?>
+                                    <span class="text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                                        🌐 <?php echo $pubShare['remaining_text']; ?>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                            <td class="px-5 py-3.5 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center gap-1.5">
+                                    <button type="button" 
+                                            onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
+                                            title="Lihat" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 flex items-center justify-center transition-colors">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                    <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
+                                       title="Unduh" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                                    </a>
+                                    <?php if ($is_owner): ?>
+                                    <button type="button" 
+                                            onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
+                                            title="Bagikan" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 flex items-center justify-center transition-colors">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                                    </button>
+                                    <?php endif; ?>
+                                    <?php if ($is_owner || isAdmin()): ?>
+                                    <button type="button" 
+                                            onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
+                                            title="Hapus" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                    </button>
+                                    <?php endif; ?>
+                                </div>
+                            </td>
+                        </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Hidden Delete Form -->
+        <form id="deleteForm" method="POST" class="hidden">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="delete_doc" value="1">
+            <input type="hidden" name="doc_id" id="deleteDocId">
+        </form>
+
+        <?php endif; ?>
+
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 0. DEDICATED UPLOAD MODAL (Clean, Non-Redundant & Focused) -->
+<!-- ============================================================== -->
+<div id="uploadModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
+    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200" onclick="event.stopPropagation()">
+        
+        <!-- Modal Header -->
+        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/70">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-base font-black text-slate-900" id="uploadModalTitle">Unggah Dokumen Baru</h3>
+                    <div class="flex items-center gap-1.5 mt-0.5">
                         <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             Kompresi Cerdas Aktif
                         </span>
                     </div>
                 </div>
+            </div>
+            <button type="button" onclick="closeUploadModal()" aria-label="Tutup modal unggah" class="w-8 h-8 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
 
-                <form method="POST" enctype="multipart/form-data" data-no-ajax="true" class="space-y-4" id="docUploadForm">
-                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                    <input type="hidden" name="add_doc" value="1">
+        <!-- Upload Form -->
+        <form method="POST" enctype="multipart/form-data" data-no-ajax="true" class="p-6 space-y-4" id="docUploadForm">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+            <input type="hidden" name="add_doc" value="1">
 
-                    <!-- Drag & Drop Zone -->
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Berkas Dokumen</label>
-                        <label for="fileInput" 
-                               id="dropZone"
-                               class="flex flex-col items-center justify-center gap-2.5 px-4 py-8 rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-500 bg-slate-50/50 hover:bg-indigo-50/20 transition-all cursor-pointer group">
-                            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:scale-105 transition-all shadow-xs">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                            </div>
-                            <div class="text-center">
-                                <span class="text-slate-800 text-xs font-bold block mb-0.5">Pilih atau Seret Berkas ke Sini</span>
-                                <span class="text-slate-400 text-[10px]">PDF, Word, Excel, Foto, TXT, ZIP</span>
-                            </div>
-                            <input type="file" name="file" required class="hidden" id="fileInput" onchange="handleFileSelect(this)">
-                        </label>
+            <!-- Drag & Drop Zone -->
+            <div>
+                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Pilih Berkas</label>
+                <label for="fileInput" 
+                       id="dropZone"
+                       class="flex flex-col items-center justify-center gap-2.5 px-4 py-8 rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-500 bg-slate-50/50 hover:bg-indigo-50/20 transition-all cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:scale-105 transition-all shadow-xs">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    </div>
+                    <div class="text-center">
+                        <span class="text-slate-800 text-xs font-bold block mb-0.5">Pilih atau Seret Berkas ke Sini</span>
+                        <span class="text-slate-400 text-[10px]">Foto (JPG, PNG), PDF, Dokumen Word, Excel, TXT, ZIP</span>
+                    </div>
+                    <input type="file" name="file" required class="hidden" id="fileInput" onchange="handleFileSelect(this)">
+                </label>
 
-                        <!-- Selected File Preview Chip -->
-                        <div id="fileSelectedBox" class="hidden mt-2.5 p-3 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center justify-between gap-2">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">✓</span>
-                                <div class="min-w-0">
-                                    <p id="selectedFileName" class="text-xs font-black text-indigo-950 truncate"></p>
-                                    <p id="selectedFileSize" class="text-[10px] font-semibold text-indigo-600"></p>
-                                </div>
-                            </div>
-                            <button type="button" onclick="clearSelectedFile()" class="text-xs font-bold text-slate-400 hover:text-rose-600 p-1">✕</button>
+                <!-- Selected File Preview Chip -->
+                <div id="fileSelectedBox" class="hidden mt-2.5 p-3 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">✓</span>
+                        <div class="min-w-0">
+                            <p id="selectedFileName" class="text-xs font-black text-indigo-950 truncate"></p>
+                            <p id="selectedFileSize" class="text-[10px] font-semibold text-indigo-600"></p>
                         </div>
                     </div>
-
-                    <!-- Name -->
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Nama Dokumen</label>
-                        <input type="text" name="name" id="docNameInput" placeholder="Contoh: Laporan Keuangan Q4" required
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
-                    </div>
-
-                    <!-- Tags -->
-                    <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tag Kategori (pisahkan dengan koma)</label>
-                        <input type="text" name="tags" placeholder="keuangan, kerja, penting"
-                               class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
-                    </div>
-
-                    <!-- Submit Button -->
-                    <button type="submit" id="btnUploadSubmit"
-                            class="w-full py-3.5 rounded-xl font-bold text-white transition-transform active:scale-95 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 text-xs">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                        <span>Unggah &amp; Kompres Berkas</span>
-                    </button>
-                </form>
+                    <button type="button" onclick="clearSelectedFile()" class="text-xs font-bold text-slate-400 hover:text-rose-600 p-1">✕</button>
+                </div>
             </div>
-        </div>
+
+            <!-- Name -->
+            <div>
+                <label for="docNameInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Nama Dokumen</label>
+                <input type="text" name="name" id="docNameInput" placeholder="Contoh: Laporan Keuangan Q4" required
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+            </div>
+
+            <!-- Tags -->
+            <div>
+                <label for="docTagsInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tag Kategori (pisahkan dengan koma)</label>
+                <input type="text" name="tags" id="docTagsInput" placeholder="keuangan, penting, internal"
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeUploadModal()"
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all text-xs">
+                    Batal
+                </button>
+                <button type="submit" id="btnUploadSubmit"
+                        class="px-5 py-2.5 rounded-xl font-bold text-white transition-transform active:scale-95 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 text-xs">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    <span>Unggah &amp; Kompres Berkas</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
@@ -1296,6 +1344,66 @@ function docIconSvg($type, $color) {
         return (text || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    
+    // -------------------------------------------------------------
+    // Upload Modal
+    // -------------------------------------------------------------
+    window.openUploadModal = function() {
+        const m = document.getElementById('uploadModal');
+        if (m) {
+            m.classList.remove('hidden');
+            m.style.display = 'flex';
+            const fileIn = document.getElementById('fileInput');
+            if (fileIn) fileIn.focus();
+        }
+    };
+
+    window.closeUploadModal = function() {
+        const m = document.getElementById('uploadModal');
+        if (m) {
+            m.classList.add('hidden');
+            m.style.display = 'none';
+        }
+    };
+
+    // -------------------------------------------------------------
+    // Instant Client-side Filter / Search
+    // -------------------------------------------------------------
+    window.handleDocSearch = function(query) {
+        const q = (query || '').toLowerCase().trim();
+        const clearBtn = document.getElementById('docSearchClear');
+        if (clearBtn) clearBtn.classList.toggle('hidden', !q);
+
+        document.querySelectorAll('#docContainerGrid .doc-grid-card').forEach(card => {
+            const name = (card.getAttribute('data-name') || '').toLowerCase();
+            const tags = (card.getAttribute('data-tags') || '').toLowerCase();
+            if (!q || name.includes(q) || tags.includes(q)) {
+                card.classList.remove('hidden');
+            } else {
+                card.classList.add('hidden');
+            }
+        });
+
+        document.querySelectorAll('#docContainerList .doc-table-row').forEach(row => {
+            const name = (row.getAttribute('data-name') || '').toLowerCase();
+            const tags = (row.getAttribute('data-tags') || '').toLowerCase();
+            if (!q || name.includes(q) || tags.includes(q)) {
+                row.classList.remove('hidden');
+            } else {
+                row.classList.add('hidden');
+            }
+        });
+    };
+
+    window.clearDocSearch = function() {
+        const input = document.getElementById('docSearchInput');
+        if (input) {
+            input.value = '';
+            handleDocSearch('');
+            input.focus();
+        }
+    };
+
     window.closeModal = function() {
         const modal = document.getElementById('viewModal');
         modal.classList.add('hidden');
@@ -1315,6 +1423,7 @@ function docIconSvg($type, $color) {
         if (e.key === 'Escape') {
             closeModal();
             closeShareModal();
+            closeUploadModal();
         }
     });
 })();
