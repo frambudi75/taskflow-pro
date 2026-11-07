@@ -11,17 +11,9 @@ $error = '';
 $app_name = getSetting('app_name', 'TaskFlow Pro');
 $company_name = getSetting('company_name', $app_name);
 $company_tagline = getSetting('company_tagline', 'Manajemen Tugas, Dokumen & Kolaborasi Tim');
-$company_logo = getSetting('company_logo', '');
-if (empty($company_logo)) {
-    $company_logo = getSetting('app_logo', '');
-}
-
-$logo_valid = false;
-if (!empty($company_logo)) {
-    if (file_exists(__DIR__ . '/' . $company_logo) || file_exists($company_logo)) {
-        $logo_valid = true;
-    }
-}
+$app_logo_info = getAppLogoInfo();
+$logo_valid = $app_logo_info['is_custom'];
+$company_logo = $app_logo_info['url'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email'] ?? '');
@@ -61,7 +53,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk – <?php echo htmlspecialchars($app_name); ?></title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="<?php echo $app_logo_info['mime']; ?>" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>

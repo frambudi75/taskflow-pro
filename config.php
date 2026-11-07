@@ -476,6 +476,54 @@ function getSetting($key, $default = '') {
 }
 
 /**
+ * Get active application logo & favicon info.
+ * Resolves uploaded company_logo / app_logo or falls back to favicon.svg
+ */
+function getAppLogoInfo() {
+    $logo = getSetting('company_logo', '');
+    if (empty($logo)) {
+        $logo = getSetting('app_logo', '');
+    }
+
+    if (!empty($logo)) {
+        $cleanPath = ltrim(str_replace('\\', '/', $logo), '/');
+        $fullPath = __DIR__ . '/' . $cleanPath;
+        if (file_exists($fullPath) && is_readable($fullPath)) {
+            $ext = strtolower(pathinfo($fullPath, PATHINFO_EXTENSION));
+            $mimes = [
+                'png'  => 'image/png',
+                'jpg'  => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'webp' => 'image/webp',
+                'svg'  => 'image/svg+xml',
+                'ico'  => 'image/x-icon',
+                'gif'  => 'image/gif',
+            ];
+            $ver = filemtime($fullPath);
+            return [
+                'url'       => $cleanPath . '?v=' . $ver,
+                'raw_url'   => $cleanPath,
+                'path'      => $fullPath,
+                'exists'    => true,
+                'is_custom' => true,
+                'mime'      => $mimes[$ext] ?? 'image/png',
+            ];
+        }
+    }
+
+    $favPath = __DIR__ . '/favicon.svg';
+    $favVer = file_exists($favPath) ? filemtime($favPath) : 1;
+    return [
+        'url'       => 'favicon.svg?v=' . $favVer,
+        'raw_url'   => 'favicon.svg',
+        'path'      => $favPath,
+        'exists'    => file_exists($favPath),
+        'is_custom' => false,
+        'mime'      => 'image/svg+xml',
+    ];
+}
+
+/**
  * Send a notification via Telegram Bot API.
  */
 /**

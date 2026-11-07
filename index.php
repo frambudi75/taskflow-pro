@@ -15,6 +15,7 @@ $user_id = $_SESSION['user_id'] ?? null;
 $display_name = $_SESSION['display_name'] ?? 'User';
 $role = $_SESSION['role'] ?? 'user';
 $email = $_SESSION['email'] ?? '';
+$app_logo_info = getAppLogoInfo();
 
 // Simple Logout logic
 if (isset($_GET['logout'])) {
@@ -57,7 +58,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow Pro')); ?></title>
-    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="icon" type="<?php echo $app_logo_info['mime']; ?>" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -420,9 +423,13 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
     <header class="md:hidden flex items-center justify-between px-5 py-4 bg-[#0f172a] shadow-sm z-30 flex-shrink-0">
         <div class="flex items-center gap-3">
-             <div class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white">
-                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-             </div>
+             <?php if ($app_logo_info['is_custom']): ?>
+                 <img src="<?php echo htmlspecialchars($app_logo_info['url']); ?>" alt="Logo" class="w-8 h-8 rounded-lg object-contain bg-white/5 border border-white/10 p-0.5 flex-shrink-0" />
+             <?php else: ?>
+                 <div class="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white flex-shrink-0">
+                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                 </div>
+             <?php endif; ?>
              <span class="text-white font-bold text-sm uppercase tracking-tight"><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow')); ?></span>
         </div>
         <button onclick="toggleSidebar()" aria-label="Buka menu navigasi" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
@@ -439,9 +446,13 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
             <div class="px-4 py-3.5 flex items-center justify-between relative z-20 sidebar-header-box border-b border-white/[0.08]">
                 <div class="flex items-center gap-2.5 overflow-hidden">
-                    <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
-                    </div>
+                    <?php if ($app_logo_info['is_custom']): ?>
+                        <img src="<?php echo htmlspecialchars($app_logo_info['url']); ?>" alt="Logo" class="w-8 h-8 rounded-lg object-contain bg-white/5 border border-white/10 p-0.5 flex-shrink-0" />
+                    <?php else: ?>
+                        <div class="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+                        </div>
+                    <?php endif; ?>
                     <div class="sidebar-brand-text-wrap overflow-hidden whitespace-nowrap">
                         <div class="sidebar-brand-text truncate"><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow')); ?></div>
                         <div class="sidebar-brand-sub truncate">Workspace</div>

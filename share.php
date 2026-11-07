@@ -5,7 +5,8 @@ require_once __DIR__ . '/config.php';
 $token = trim($_GET['token'] ?? '');
 $app_name = getSetting('app_name', 'TaskFlow Pro');
 $company_name = getSetting('company_name', $app_name);
-$company_logo = getSetting('company_logo', '');
+$app_logo_info = getAppLogoInfo();
+$company_logo = $app_logo_info['url'];
 
 // Fetch share record
 $share = null;
@@ -119,6 +120,9 @@ $isPdf   = $share && strtolower($share['file_type']) === 'application/pdf';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $share ? htmlspecialchars($share['doc_name']) . ' - ' : ''; ?><?php echo htmlspecialchars($app_name); ?></title>
+    <link rel="icon" type="<?php echo $app_logo_info['mime']; ?>" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -146,8 +150,8 @@ $isPdf   = $share && strtolower($share['file_type']) === 'application/pdf';
     <!-- Header Bar -->
     <header class="w-full border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
-            <?php if (!empty($company_logo) && file_exists(__DIR__ . '/' . $company_logo)): ?>
-                <img src="<?php echo htmlspecialchars($company_logo); ?>" alt="Logo" class="h-8 max-w-[140px] object-contain">
+            <?php if ($app_logo_info['is_custom']): ?>
+                <img src="<?php echo htmlspecialchars($app_logo_info['url']); ?>" alt="Logo" class="h-8 max-w-[140px] object-contain">
             <?php else: ?>
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white font-black text-base shadow-md shadow-indigo-600/30">
                     TF
