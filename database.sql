@@ -182,6 +182,26 @@ CREATE TABLE `document_shares` (
   CONSTRAINT `doc_share_by_fk` FOREIGN KEY (`shared_by_user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+DROP TABLE IF EXISTS `document_public_shares`;
+CREATE TABLE `document_public_shares` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `document_id` int(11) NOT NULL,
+  `share_token` varchar(64) NOT NULL,
+  `created_by` int(11) NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `views_count` int(11) NOT NULL DEFAULT 0,
+  `downloads_count` int(11) NOT NULL DEFAULT 0,
+  `is_active` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `idx_public_token` (`share_token`),
+  KEY `idx_public_doc` (`document_id`),
+  KEY `idx_public_user` (`created_by`),
+  KEY `idx_public_expires` (`expires_at`),
+  CONSTRAINT `pub_share_doc_fk` FOREIGN KEY (`document_id`) REFERENCES `documents` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `pub_share_user_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 DROP TABLE IF EXISTS `projects`;
 CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

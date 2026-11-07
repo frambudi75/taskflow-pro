@@ -163,6 +163,22 @@ try {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         INDEX idx_user_projects (user_id)
     )");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS document_public_shares (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        document_id INT NOT NULL,
+        share_token VARCHAR(64) UNIQUE NOT NULL,
+        created_by INT NOT NULL,
+        expires_at DATETIME NOT NULL,
+        views_count INT NOT NULL DEFAULT 0,
+        downloads_count INT NOT NULL DEFAULT 0,
+        is_active TINYINT(1) NOT NULL DEFAULT 1,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+        INDEX idx_public_token (share_token),
+        INDEX idx_public_expires (expires_at)
+    )");
 } catch (\Throwable $e) {}
 
 /**

@@ -89,6 +89,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['revoke_share'])) {
     }
 }
 
+// Handle Create Public Share Link (External with Expiration)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_public_share'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $doc_id = (int)$_POST['doc_id'];
+        $duration = $_POST['duration'] ?? '24_hours';
+
+        // Verify document ownership
+        $chk = $pdo->prepare("SELECT id, name FROM documents WHERE id = ? AND (user_id = ?" . (isAdmin() ? " OR 1=1" : "") . ")");
+        $chk->execute([$doc_id, $user_id]);
+        $doc = $chk->fetch();
+
+        if ($doc) {
+            $durationMap = [
+                '1_hour'   => '+1 hour',
+                '6_hours'  => '+6 hours',
+                '24_hours' => '+24 hours',
+                '3_days'   => '+3 days',
+                '7_days'   => '+7 days',
+                '30_days'  => '+30 days'
+            ];
+            $interval = $durationMap[$duration] ?? '+24 hours';
+            $expires_at = date('Y-m-d H:i:s', strtotime($interval));
+
+            // Deactivate previous active shares for this doc
+            $deact = $pdo->prepare("UPDATE document_public_shares SET is_active = 0 WHERE document_id = ?");
+            $deact->execute([$doc_id]);
+
+            // Create cryptographically secure token
+            $token = bin2hex(random_bytes(24));
+            $ins = $pdo->prepare("INSERT INTO document_public_shares (document_id, share_token, created_by, expires_at) VALUES (?, ?, ?, ?)");
+            $ins->execute([$doc_id, $token, $user_id, $expires_at]);
+
+            logActivity("Membuat tautan publik untuk dokumen '" . $doc['name'] . "'", "document_public_share", $doc_id);
+            header("Location: index.php?page=documents&tab=" . $tab . "&success=public_shared");
+            exit;
+        }
+    }
+}
+
+// Handle Revoke Public Share Link
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['revoke_public_share'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $pub_share_id = (int)$_POST['pub_share_id'];
+        $del = $pdo->prepare("UPDATE document_public_shares SET is_active = 0 WHERE id = ? AND (created_by = ?" . (isAdmin() ? " OR 1=1" : "") . ")");
+        $del->execute([$pub_share_id, $user_id]);
+        logActivity("Menonaktifkan tautan publik dokumen", "document_public_revoke");
+        header("Location: index.php?page=documents&tab=" . $tab . "&success=public_revoked");
+        exit;
+    }
+}
+
 // Handle Delete Document
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_doc'])) {
     if (validateCSRF($_POST['csrf_token'])) {
@@ -164,6 +215,33 @@ $shared_documents = $stmt->fetchAll();
 $uStmt = $pdo->prepare("SELECT id, display_name, email, role FROM users WHERE id != ? ORDER BY display_name ASC");
 $uStmt->execute([$user_id]);
 $system_users = $uStmt->fetchAll();
+
+// Active public shares created by this user
+$pub_stmt = $pdo->prepare("SELECT * FROM document_public_shares WHERE created_by = ? AND is_active = 1 AND expires_at > NOW()");
+$pub_stmt->execute([$user_id]);
+$public_shares_raw = $pub_stmt->fetchAll();
+$public_shares_by_doc = [];
+
+// Base URL for public sharing
+$configured_app_url = getSetting('app_url');
+if (!empty($configured_app_url)) {
+    $share_base_url = rtrim($configured_app_url, '/') . '/share.php?token=';
+} else {
+    $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
+    $dir = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
+    $share_base_url = $protocol . '://' . $host . ($dir ? $dir : '') . '/share.php?token=';
+}
+
+foreach ($public_shares_raw as $ps) {
+    $ps['full_url'] = $share_base_url . $ps['share_token'];
+    $ps['expires_formatted'] = date('d M Y H:i', strtotime($ps['expires_at']));
+    $diff_sec = strtotime($ps['expires_at']) - time();
+    $diff_hrs = floor($diff_sec / 3600);
+    $diff_mins = floor(($diff_sec % 3600) / 60);
+    $ps['remaining_text'] = $diff_hrs > 0 ? ($diff_hrs . 'j ' . $diff_mins . 'm') : ($diff_mins . 'm');
+    $public_shares_by_doc[$ps['document_id']] = $ps;
+}
 
 // Active documents to display based on selected tab
 $documents = $tab === 'shared' ? $shared_documents : $my_documents;
@@ -253,6 +331,8 @@ function docSvgIcon($type, $color) {
             if($_GET['success'] === 'deleted') echo "Dokumen berhasil dihapus dari sistem."; 
             if($_GET['success'] === 'shared') echo "Hak akses dokumen berhasil dibagikan ke pengguna terpilih."; 
             if($_GET['success'] === 'revoked') echo "Hak akses berbagi dokumen berhasil dicabut."; 
+            if($_GET['success'] === 'public_shared') echo "Tautan publik berhasil dibuat dan siap dibagikan!"; 
+            if($_GET['success'] === 'public_revoked') echo "Tautan publik berhasil dinonaktifkan."; 
             ?>
         </p>
     </div>
@@ -311,6 +391,7 @@ function docSvgIcon($type, $color) {
                         $serve_download_url = 'serve_file.php?file=' . rawurlencode($clean_path) . '&download=1';
                         $tags       = array_filter(array_map('trim', explode(',', $doc['tags'] ?? '')));
                         $is_owner   = ((int)$doc['user_id'] === $user_id);
+                        $pubShare   = $public_shares_by_doc[$doc['id']] ?? null;
                     ?>
                     <div class="group relative p-4 rounded-2xl bg-white border border-slate-200/90 hover:border-emerald-400 hover:shadow-md hover:shadow-emerald-500/5 hover:-translate-y-0.5 transition-all duration-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         
@@ -352,7 +433,14 @@ function docSvgIcon($type, $color) {
                                     <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
                                     <span class="text-slate-300">·</span>
                                     <span class="text-emerald-800 font-extrabold bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md text-[10px]">
-                                        🔗 Dibagikan (<?php echo $doc['share_count']; ?>)
+                                        🔗 Internal (<?php echo $doc['share_count']; ?>)
+                                    </span>
+                                    <?php endif; ?>
+
+                                    <?php if (!empty($pubShare)): ?>
+                                    <span class="text-slate-300">·</span>
+                                    <span class="inline-flex items-center gap-1 text-sky-800 font-extrabold bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md text-[10px]" title="Tautan publik aktif hingga <?php echo $pubShare['expires_formatted']; ?>">
+                                        🌐 Link Publik (exp: <?php echo $pubShare['remaining_text']; ?>)
                                     </span>
                                     <?php endif; ?>
 
@@ -381,7 +469,7 @@ function docSvgIcon($type, $color) {
 
                             <!-- Share Button (Only for Document Owner) -->
                             <?php if ($is_owner): ?>
-                            <button type="button" onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>')"
+                            <button type="button" onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
                                     title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
                                     class="w-9 h-9 flex items-center justify-center rounded-xl bg-sky-50 hover:bg-sky-600 text-sky-700 hover:text-white transition-all shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
@@ -466,17 +554,17 @@ function docSvgIcon($type, $color) {
     </div>
 </div>
 
-<!-- Share Modal (Fitur Berbagi Dokumen ke Pengguna Lain) -->
+<!-- Share Modal (Fitur Berbagi Dokumen ke Tim & Tautan Publik dengan Expired) -->
 <div id="shareModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
     <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col">
         <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center shadow-sm">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 </div>
                 <div>
                     <h3 class="text-base font-extrabold text-slate-900" id="shareModalTitle">Bagikan Dokumen</h3>
-                    <p class="text-xs text-slate-400 font-medium" id="shareDocName"></p>
+                    <p class="text-xs text-slate-400 font-medium truncate max-w-[260px]" id="shareDocName"></p>
                 </div>
             </div>
             <button type="button" onclick="closeShareModal()" aria-label="Tutup modal berbagi" class="w-8 h-8 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center text-slate-500">
@@ -484,35 +572,129 @@ function docSvgIcon($type, $color) {
             </button>
         </div>
 
-        <div class="p-6 space-y-5">
-            <form method="POST" class="space-y-4">
-                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <input type="hidden" name="share_doc" value="1">
-                <input type="hidden" name="doc_id" id="shareDocId">
+        <!-- Share Tabs -->
+        <div class="flex border-b border-slate-100 bg-slate-50/80 p-1.5 gap-1.5 text-xs font-bold">
+            <button type="button" id="tabBtnExternal" onclick="switchShareModalTab('external')"
+                    class="flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 bg-white text-sky-700 shadow-sm border border-slate-200/80">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                Tautan Eksternal (Expired)
+            </button>
+            <button type="button" id="tabBtnInternal" onclick="switchShareModalTab('internal')"
+                    class="flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Rekan Tim Internal
+            </button>
+        </div>
 
-                <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Pilih Pengguna</label>
-                    <select name="target_user_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        <option value="">-- Pilih Rekan Kerja --</option>
-                        <?php foreach($system_users as $su): ?>
-                        <option value="<?php echo $su['id']; ?>"><?php echo htmlspecialchars($su['display_name']); ?> (<?php echo htmlspecialchars($su['email']); ?>)</option>
-                        <?php endforeach; ?>
-                    </select>
+        <div class="p-6">
+            <!-- TAB 1: EXTERNAL PUBLIC SHARE LINK -->
+            <div id="tabContentExternal" class="space-y-4">
+                
+                <!-- If Active Share Exists -->
+                <div id="sharePublicActiveBlock" class="hidden space-y-4">
+                    <div class="p-4 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-sky-700">
+                                <span class="w-2 h-2 rounded-full bg-sky-500 animate-pulse"></span>
+                                Tautan Aktif
+                            </span>
+                            <span id="pubExpiryPill" class="text-[11px] font-bold text-sky-800 bg-sky-100 px-2 py-0.5 rounded-md"></span>
+                        </div>
+                        <p class="text-xs text-sky-800 font-medium mb-3">Siapa pun yang memiliki tautan ini dapat mengunduh dokumen sebelum batas waktu habis.</p>
+
+                        <!-- Copy Link Field -->
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="pubShareUrlInput" readonly
+                                   class="flex-1 bg-white border border-sky-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 outline-none select-all">
+                            <button type="button" id="copyBtn" onclick="copyShareLink()"
+                                    class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-1.5 shadow-sm">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                <span id="copyBtnText">Salin</span>
+                            </button>
+                        </div>
+
+                        <!-- Stats Views & Downloads -->
+                        <div class="mt-3 pt-3 border-t border-sky-200/60 flex items-center justify-between text-[11px] text-sky-800 font-semibold">
+                            <span id="pubViewsText">Dilihat: 0 kali</span>
+                            <span id="pubDownloadsText">Diunduh: 0 kali</span>
+                        </div>
+                    </div>
+
+                    <!-- Revoke Form -->
+                    <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menonaktifkan tautan publik ini? Pengguna luar tidak akan bisa mengakses lagi.');">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                        <input type="hidden" name="revoke_public_share" value="1">
+                        <input type="hidden" name="pub_share_id" id="revokePubShareId">
+                        <button type="submit" class="w-full py-2.5 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-700 font-bold text-xs transition-colors flex items-center justify-center gap-2">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+                            Cabut &amp; Nonaktifkan Tautan Publik
+                        </button>
+                    </form>
                 </div>
 
-                <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Hak Akses</label>
-                    <select name="permission" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
-                        <option value="view">Hanya Pratinjau (Lihat)</option>
-                        <option value="download">Pratinjau &amp; Boleh Unduh</option>
-                    </select>
+                <!-- If No Active Share (Create Form) -->
+                <div id="sharePublicCreateBlock" class="space-y-4">
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                        Buat tautan aman untuk dibagikan ke klien atau pihak luar. Tautan otomatis kedaluwarsa setelah durasi yang Anda pilih.
+                    </p>
+
+                    <form method="POST" class="space-y-4">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                        <input type="hidden" name="create_public_share" value="1">
+                        <input type="hidden" name="doc_id" id="pubDocId">
+
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Masa Berlaku Tautan (Expired)</label>
+                            <select name="duration" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                <option value="1_hour">1 Jam</option>
+                                <option value="6_hours">6 Jam</option>
+                                <option value="24_hours" selected>24 Jam (1 Hari)</option>
+                                <option value="3_days">3 Hari</option>
+                                <option value="7_days">7 Hari (1 Minggu)</option>
+                                <option value="30_days">30 Hari (1 Bulan)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-md shadow-sky-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                            Buat Tautan Publik Berwaktu
+                        </button>
+                    </form>
                 </div>
 
-                <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    Berikan Akses
-                </button>
-            </form>
+            </div>
+
+            <!-- TAB 2: INTERNAL USER SHARE -->
+            <div id="tabContentInternal" class="hidden space-y-4">
+                <form method="POST" class="space-y-4">
+                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                    <input type="hidden" name="share_doc" value="1">
+                    <input type="hidden" name="doc_id" id="shareDocId">
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Pilih Pengguna Tim</label>
+                        <select name="target_user_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="">-- Pilih Rekan Kerja --</option>
+                            <?php foreach($system_users as $su): ?>
+                            <option value="<?php echo $su['id']; ?>"><?php echo htmlspecialchars($su['display_name']); ?> (<?php echo htmlspecialchars($su['email']); ?>)</option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Hak Akses</label>
+                        <select name="permission" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500">
+                            <option value="view">Hanya Pratinjau (Lihat)</option>
+                            <option value="download">Pratinjau &amp; Boleh Unduh</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="w-full py-3.5 rounded-xl font-bold text-white bg-sky-600 hover:bg-sky-700 shadow-sm transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Berikan Akses Internal
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
@@ -554,12 +736,73 @@ function docSvgIcon($type, $color) {
         }
     };
 
-    window.openShareModal = function(docId, docName) {
+    window.openShareModal = function(docId, docName, pubShare) {
         document.getElementById('shareDocId').value = docId;
+        document.getElementById('pubDocId').value = docId;
         document.getElementById('shareDocName').textContent = docName;
+
+        const activeBlock = document.getElementById('sharePublicActiveBlock');
+        const createBlock = document.getElementById('sharePublicCreateBlock');
+
+        if (pubShare && pubShare.full_url) {
+            document.getElementById('pubShareUrlInput').value = pubShare.full_url;
+            document.getElementById('pubExpiryPill').textContent = 'Exp: ' + (pubShare.remaining_text || pubShare.expires_formatted);
+            document.getElementById('pubViewsText').textContent = 'Dilihat: ' + (pubShare.views_count || 0) + ' kali';
+            document.getElementById('pubDownloadsText').textContent = 'Diunduh: ' + (pubShare.downloads_count || 0) + ' kali';
+            document.getElementById('revokePubShareId').value = pubShare.id;
+
+            activeBlock.classList.remove('hidden');
+            createBlock.classList.add('hidden');
+        } else {
+            activeBlock.classList.add('hidden');
+            createBlock.classList.remove('hidden');
+        }
+
+        switchShareModalTab('external');
+
         const modal = document.getElementById('shareModal');
         modal.classList.remove('hidden');
         modal.style.display = 'flex';
+    };
+
+    window.switchShareModalTab = function(tab) {
+        const extContent = document.getElementById('tabContentExternal');
+        const intContent = document.getElementById('tabContentInternal');
+        const extBtn = document.getElementById('tabBtnExternal');
+        const intBtn = document.getElementById('tabBtnInternal');
+
+        if (tab === 'external') {
+            extContent.classList.remove('hidden');
+            intContent.classList.add('hidden');
+            extBtn.className = 'flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 bg-white text-sky-700 shadow-sm border border-slate-200/80';
+            intBtn.className = 'flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900';
+        } else {
+            extContent.classList.add('hidden');
+            intContent.classList.remove('hidden');
+            intBtn.className = 'flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 bg-white text-sky-700 shadow-sm border border-slate-200/80';
+            extBtn.className = 'flex-1 py-2.5 px-3 rounded-xl transition-all flex items-center justify-center gap-2 text-slate-600 hover:text-slate-900';
+        }
+    };
+
+    window.copyShareLink = function() {
+        const input = document.getElementById('pubShareUrlInput');
+        if (!input) return;
+        input.select();
+        input.setSelectionRange(0, 99999);
+        navigator.clipboard.writeText(input.value).then(function() {
+            const btnText = document.getElementById('copyBtnText');
+            if (btnText) {
+                btnText.textContent = 'Tersalin!';
+                setTimeout(function() { btnText.textContent = 'Salin'; }, 2000);
+            }
+        }).catch(function() {
+            document.execCommand('copy');
+            const btnText = document.getElementById('copyBtnText');
+            if (btnText) {
+                btnText.textContent = 'Tersalin!';
+                setTimeout(function() { btnText.textContent = 'Salin'; }, 2000);
+            }
+        });
     };
 
     window.closeShareModal = function() {
