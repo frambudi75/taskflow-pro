@@ -1,6 +1,6 @@
 <?php
 if (!defined('IN_APP')) exit('Akses Ditolak');
-// pages/dashboard.php - Executive Glassmorphic Dashboard
+// pages/dashboard.php - Executive Glassmorphic Dashboard with Interactive Widgets
 $user_id = (int)$_SESSION['user_id'];
 
 // Get statistics (with caching for 10 minutes)
@@ -90,7 +90,7 @@ if (isAdmin()) {
 $profilePhoto = $_SESSION['profile_photo'] ?? null;
 $avatarSrc = $profilePhoto && file_exists(__DIR__ . '/../uploads/avatars/' . $profilePhoto)
     ? 'uploads/avatars/' . $profilePhoto
-    : getAvatarDataUri($_SESSION['display_name'] ?? 'User', 48);
+    : getAvatarDataUri($_SESSION['display_name'] ?? 'User', 44);
 
 $pct      = $total_todos > 0 ? round(($completed_todos / $total_todos) * 100) : 0;
 $hour     = (int)date('H');
@@ -113,6 +113,8 @@ for ($i = 6; $i >= 0; $i--) {
     $productivity_data[] = (int)($stmtT->fetch()['count'] ?? 0);
 }
 
+$has_productivity_activity = array_sum($productivity_data) > 0;
+
 // Helper relative time
 if (!function_exists('dashTimeAgo')) {
     function dashTimeAgo($datetime) {
@@ -124,6 +126,25 @@ if (!function_exists('dashTimeAgo')) {
         if ($diff < 86400) return round($diff / 3600) . 'j lalu';
         if ($diff < 172800) return 'Kemarin';
         return date('d/m', $time);
+    }
+}
+
+// Helper document file type badge & icon
+if (!function_exists('dashDocTypeInfo')) {
+    function dashDocTypeInfo($docName) {
+        $ext = strtolower(pathinfo($docName ?? '', PATHINFO_EXTENSION));
+        if (in_array($ext, ['pdf'])) {
+            return ['PDF', 'bg-rose-50 text-rose-600 border-rose-200 dark:bg-rose-950/60 dark:text-rose-400 dark:border-rose-900/50'];
+        } elseif (in_array($ext, ['doc', 'docx', 'txt', 'rtf'])) {
+            return ['DOC', 'bg-blue-50 text-blue-600 border-blue-200 dark:bg-blue-950/60 dark:text-blue-400 dark:border-blue-900/50'];
+        } elseif (in_array($ext, ['xls', 'xlsx', 'csv'])) {
+            return ['XLS', 'bg-emerald-50 text-emerald-600 border-emerald-200 dark:bg-emerald-950/60 dark:text-emerald-400 dark:border-emerald-900/50'];
+        } elseif (in_array($ext, ['zip', 'rar', '7z', 'tar', 'gz'])) {
+            return ['ZIP', 'bg-amber-50 text-amber-600 border-amber-200 dark:bg-amber-950/60 dark:text-amber-400 dark:border-amber-900/50'];
+        } elseif (in_array($ext, ['png', 'jpg', 'jpeg', 'webp', 'svg'])) {
+            return ['IMG', 'bg-violet-50 text-violet-600 border-violet-200 dark:bg-violet-950/60 dark:text-violet-400 dark:border-violet-900/50'];
+        }
+        return ['FILE', 'bg-slate-50 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'];
     }
 }
 ?>
@@ -142,7 +163,7 @@ if (!function_exists('dashTimeAgo')) {
     box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), inset 0 1px 0 rgba(255, 255, 255, 1);
     border-radius: 20px;
     position: relative;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .glass-surface {
     background: rgba(15, 23, 42, 0.82);
@@ -156,14 +177,14 @@ if (!function_exists('dashTimeAgo')) {
     -webkit-backdrop-filter: blur(20px);
     border: 1px solid rgba(226, 232, 240, 0.85);
     border-radius: 20px;
-    padding: 20px;
+    padding: 18px 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 14px;
+    gap: 12px;
     position: relative;
     overflow: hidden;
-    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 1);
 }
 .dark .dash-stat-card {
@@ -174,15 +195,15 @@ if (!function_exists('dashTimeAgo')) {
 .dash-stat-card:hover { 
     transform: translateY(-3px); 
     border-color: #cbd5e1;
-    box-shadow: 0 14px 28px -4px rgba(15, 23, 42, 0.09); 
+    box-shadow: 0 12px 26px -4px rgba(15, 23, 42, 0.09); 
 }
 .dark .dash-stat-card:hover {
     border-color: #334155;
-    box-shadow: 0 14px 28px -4px rgba(0, 0, 0, 0.45);
+    box-shadow: 0 12px 26px -4px rgba(0, 0, 0, 0.45);
 }
 
 .dash-stat-card .stat-icon {
-    transition: transform 0.25s ease;
+    transition: transform 0.22s ease;
 }
 .dash-stat-card:hover .stat-icon {
     transform: scale(1.08);
@@ -190,7 +211,7 @@ if (!function_exists('dashTimeAgo')) {
 
 .d-section-head {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 16px 22px; border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+    padding: 15px 20px; border-bottom: 1px solid rgba(226, 232, 240, 0.8);
 }
 .dark .d-section-head { border-color: rgba(30, 41, 59, 0.8); }
 .d-section-head h3 { font-size: 13.5px; font-weight: 800; color: #0f172a; margin: 0; }
@@ -205,14 +226,14 @@ if (!function_exists('dashTimeAgo')) {
 }
 
 .d-row {
-    display: flex; align-items: center; gap: 13px;
-    padding: 13px 20px; border-bottom: 1px solid rgba(241, 245, 249, 0.9);
-    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px; border-bottom: 1px solid rgba(241, 245, 249, 0.9);
+    transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .d-row { border-color: rgba(30, 41, 59, 0.7); }
 .d-row:last-child { border-bottom: none; }
 .d-row:hover { 
-    background: rgba(248, 250, 252, 0.8); 
+    background: rgba(248, 250, 252, 0.85); 
     transform: translateX(3px);
 }
 .dark .d-row:hover { 
@@ -221,7 +242,7 @@ if (!function_exists('dashTimeAgo')) {
 
 .pb-bg { 
     background: rgba(241, 245, 249, 0.9); 
-    border-radius: 100px; height: 5px; margin-top: 6px; overflow: hidden;
+    border-radius: 100px; height: 5px; margin-top: 5px; overflow: hidden;
 }
 .dark .pb-bg { background: #1e293b; }
 .pb-fill { 
@@ -230,35 +251,43 @@ if (!function_exists('dashTimeAgo')) {
     animation: barFill 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-.chart-container { position: relative; height: 300px; width: 100%; padding: 12px 18px 18px; }
+.quick-action-btn {
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.quick-action-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px -2px rgba(15, 23, 42, 0.08);
+}
+
+.chart-container { position: relative; height: 290px; width: 100%; padding: 12px 18px 18px; }
 </style>
 
-<div class="p-5 md:p-8 w-full max-w-[1600px] mx-auto">
+<div class="p-4 md:p-7 w-full max-w-[1600px] mx-auto space-y-6">
 
-    <!-- WELCOME / DASHBOARD HERO BANNER (Executive Night-Sky Gradient with Ambient Glow) -->
-    <div class="mb-7 p-6 md:p-8 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- WELCOME / DASHBOARD HERO BANNER (Compact Executive Night-Sky Style) -->
+    <div class="p-5 md:p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">
         <!-- Ambient radial highlights inside banner -->
-        <div class="absolute -top-20 -right-20 w-80 h-80 bg-indigo-500/25 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-20 left-1/4 w-64 h-64 bg-purple-500/15 rounded-full blur-2xl pointer-events-none"></div>
+        <div class="absolute -top-16 -right-16 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-16 left-1/4 w-60 h-60 bg-purple-500/15 rounded-full blur-2xl pointer-events-none"></div>
         
         <div class="relative z-10">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-200 text-xs font-extrabold uppercase tracking-widest mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-200 text-xs font-extrabold uppercase tracking-widest mb-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <?php echo date('l, d F Y'); ?>
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-white leading-tight tracking-tight mb-2">
+            <h1 class="text-xl md:text-2xl font-black text-white leading-tight tracking-tight mb-1.5">
                 <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?> 👋
             </h1>
-            <p class="text-slate-300 text-sm font-medium max-w-xl leading-relaxed">
+            <p class="text-slate-300 text-xs md:text-sm font-medium max-w-xl leading-relaxed">
                 <?php echo ($total_todos - $completed_todos) > 0
-                    ? ($total_todos - $completed_todos) . ' tugas masih menunggu diselesaikan hari ini. Tetap fokus dan pertahankan ritme produktif Anda!'
+                    ? ($total_todos - $completed_todos) . ' tugas menunggu diselesaikan hari ini. Tetap fokus dan pertahankan ritme produktif Anda!'
                     : 'Luar biasa! Seluruh target harian Anda telah tercapai dengan sukses.'; ?>
             </p>
         </div>
 
-        <div class="relative z-10 flex items-center gap-3.5 self-start md:self-center flex-shrink-0 bg-white/5 backdrop-blur-md p-2.5 pr-4 rounded-2xl border border-white/10">
+        <div class="relative z-10 flex items-center gap-3 self-start md:self-center flex-shrink-0 bg-white/5 backdrop-blur-md p-2.5 pr-4 rounded-2xl border border-white/10">
             <img src="<?php echo $avatarSrc; ?>" alt="Avatar Pengguna"
-                 class="w-12 h-12 rounded-xl object-cover border-2 border-indigo-400/40 shadow-md">
+                 class="w-11 h-11 rounded-xl object-cover border-2 border-indigo-400/40 shadow-md">
             <div class="text-left">
                 <div class="text-white font-extrabold text-sm tracking-wide leading-tight"><?php echo htmlspecialchars($_SESSION['display_name'] ?? ''); ?></div>
                 <div class="inline-block mt-0.5 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-500/30 text-indigo-200 border border-indigo-400/20">
@@ -268,20 +297,20 @@ if (!function_exists('dashTimeAgo')) {
         </div>
     </div>
 
-    <!-- STAT CARDS (Refined Executive Frosted Glass with Colored Hairline Tops) -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5 mb-7">
+    <!-- STAT CARDS (Executive Frosted Glass with Number Count-Up Animation) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         
         <!-- CARD 1: TUGAS -->
         <div class="dash-stat-card border-t-[3px] border-t-indigo-500">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tugas</span>
-                <div class="stat-icon w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </div>
             </div>
             <div>
                 <div class="flex items-baseline justify-between">
-                    <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_todos; ?></div>
+                    <div class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none counter-value" data-target="<?php echo $total_todos; ?>">0</div>
                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">🎯 Aktif</span>
                 </div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2"><?php echo $completed_todos; ?> selesai · <?php echo $pct; ?>%</div>
@@ -293,14 +322,16 @@ if (!function_exists('dashTimeAgo')) {
         <div class="dash-stat-card border-t-[3px] border-t-emerald-500">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Penyelesaian</span>
-                <div class="stat-icon w-9 h-9 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
             </div>
             <div>
                 <div class="flex items-baseline justify-between">
-                    <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $pct; ?>%</div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60 dark:border-emerald-800/40">✓ On Track</span>
+                    <div class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                        <span class="counter-value" data-target="<?php echo $pct; ?>">0</span>%
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60">✓ On Track</span>
                 </div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tercapai</div>
             </div>
@@ -311,14 +342,14 @@ if (!function_exists('dashTimeAgo')) {
         <div class="dash-stat-card border-t-[3px] border-t-violet-500">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Catatan &amp; Ide</span>
-                <div class="stat-icon w-9 h-9 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
                 </div>
             </div>
             <div>
                 <div class="flex items-baseline justify-between">
-                    <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_notes; ?></div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/60 dark:border-violet-800/40">📝 Catatan</span>
+                    <div class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none counter-value" data-target="<?php echo $total_notes; ?>">0</div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/60">📝 Catatan</span>
                 </div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2">Dokumentasi tersimpan</div>
             </div>
@@ -329,14 +360,14 @@ if (!function_exists('dashTimeAgo')) {
         <div class="dash-stat-card border-t-[3px] border-t-sky-500">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dokumen Arsip</span>
-                <div class="stat-icon w-9 h-9 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900/50">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900/50">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 </div>
             </div>
             <div>
                 <div class="flex items-baseline justify-between">
-                    <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_docs; ?></div>
-                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/60 dark:border-sky-800/40">🔒 Storage</span>
+                    <div class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none counter-value" data-target="<?php echo $total_docs; ?>">0</div>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/60">🔒 Storage</span>
                 </div>
                 <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-2">Berkas terkompresi &amp; aman</div>
             </div>
@@ -346,12 +377,12 @@ if (!function_exists('dashTimeAgo')) {
     </div>
 
     <!-- MAIN GRID (8 Cols Left, 4 Cols Right) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
         <!-- LEFT COLUMN (8 Cols) -->
         <div class="lg:col-span-8 flex flex-col gap-6">
 
-            <!-- Productivity Chart -->
+            <!-- Productivity Chart (With Informative Empty State) -->
             <div class="glass-surface overflow-hidden">
                 <div class="d-section-head flex-wrap gap-2">
                     <div class="flex items-center gap-2.5">
@@ -360,35 +391,56 @@ if (!function_exists('dashTimeAgo')) {
                         </div>
                         <div>
                             <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Grafik Tren Produktivitas</h3>
-                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Tren penyelesaian tugas dalam 7 hari terakhir</p>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Tren penyelesaian tugas 7 hari terakhir</p>
                         </div>
                     </div>
                     <span class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200/60 dark:border-slate-700/60">
-                        7 Hari Terakhir
+                        7 Hari
                     </span>
                 </div>
+
+                <?php if (!$has_productivity_activity): ?>
+                <!-- Informative Empty State (No flat 0 line) -->
+                <div class="p-8 md:p-10 text-center flex flex-col items-center justify-center min-h-[290px]">
+                    <div class="w-14 h-14 rounded-2xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-500 flex items-center justify-center mb-3 border border-indigo-100 dark:border-indigo-900/40 shadow-sm">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    </div>
+                    <h4 class="text-sm font-black text-slate-800 dark:text-slate-200 mb-1.5">Belum Ada Aktivitas Penyelesaian</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-sm mb-4 leading-relaxed font-medium">
+                        Grafik tren produktivitas akan otomatis aktif dan terpetakan setelah Anda menyelesaikan tugas pertama di Kalender atau Proyek.
+                    </p>
+                    <a href="?page=calendar" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/30 flex items-center gap-1.5 active:scale-95">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                        Buka Kalender Tugas &rarr;
+                    </a>
+                </div>
+                <?php else: ?>
                 <div class="chart-container">
                     <canvas id="productivityChart"></canvas>
                 </div>
+                <?php endif; ?>
             </div>
 
-            <!-- Upcoming Tasks (7 Days) -->
+            <!-- Upcoming Tasks (7 Days - High Prominence) -->
             <div class="glass-surface overflow-hidden">
                 <div class="d-section-head">
                     <div class="flex items-center gap-2.5">
                         <div class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
-                        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Tugas Mendatang (7 Hari ke Depan)</h3>
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Tugas Mendatang (7 Hari ke Depan)</h3>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">Prioritas agenda terdekat Anda</p>
+                        </div>
                     </div>
-                    <a href="?page=calendar" class="p-1.5 flex items-center gap-1 font-bold text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">Lihat Kalender &rarr;</a>
+                    <a href="?page=calendar" class="p-1.5 flex items-center gap-1 font-bold text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">Lihat Semua &rarr;</a>
                 </div>
                 <?php if (empty($upcoming_todos)): ?>
-                <div class="p-10 text-center">
-                    <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3 text-slate-400">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div class="p-8 text-center">
+                    <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-2.5 text-slate-400">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
-                    <p class="text-slate-600 dark:text-slate-300 font-bold text-xs mb-2">Tidak ada tugas terjadwal untuk 7 hari ke depan.</p>
+                    <p class="text-slate-600 dark:text-slate-300 font-bold text-xs mb-1.5">Tidak ada tugas terjadwal untuk 7 hari mendatang.</p>
                     <a href="?page=calendar" class="text-indigo-600 dark:text-indigo-400 font-extrabold text-xs hover:underline">+ Buat Tugas Baru</a>
                 </div>
                 <?php else: ?>
@@ -472,13 +524,13 @@ if (!function_exists('dashTimeAgo')) {
         <!-- RIGHT COLUMN (4 Cols) -->
         <div class="lg:col-span-4 flex flex-col gap-6">
 
-            <!-- Quick Actions -->
+            <!-- Quick Actions (With Hover Lift & Micro-Interactions) -->
             <div class="glass-surface overflow-hidden">
                 <div class="d-section-head">
                     <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aksi Cepat</h3>
                 </div>
                 <div class="p-3.5 flex flex-col gap-2.5">
-                    <a href="?page=calendar" class="group flex items-center justify-between p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                    <a href="?page=calendar" class="quick-action-btn group flex items-center justify-between p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -491,7 +543,7 @@ if (!function_exists('dashTimeAgo')) {
                         <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
 
-                    <a href="?page=notes" class="group flex items-center justify-between p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                    <a href="?page=notes" class="quick-action-btn group flex items-center justify-between p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-lg bg-violet-50 dark:bg-violet-950/60 border border-violet-100 dark:border-violet-900/50 text-violet-600 dark:text-violet-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
@@ -504,7 +556,7 @@ if (!function_exists('dashTimeAgo')) {
                         <svg class="w-4 h-4 text-slate-400 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 18 15 12 9 6"/></svg>
                     </a>
 
-                    <a href="?page=documents" class="group flex items-center justify-between p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                    <a href="?page=documents" class="quick-action-btn group flex items-center justify-between p-3 rounded-xl border border-slate-200/70 dark:border-slate-800 bg-white/50 dark:bg-slate-800/40 hover:bg-white dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50">
                         <div class="flex items-center gap-3">
                             <div class="w-9 h-9 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
@@ -552,7 +604,7 @@ if (!function_exists('dashTimeAgo')) {
                             $icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
                         }
                     ?>
-                    <div class="p-3.5 flex items-start gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
+                    <div class="p-3 flex items-start gap-3 hover:bg-slate-50/70 dark:hover:bg-slate-800/40 transition-colors">
                         <div class="w-7 h-7 rounded-lg border <?php echo $badgeColor; ?> flex items-center justify-center shrink-0 mt-0.5">
                             <?php echo $icon; ?>
                         </div>
@@ -560,7 +612,7 @@ if (!function_exists('dashTimeAgo')) {
                             <p class="text-[12px] font-bold text-slate-800 dark:text-slate-200 line-clamp-1 leading-snug">
                                 <?php echo htmlspecialchars($act['action']); ?>
                             </p>
-                            <div class="flex items-center gap-2 mt-1 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
+                            <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-500 dark:text-slate-400 font-semibold">
                                 <span><?php echo htmlspecialchars($act['display_name'] ?? 'Sistem'); ?></span>
                                 <span>•</span>
                                 <span><?php echo dashTimeAgo($act['created_at']); ?></span>
@@ -572,7 +624,7 @@ if (!function_exists('dashTimeAgo')) {
                 <?php endif; ?>
             </div>
 
-            <!-- Recent Docs -->
+            <!-- Recent Docs (With Specific File Type Icons) -->
             <div class="glass-surface overflow-hidden">
                 <div class="d-section-head">
                     <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Dokumen Terbaru</h3>
@@ -583,10 +635,12 @@ if (!function_exists('dashTimeAgo')) {
                     <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">Belum ada dokumen tersimpan.</p>
                 </div>
                 <?php else: ?>
-                    <?php foreach($recent_docs as $doc): ?>
+                    <?php foreach($recent_docs as $doc): 
+                        $docType = dashDocTypeInfo($doc['name']);
+                    ?>
                     <div class="d-row">
-                        <div class="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-950/60 border border-sky-100 dark:border-sky-900/50 text-sky-600 dark:text-sky-400 flex-shrink-0 flex items-center justify-center">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                        <div class="w-9 h-9 rounded-xl border flex-shrink-0 flex items-center justify-center font-black text-[10px] tracking-wider <?php echo $docType[1]; ?>">
+                            <?php echo $docType[0]; ?>
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="font-extrabold text-slate-900 dark:text-white text-[12.5px] truncate"><?php echo htmlspecialchars($doc['name']); ?></p>
@@ -634,86 +688,114 @@ if (!function_exists('dashTimeAgo')) {
 
 <script>
 (function() {
+    // Number count-up animation
+    var counters = document.querySelectorAll('.counter-value');
+    counters.forEach(function(counter) {
+        var target = parseInt(counter.getAttribute('data-target'), 10) || 0;
+        if (target === 0) {
+            counter.innerText = '0';
+            return;
+        }
+        var count = 0;
+        var duration = 800; // ms
+        var stepTime = Math.max(16, Math.floor(duration / target));
+        var increment = target > 50 ? Math.ceil(target / 40) : 1;
+
+        var timer = setInterval(function() {
+            count += increment;
+            if (count >= target) {
+                counter.innerText = target;
+                clearInterval(timer);
+            } else {
+                counter.innerText = count;
+            }
+        }, stepTime);
+    });
+
+    // Chart.js initialization (only if has activity)
+    <?php if ($has_productivity_activity): ?>
     var labelsData = <?php echo json_encode($labels); ?>;
     var todosData = <?php echo json_encode($productivity_data); ?>;
 
     var chartCanvas = document.getElementById('productivityChart');
-    if (!chartCanvas) return;
-    var ctx = chartCanvas.getContext('2d');
-    
-    if (window.taskflowProductivityChart) {
-        window.taskflowProductivityChart.destroy();
-    }
+    if (chartCanvas) {
+        var ctx = chartCanvas.getContext('2d');
+        
+        if (window.taskflowProductivityChart) {
+            window.taskflowProductivityChart.destroy();
+        }
 
-    var grad = ctx.createLinearGradient(0, 0, 0, 260);
-    grad.addColorStop(0, 'rgba(99, 102, 241, 0.30)');
-    grad.addColorStop(1, 'rgba(99, 102, 241, 0.00)');
+        var grad = ctx.createLinearGradient(0, 0, 0, 260);
+        grad.addColorStop(0, 'rgba(99, 102, 241, 0.30)');
+        grad.addColorStop(1, 'rgba(99, 102, 241, 0.00)');
 
-    window.taskflowProductivityChart = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labelsData,
-            datasets: [
-                {
-                    label: 'Tugas Selesai',
-                    data: todosData,
-                    borderColor: '#4f46e5',
-                    backgroundColor: grad,
-                    borderWidth: 2.8,
-                    tension: 0.38,
-                    fill: true,
-                    pointBackgroundColor: '#ffffff',
-                    pointBorderColor: '#4f46e5',
-                    pointBorderWidth: 2.5,
-                    pointRadius: 4.5,
-                    pointHoverRadius: 7,
-                    pointHoverBackgroundColor: '#4f46e5',
-                    pointHoverBorderColor: '#ffffff',
-                    pointHoverBorderWidth: 2
-                }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { 
-                    display: true,
-                    position: 'top',
-                    labels: {
-                        boxWidth: 12,
-                        padding: 14,
-                        font: { size: 12, weight: '700' },
-                        color: '#475569'
+        window.taskflowProductivityChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labelsData,
+                datasets: [
+                    {
+                        label: 'Tugas Selesai',
+                        data: todosData,
+                        borderColor: '#4f46e5',
+                        backgroundColor: grad,
+                        borderWidth: 2.8,
+                        tension: 0.38,
+                        fill: true,
+                        pointBackgroundColor: '#ffffff',
+                        pointBorderColor: '#4f46e5',
+                        pointBorderWidth: 2.5,
+                        pointRadius: 4.5,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#4f46e5',
+                        pointHoverBorderColor: '#ffffff',
+                        pointHoverBorderWidth: 2
                     }
-                },
-                tooltip: {
-                    padding: 10,
-                    cornerRadius: 10,
-                    boxPadding: 6
-                }
+                ]
             },
-            scales: {
-                y: {
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        color: '#64748b',
-                        font: { size: 11, weight: '600' }
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { 
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 12,
+                            padding: 14,
+                            font: { size: 12, weight: '700' },
+                            color: '#475569'
+                        }
                     },
-                    grid: {
-                        color: 'rgba(226, 232, 240, 0.6)'
+                    tooltip: {
+                        padding: 10,
+                        cornerRadius: 10,
+                        boxPadding: 6
                     }
                 },
-                x: {
-                    ticks: {
-                        color: '#475569',
-                        font: { size: 11, weight: '600' }
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                            color: '#64748b',
+                            font: { size: 11, weight: '600' }
+                        },
+                        grid: {
+                            color: 'rgba(226, 232, 240, 0.6)'
+                        }
                     },
-                    grid: { display: false }
+                    x: {
+                        ticks: {
+                            color: '#475569',
+                            font: { size: 11, weight: '600' }
+                        },
+                        grid: { display: false }
+                    }
                 }
             }
-        }
-    });
+        });
+    }
+    <?php endif; ?>
 })();
 </script>

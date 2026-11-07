@@ -276,12 +276,20 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 
         #pageLoader {
             position: fixed; top: 0; left: 0; right: 0; height: 3px;
-            background: #4f46e5;
-            z-index: 9999; transform: translateX(-100%); transition: transform 0.3s ease;
+            background: linear-gradient(90deg, #4f46e5, #818cf8, #06b6d4);
+            z-index: 9999; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
             pointer-events: none;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
         }
-        #pageLoader.loading { transform: translateX(-30%); }
+        #pageLoader.loading { transform: translateX(-25%); }
         #pageLoader.finish { transform: translateX(0); }
+
+        #ajaxContent {
+            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #ajaxContent.page-fade {
+            opacity: 0.4;
+        }
 
         /* Desktop Collapsed Sidebar Styles */
         @media (min-width: 768px) {
@@ -592,6 +600,7 @@ function loadPage(url, pushState = true) {
     const content = document.getElementById('ajaxContent');
     
     loader.classList.add('loading');
+    if (content) content.classList.add('page-fade');
     
     fetch(url, {
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -609,6 +618,7 @@ function loadPage(url, pushState = true) {
         content.innerHTML = html;
         executeScripts(content);
         content.scrollTop = 0;
+        if (content) content.classList.remove('page-fade');
         
         // Update URL
         if (pushState) history.pushState({url: url}, '', url);
@@ -628,6 +638,7 @@ function loadPage(url, pushState = true) {
     .catch(err => {
         console.error('AJAX Load Error:', err);
         loader.classList.remove('loading');
+        if (content) content.classList.remove('page-fade');
     });
 }
 
