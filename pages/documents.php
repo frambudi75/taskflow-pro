@@ -457,7 +457,7 @@ function docIconSvg($type, $color) {
             <button type="button" onclick="openUploadModal()"
                     class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-2 shadow-sm shadow-indigo-600/20">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>+ Unggah Berkas</span>
+                <span>Unggah Berkas</span>
             </button>
         </div>
     </div>
@@ -519,12 +519,16 @@ function docIconSvg($type, $color) {
                     <span class="text-2xl md:text-3xl font-black text-emerald-600 tracking-tight leading-none"><?php echo $my_storage_formatted; ?></span>
                     <span class="text-xs font-bold text-slate-400">/ 5 GB</span>
                 </div>
-                <!-- Storage progress bar -->
-                <div class="w-full bg-slate-100 rounded-full h-1.5 mt-2.5 overflow-hidden">
-                    <div class="bg-emerald-500 h-full rounded-full transition-all duration-500" style="width: <?php echo $storage_bar_pct; ?>%"></div>
+            </div>
+            <div class="mt-3">
+                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
+                    <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-500 shadow-xs" style="width: <?php echo max(3, $storage_bar_pct); ?>%"></div>
+                </div>
+                <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold mt-1.5">
+                    <span><?php echo $storage_pct; ?>% kuota terpakai</span>
+                    <span>Sisa <?php echo formatSize(max(0, $max_storage_bytes - $my_storage_bytes)); ?></span>
                 </div>
             </div>
-            <div class="text-[10px] text-slate-400 font-semibold mt-2"><?php echo $storage_pct; ?>% kuota terpakai</div>
         </div>
 
         <!-- Card 3: Dibagikan ke Saya (Neutral zero state) -->
@@ -643,27 +647,35 @@ function docIconSvg($type, $color) {
                  onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')">
                 
                 <div>
-                    <!-- Visual Thumbnail for Images or Hero Icon Header for Documents -->
+                    <!-- Consistent Fixed-Height (h-36) Header for Perfect Grid Alignment -->
                     <?php if ($isImage): ?>
-                    <div class="h-32 w-full overflow-hidden bg-slate-100 relative border-b border-slate-100">
+                    <div class="h-36 w-full overflow-hidden bg-slate-50 relative border-b border-slate-100 flex items-center justify-center">
                         <img src="<?php echo htmlspecialchars($serve_view_url); ?>" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                              loading="lazy" 
-                             alt="<?php echo htmlspecialchars($doc['name']); ?>">
-                        <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase text-white shadow-xs"
-                              style="background:<?php echo $info['badge_bg']; ?>;">
+                             alt="<?php echo htmlspecialchars($doc['name']); ?>"
+                             onerror="this.onerror=null; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                        <!-- Safe Fallback Placeholder if Image Fails to Load -->
+                        <div class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-100/80 text-slate-400">
+                            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-xs">
+                                <?php echo $iconSvg; ?>
+                            </div>
+                            <span class="text-[10px] font-semibold text-slate-400 mt-1.5">Berkas Gambar</span>
+                        </div>
+                        <!-- Frosted Glassmorphism Extension Badge -->
+                        <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white tracking-wider backdrop-blur-md bg-slate-900/65 shadow-xs border border-white/20">
                             <?php echo $info['label']; ?>
                         </span>
                     </div>
                     <?php else: ?>
-                    <div class="h-28 w-full flex flex-col items-center justify-center relative border-b border-slate-100/90 transition-colors"
+                    <div class="h-36 w-full flex flex-col items-center justify-center relative border-b border-slate-100 transition-colors"
                          style="background: linear-gradient(180deg, <?php echo $info['bg']; ?> 0%, #FFFFFF 100%);">
                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center border shadow-xs group-hover:scale-110 transition-transform duration-200"
                              style="background:<?php echo $info['bg']; ?>; border-color:<?php echo $info['border']; ?>;">
                             <?php echo $iconSvg; ?>
                         </div>
-                        <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[9px] font-black uppercase text-white shadow-xs"
-                              style="background:<?php echo $info['badge_bg']; ?>;">
+                        <!-- Frosted Glassmorphism Extension Badge -->
+                        <span class="absolute top-2.5 right-2.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold text-white tracking-wider backdrop-blur-md bg-slate-900/65 shadow-xs border border-white/20">
                             <?php echo $info['label']; ?>
                         </span>
                     </div>
@@ -672,83 +684,90 @@ function docIconSvg($type, $color) {
                     <!-- Card Body Content -->
                     <div class="p-4">
                         <!-- Document Name -->
-                        <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug mb-1.5">
+                        <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug mb-1">
                             <?php echo htmlspecialchars($doc['name']); ?>
                         </h3>
 
-                        <!-- Meta Info: Size • Date -->
-                        <div class="text-[11px] font-semibold text-slate-400 mb-2.5 flex items-center gap-1.5">
+                        <!-- Compact Meta Info: Size • Date -->
+                        <div class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
                             <span><?php echo formatSize($doc['file_size']); ?></span>
                             <span>•</span>
                             <span><?php echo date('d M Y', strtotime($doc['upload_date'])); ?></span>
                         </div>
 
-                        <!-- Tags / Collaboration Chips in Neat Pill Badges -->
-                        <div class="flex flex-wrap items-center gap-1.5 mb-1">
+                        <!-- Tags / Collaboration Chips in Rounded-Full Pastel Pills -->
+                        <div class="flex flex-wrap items-center gap-1.5">
                             <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
                                 👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
                             </span>
                             <?php endif; ?>
 
                             <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
                                 🔗 Tim (<?php echo $doc['share_count']; ?>)
                             </span>
                             <?php endif; ?>
 
                             <?php if (!empty($pubShare)): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md" 
+                            <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full" 
                                   title="Tautan publik aktif hingga <?php echo $pubShare['expires_formatted']; ?>">
                                 🌐 Publik: <?php echo $pubShare['remaining_text']; ?>
                             </span>
                             <?php endif; ?>
 
                             <?php foreach($tags as $tag): ?>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-md text-slate-600 bg-slate-100 border border-slate-200/60">
+                            <button type="button" 
+                                    onclick="event.stopPropagation(); filterByDocTag('<?php echo htmlspecialchars(addslashes($tag)); ?>')" 
+                                    title="Filter dokumen dengan tag #<?php echo htmlspecialchars($tag); ?>"
+                                    class="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-colors">
                                 #<?php echo htmlspecialchars($tag); ?>
-                            </span>
+                            </button>
                             <?php endforeach; ?>
                         </div>
                     </div>
                 </div>
 
-                <!-- Footer Action Buttons (Clean Balanced Icon Buttons) -->
-                <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-end gap-1.5 mt-auto" onclick="event.stopPropagation()">
-                    <!-- Preview / Mata -->
+                <!-- Footer Action Buttons (Balanced Layout: Primary Action Left, Secondary Actions Right) -->
+                <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto" onclick="event.stopPropagation()">
+                    <!-- Primary Quick Action: Pratinjau Button -->
                     <button type="button" 
                             onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                            title="Pratinjau Berkas" aria-label="Lihat dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-500 hover:text-indigo-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                            title="Lihat Pratinjau Berkas" aria-label="Lihat dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                            class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 border border-slate-200/80 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                        <span>Pratinjau</span>
                     </button>
 
-                    <!-- Download -->
-                    <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
-                       title="Unduh Berkas" aria-label="Unduh dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                       class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    </a>
+                    <!-- Secondary Actions Group: Unduh, Bagikan, Hapus -->
+                    <div class="flex items-center gap-1">
+                        <!-- Unduh -->
+                        <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
+                           title="Unduh Berkas" aria-label="Unduh dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                           class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                        </a>
 
-                    <!-- Share (Only Owner) -->
-                    <?php if ($is_owner): ?>
-                    <button type="button" 
-                            onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
-                            title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-500 hover:text-sky-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
-                    </button>
-                    <?php endif; ?>
+                        <!-- Bagikan (Only Owner) -->
+                        <?php if ($is_owner): ?>
+                        <button type="button" 
+                                onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
+                                title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                                class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-500 hover:text-sky-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
+                        </button>
+                        <?php endif; ?>
 
-                    <!-- Delete (Owner or Admin) -->
-                    <?php if ($is_owner || isAdmin()): ?>
-                    <button type="button" 
-                            onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
-                            title="Hapus Dokumen" aria-label="Hapus dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                            class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center transition-colors">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    </button>
-                    <?php endif; ?>
+                        <!-- Hapus (Owner or Admin) -->
+                        <?php if ($is_owner || isAdmin()): ?>
+                        <button type="button" 
+                                onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
+                                title="Hapus Dokumen" aria-label="Hapus dokumen <?php echo htmlspecialchars($doc['name']); ?>"
+                                class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                        </button>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
             <?php endforeach; ?>
@@ -1393,6 +1412,14 @@ function docIconSvg($type, $color) {
                 row.classList.add('hidden');
             }
         });
+    };
+
+    window.filterByDocTag = function(tag) {
+        const input = document.getElementById('docSearchInput');
+        if (input) {
+            input.value = tag;
+            handleDocSearch(tag);
+        }
     };
 
     window.clearDocSearch = function() {
