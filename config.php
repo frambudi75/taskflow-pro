@@ -177,6 +177,12 @@ try {
         INDEX idx_public_token (share_token),
         INDEX idx_public_expires (expires_at)
     )");
+
+    // Ensure storage_quota column exists in users
+    $checkCol = $pdo->query("SHOW COLUMNS FROM users LIKE 'storage_quota'")->fetchAll();
+    if (empty($checkCol)) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN storage_quota BIGINT UNSIGNED NOT NULL DEFAULT 5368709120 AFTER role");
+    }
 } catch (\Throwable $e) {}
 
 /**
@@ -473,6 +479,12 @@ function getSetting($key, $default = '') {
     $stmt->execute([$key]);
     $val = $stmt->fetchColumn();
     return $val !== false ? $val : $default;
+}
+
+function setSetting($key, $value) {
+    global $pdo;
+    $stmt = $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES (?, ?) ON DUPLICATE KEY UPDATE `value` = ?");
+    return $stmt->execute([$key, $value, $value]);
 }
 
 /**

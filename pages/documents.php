@@ -20,6 +20,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_doc'])) {
 
         if (isset($_FILES['file']) && $_FILES['file']['error'] === UPLOAD_ERR_OK) {
             $file = $_FILES['file'];
+
+            // Enforce user storage quota
+            $uQuotaStmt = $pdo->prepare("SELECT storage_quota FROM users WHERE id = ?");
+            $uQuotaStmt->execute([$user_id]);
+            $raw_quota = $uQuotaStmt->fetchColumn();
+            $user_quota = ($raw_quota !== false) ? (int)$raw_quota : 5368709120;
+
+            if ($user_quota > 0) {
+                $usedStmt = $pdo->prepare("SELECT COALESCE(SUM(file_size), 0) FROM documents WHERE user_id = ?");
+                $usedStmt->execute([$user_id]);
+                $current_used = (int)$usedStmt->fetchColumn();
+
+                if (($current_used + (int)$file['size']) > $user_quota) {
+                    header("Location: index.php?page=documents&tab=" . $tab . "&error=quota_exceeded");
+                    exit;
+                }
+            }
+
             $upload_dir = 'uploads/' . $user_id . '/';
             $safe_name = preg_replace('/[^a-zA-Z0-9._-]/', '_', basename($file['name']));
             $filename    = time() . '_' . $safe_name;
@@ -262,14 +280,22 @@ foreach ($public_shares_raw as $ps) {
 $documents = $tab === 'shared' ? $shared_documents : $my_documents;
 
 // Calculate storage stats & quota progress
+$uQuotaStmt = $pdo->prepare("SELECT storage_quota FROM users WHERE id = ?");
+$uQuotaStmt->execute([$user_id]);
+$raw_user_quota = $uQuotaStmt->fetchColumn();
+$user_quota = ($raw_user_quota !== false) ? (int)$raw_user_quota : 5368709120;
+$is_unlimited = ($user_quota === 0);
+
 $my_storage_bytes = 0;
 foreach ($my_documents as $md) {
     $my_storage_bytes += (int)($md['file_size'] ?? 0);
 }
 $my_storage_formatted = formatSize($my_storage_bytes);
-$max_storage_bytes    = 5 * 1024 * 1024 * 1024; // 5 GB standard quota
-$storage_pct          = round(($my_storage_bytes / $max_storage_bytes) * 100, 1);
-$storage_bar_pct      = min(100, max(1, $storage_pct));
+$storage_quota_formatted = $is_unlimited ? 'Tanpa Batas' : formatSize($user_quota);
+$storage_pct = $is_unlimited ? 0 : round(($my_storage_bytes / max(1, $user_quota)) * 100, 1);
+$storage_bar_pct = $is_unlimited ? 100 : min(100, max(1, $storage_pct));
+$storage_remaining_bytes = max(0, $user_quota - $my_storage_bytes);
+$storage_remaining_formatted = $is_unlimited ? 'Tanpa Batas' : formatSize($storage_remaining_bytes);
 
 // -------------------------------------------------------------
 // Helper: File Type Format & Icon Info
@@ -463,6 +489,20 @@ function docIconSvg($type, $color) {
     </div>
 
     <!-- Alert Notifications -->
+    <?php if (isset($_GET['error']) && $_GET['error'] === 'quota_exceeded'): ?>
+    <div class="flex items-start gap-3 bg-rose-50 border border-rose-200 rounded-2xl p-4 text-rose-900 text-xs shadow-xs">
+        <div class="w-7 h-7 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        </div>
+        <div class="flex-1">
+            <h4 class="font-black text-rose-950 text-sm mb-0.5">Kapasitas Kuota Penyimpanan Penuh</h4>
+            <p class="font-medium text-rose-700 leading-relaxed">
+                Penyimpanan akun Anda tidak mencukupi untuk mengunggah berkas ini. Batas kuota Anda adalah <span class="font-bold underline"><?php echo $storage_quota_formatted; ?></span> dan saat ini telah terpakai <span class="font-bold underline"><?php echo $my_storage_formatted; ?></span> (sisa <?php echo $storage_remaining_formatted; ?>). Silakan hapus beberapa berkas lama atau hubungi Administrator untuk menambah kapasitas penyimpanan Anda.
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <?php if (isset($_GET['error']) && $_GET['error'] === 'upload_failed'): ?>
     <div class="flex items-center gap-3 bg-rose-50 border border-rose-200 rounded-2xl px-5 py-3.5 text-rose-800 text-xs font-bold shadow-xs">
         <svg class="w-5 h-5 flex-shrink-0 text-rose-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
@@ -516,17 +556,34 @@ function docIconSvg($type, $color) {
                     </div>
                 </div>
                 <div class="flex items-baseline gap-1.5 flex-wrap">
-                    <span class="text-2xl md:text-3xl font-black text-emerald-600 tracking-tight leading-none"><?php echo $my_storage_formatted; ?></span>
-                    <span class="text-xs font-bold text-slate-400">/ 5 GB</span>
+                    <span class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none"><?php echo $my_storage_formatted; ?></span>
+                    <span class="text-xs font-bold text-slate-400">/ <?php echo $storage_quota_formatted; ?></span>
                 </div>
             </div>
             <div class="mt-3">
                 <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
-                    <div class="bg-gradient-to-r from-emerald-400 to-emerald-500 h-full rounded-full transition-all duration-500 shadow-xs" style="width: <?php echo max(3, $storage_bar_pct); ?>%"></div>
+                    <?php 
+                    $barGradient = 'from-emerald-400 to-emerald-500';
+                    if (!$is_unlimited) {
+                        if ($storage_pct >= 90) {
+                            $barGradient = 'from-rose-500 to-red-600';
+                        } elseif ($storage_pct >= 75) {
+                            $barGradient = 'from-amber-400 to-amber-500';
+                        }
+                    } else {
+                        $barGradient = 'from-indigo-400 to-indigo-600';
+                    }
+                    ?>
+                    <div class="bg-gradient-to-r <?php echo $barGradient; ?> h-full rounded-full transition-all duration-500 shadow-xs" style="width: <?php echo max(3, $storage_bar_pct); ?>%"></div>
                 </div>
                 <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold mt-1.5">
-                    <span><?php echo $storage_pct; ?>% kuota terpakai</span>
-                    <span>Sisa <?php echo formatSize(max(0, $max_storage_bytes - $my_storage_bytes)); ?></span>
+                    <?php if ($is_unlimited): ?>
+                        <span class="text-indigo-600 font-bold">♾️ Kuota Bebas</span>
+                        <span>Tanpa Batas</span>
+                    <?php else: ?>
+                        <span class="<?php echo $storage_pct >= 90 ? 'text-rose-600 font-black' : ''; ?>"><?php echo $storage_pct; ?>% kuota terpakai</span>
+                        <span>Sisa <?php echo $storage_remaining_formatted; ?></span>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -905,6 +962,9 @@ function docIconSvg($type, $color) {
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             Kompresi Cerdas Aktif
                         </span>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                            Sisa Kuota: <?php echo $storage_remaining_formatted; ?>
+                        </span>
                     </div>
                 </div>
             </div>
@@ -1193,6 +1253,9 @@ function docIconSvg($type, $color) {
     // -------------------------------------------------------------
     // File Selection & Drag-and-Drop Handler
     // -------------------------------------------------------------
+    const USER_QUOTA_BYTES = <?php echo (int)$user_quota; ?>;
+    const REMAINING_QUOTA_BYTES = <?php echo (int)$storage_remaining_bytes; ?>;
+
     window.handleFileSelect = function(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
@@ -1201,10 +1264,27 @@ function docIconSvg($type, $color) {
         const fileNameEl = document.getElementById('selectedFileName');
         const fileSizeEl = document.getElementById('selectedFileSize');
         const docNameInput = document.getElementById('docNameInput');
+        const submitBtn = document.getElementById('btnUploadSubmit');
 
         if (fileBox && fileNameEl && fileSizeEl) {
             fileNameEl.textContent = file.name;
-            fileSizeEl.textContent = formatBytesJs(file.size);
+            
+            // Check quota limit client-side
+            if (USER_QUOTA_BYTES > 0 && file.size > REMAINING_QUOTA_BYTES) {
+                fileBox.className = 'mt-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-between gap-2';
+                fileSizeEl.innerHTML = `<span class="text-rose-600 font-bold">${formatBytesJs(file.size)} &mdash; Melebihi sisa kuota (${formatBytesJs(REMAINING_QUOTA_BYTES)})</span>`;
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+                }
+            } else {
+                fileBox.className = 'mt-2.5 p-3 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center justify-between gap-2';
+                fileSizeEl.textContent = formatBytesJs(file.size);
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                }
+            }
             fileBox.classList.remove('hidden');
         }
 
@@ -1218,8 +1298,13 @@ function docIconSvg($type, $color) {
     window.clearSelectedFile = function() {
         const fileInput = document.getElementById('fileInput');
         const fileBox = document.getElementById('fileSelectedBox');
+        const submitBtn = document.getElementById('btnUploadSubmit');
         if (fileInput) fileInput.value = '';
         if (fileBox) fileBox.classList.add('hidden');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
     };
 
     function formatBytesJs(bytes) {
