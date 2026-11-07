@@ -26,18 +26,6 @@ if (isset($_GET['logout'])) {
 // Standalone Print View or Export Bypass (Bypasses main UI chrome completely)
 if ((isset($_GET['print_view']) && $_GET['print_view'] === '1') || (isset($_GET['export']) && $_GET['export'] === 'csv')) {
     ob_clean();
-    if ($page === 'reports') {
-        include 'pages/reports.php';
-        exit;
-    }
-    if ($page === 'team-reports') {
-        if (isAdmin()) {
-            include 'pages/team-reports.php';
-        } else {
-            echo "Akses Ditolak";
-        }
-        exit;
-    }
 }
 
 // AJAX Content Helper
@@ -50,11 +38,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         case 'notes': include 'pages/notes.php'; break;
         case 'documents': include 'pages/documents.php'; break;
         case 'projects': include 'pages/projects.php'; break;
-        case 'reports': include 'pages/reports.php'; break;
         case 'activities': include 'pages/activities.php'; break;
         case 'chat': include 'pages/chat.php'; break;
         case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
-        case 'team-reports': if(isAdmin()) include 'pages/team-reports.php'; else echo "Akses Ditolak"; break;
         case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
         case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
         case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;
@@ -388,13 +374,6 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                     <span class="nav-label truncate">Proyek (Kanban)</span>
                 </a>
 
-                <a href="<?php echo route('reports'); ?>" class="nav-item <?php echo $page==='reports'?'active':''; ?>" data-nav="reports" title="Laporan Harian">
-                    <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                    </span>
-                    <span class="nav-label truncate">Laporan Harian</span>
-                </a>
-
                 <a href="<?php echo route('activities'); ?>" class="nav-item <?php echo $page==='activities'?'active':''; ?>" data-nav="activities" title="Aktivitas">
                     <span class="nav-icon">
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -447,13 +426,6 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                         <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </span>
                     <span class="nav-label truncate">Users</span>
-                </a>
-
-                <a href="<?php echo route('team-reports'); ?>" class="nav-item <?php echo $page==='team-reports'?'active':''; ?>" data-nav="team-reports" title="Laporan Tim">
-                    <span class="nav-icon">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/><line x1="14" y1="11" x2="20" y2="11"/></svg>
-                    </span>
-                    <span class="nav-label truncate">Laporan Tim</span>
                 </a>
 
                 <a href="<?php echo route('backup'); ?>" class="nav-item <?php echo $page==='backup'?'active':''; ?>" data-nav="backup" title="Backup">
@@ -516,11 +488,9 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
                 case 'notes': include 'pages/notes.php'; break;
                 case 'documents': include 'pages/documents.php'; break;
                 case 'projects': include 'pages/projects.php'; break;
-                case 'reports': include 'pages/reports.php'; break;
                 case 'activities': include 'pages/activities.php'; break;
                 case 'chat': include 'pages/chat.php'; break;
                 case 'admin': if(isAdmin()) include 'pages/admin.php'; else echo "Akses Ditolak"; break;
-                case 'team-reports': if(isAdmin()) include 'pages/team-reports.php'; else echo "Akses Ditolak"; break;
                 case 'settings': if(isAdmin()) include 'pages/settings.php'; else echo "Akses Ditolak"; break;
                 case 'backup': if(isAdmin()) include 'pages/backup.php'; else echo "Akses Ditolak"; break;
                 case 'cache': if(isAdmin()) include 'pages/cache.php'; else echo "Akses Ditolak"; break;

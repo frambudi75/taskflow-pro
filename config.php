@@ -71,13 +71,11 @@ function route($page) {
         'notes' => 'index.php?page=notes',
         'documents' => 'index.php?page=documents',
         'projects' => 'index.php?page=projects',
-        'reports' => 'index.php?page=reports',
         'activities' => 'index.php?page=activities',
         'settings' => 'index.php?page=settings',
         'profile' => 'index.php?page=profile',
         'reset-password' => 'index.php?page=reset-password',
         'admin' => 'index.php?page=admin',
-        'team-reports' => 'index.php?page=team-reports',
         'backup' => 'index.php?page=backup',
         'cache' => 'index.php?page=cache',
         'notif-harian' => 'notif_harian.php',
@@ -165,44 +163,6 @@ try {
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
         INDEX idx_user_projects (user_id)
     )");
-
-    $pdo->exec("CREATE TABLE IF NOT EXISTS daily_reports (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        report_date DATE NOT NULL,
-        category VARCHAR(50) DEFAULT 'Umum',
-        start_time TIME NULL,
-        end_time TIME NULL,
-        supervisor_name VARCHAR(100) NULL,
-        project_id INT NULL,
-        title VARCHAR(255) NOT NULL,
-        description TEXT NOT NULL,
-        photo_path TEXT DEFAULT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_user_report_date (user_id, report_date)
-    )");
-
-    // Ensure photo_path is TEXT and new columns exist
-    try {
-        $pdo->exec("ALTER TABLE daily_reports MODIFY COLUMN photo_path TEXT NULL");
-    } catch (\Throwable $e) {}
-    try {
-        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN category VARCHAR(50) DEFAULT 'Umum' AFTER report_date");
-    } catch (\Throwable $e) {}
-    try {
-        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN start_time TIME NULL AFTER category");
-    } catch (\Throwable $e) {}
-    try {
-        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN end_time TIME NULL AFTER start_time");
-    } catch (\Throwable $e) {}
-    try {
-        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN supervisor_name VARCHAR(100) NULL AFTER end_time");
-    } catch (\Throwable $e) {}
-    try {
-        $pdo->exec("ALTER TABLE daily_reports ADD COLUMN project_id INT NULL AFTER supervisor_name");
-    } catch (\Throwable $e) {}
 } catch (\Throwable $e) {}
 
 /**

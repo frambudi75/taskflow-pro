@@ -196,27 +196,6 @@ CREATE TABLE `projects` (
   CONSTRAINT `projects_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-DROP TABLE IF EXISTS `daily_reports`;
-CREATE TABLE `daily_reports` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(11) NOT NULL,
-  `report_date` date NOT NULL,
-  `category` varchar(50) DEFAULT 'Umum',
-  `start_time` time DEFAULT NULL,
-  `end_time` time DEFAULT NULL,
-  `supervisor_name` varchar(100) DEFAULT NULL,
-  `project_id` int(11) DEFAULT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text NOT NULL,
-  `photo_path` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `idx_user_report_date` (`user_id`,`report_date`),
-  KEY `idx_daily_reports_project` (`project_id`),
-  CONSTRAINT `daily_reports_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;

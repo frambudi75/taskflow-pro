@@ -32,10 +32,8 @@ $basename = basename($abs_path);
 $isAllowed = false;
 $originalName = $basename;
 
-// 1. Public authenticated assets: Settings Logo, Avatars, and Daily Report Photos
+// 1. Public authenticated assets: Settings Logo, Avatars
 if (strpos($file, 'uploads/settings/') === 0 || strpos($file, 'uploads/avatars/') === 0) {
-    $isAllowed = true;
-} elseif (strpos($file, '/reports/') !== false || strpos($file, 'uploads/reports/') === 0) {
     $isAllowed = true;
 } elseif (strpos($file, 'uploads/chat/') === 0) {
     // Chat attachments accessible to sender, receiver, or admin
@@ -68,14 +66,6 @@ if (strpos($file, 'uploads/settings/') === 0 || strpos($file, 'uploads/avatars/'
             if ($ext && !str_ends_with(strtolower($originalName), '.' . strtolower($ext))) {
                 $originalName .= '.' . $ext;
             }
-        }
-    } else {
-        // Fallback: Check Daily Reports photo path
-        $repStmt = $pdo->prepare("SELECT id, title FROM daily_reports WHERE photo_path LIKE ?");
-        $repStmt->execute(['%' . $basename . '%']);
-        if ($rep = $repStmt->fetch()) {
-            $isAllowed = true;
-            $originalName = $rep['title'];
         }
     }
 }

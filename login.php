@@ -10,7 +10,7 @@ if (isLoggedIn()) {
 $error = '';
 $app_name = getSetting('app_name', 'TaskFlow Pro');
 $company_name = getSetting('company_name', $app_name);
-$company_tagline = getSetting('company_tagline', 'Manajemen Tugas, Laporan Kegiatan & Kolaborasi Tim');
+$company_tagline = getSetting('company_tagline', 'Manajemen Tugas, Dokumen & Kolaborasi Tim');
 $company_logo = getSetting('company_logo', '');
 if (empty($company_logo)) {
     $company_logo = getSetting('app_logo', '');
@@ -131,21 +131,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
             
             <h1 class="text-3xl xl:text-4xl font-extrabold text-white leading-tight tracking-tight mb-4">
-                Kelola pekerjaan, dokumen &amp; laporan harian tim secara terintegrasi.
+                Kelola pekerjaan, dokumen &amp; kolaborasi tim secara terintegrasi.
             </h1>
             <p class="text-slate-300 text-sm xl:text-base leading-relaxed mb-8">
-                Platform produktivitas lengkap untuk pelacakan tugas, pencatatan jam kerja lapangan, serta pembuatan laporan resmi berkop perusahaan.
+                Platform produktivitas lengkap untuk pelacakan tugas, manajemen proyek, arsip dokumen, serta komunikasi kerja.
             </p>
 
             <!-- Productivity Feature Cards -->
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div class="glass-panel p-4 rounded-2xl flex items-start gap-3">
                     <div class="w-8 h-8 rounded-xl bg-indigo-500/20 flex items-center justify-center text-indigo-300 flex-shrink-0 mt-0.5">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="12" cy="14" r="2"/></svg>
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="9" y1="3" x2="9" y2="21"/><line x1="15" y1="3" x2="15" y2="21"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
                     </div>
                     <div>
-                        <h4 class="text-xs font-bold text-white">Laporan Harian &amp; PDF</h4>
-                        <p class="text-[11px] text-slate-400 mt-0.5">Dokumentasi foto &amp; cetak kop surat A4.</p>
+                        <h4 class="text-xs font-bold text-white">Proyek &amp; Kanban</h4>
+                        <p class="text-[11px] text-slate-400 mt-0.5">Alur kerja terstruktur dengan visual board.</p>
                     </div>
                 </div>
 

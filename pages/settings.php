@@ -141,8 +141,8 @@ $tg_token = getSetting('telegram_bot_token', '');
     <div class="rounded-3xl p-7 md:p-10 mb-8 relative overflow-hidden bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white shadow-lg border border-slate-800">
         <div class="relative z-10">
             <div class="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-2">Administrasi Platform</div>
-            <h1 class="text-2xl md:text-3xl font-black leading-tight mb-1">Pengaturan Sistem &amp; Kop Surat</h1>
-            <p class="text-slate-300 text-xs md:text-sm font-medium">Konfigurasi identitas perusahaan, logo resmi, notifikasi, dan preferensi aplikasi.</p>
+            <h1 class="text-2xl md:text-3xl font-black leading-tight mb-1">Pengaturan Sistem</h1>
+            <p class="text-slate-300 text-xs md:text-sm font-medium">Konfigurasi identitas aplikasi, notifikasi, dan preferensi sistem.</p>
         </div>
     </div>
 
@@ -180,8 +180,8 @@ $tg_token = getSetting('telegram_bot_token', '');
                     <div class="p-4 bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 rounded-2xl flex items-start gap-3">
                         <span class="text-xl">🏢</span>
                         <div>
-                            <h4 class="text-xs font-extrabold text-indigo-900 dark:text-indigo-300">Identitas Kop Surat Cetak Resmi</h4>
-                            <p class="text-[11px] text-indigo-700 dark:text-indigo-400 leading-relaxed font-medium">Informasi dan logo di bawah ini akan otomatis muncul pada bagian atas (**Kop Surat**) semua lembar laporan harian kerja saat dicetak atau diunduh sebagai PDF.</p>
+                            <h4 class="text-xs font-extrabold text-indigo-900 dark:text-indigo-300">Identitas Perusahaan</h4>
+                            <p class="text-[11px] text-indigo-700 dark:text-indigo-400 leading-relaxed font-medium">Informasi dan logo di bawah ini digunakan sebagai identitas resmi instansi/perusahaan Anda pada sistem.</p>
                         </div>
                     </div>
 

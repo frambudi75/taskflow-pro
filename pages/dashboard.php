@@ -24,16 +24,11 @@ if ($dashboard_stats === null) {
     $stmt->execute([$user_id]);
     $total_docs = (int)$stmt->fetch()['total_docs'];
 
-    $stmt = $pdo->prepare("SELECT COUNT(*) as total_reports FROM daily_reports WHERE user_id = ?");
-    $stmt->execute([$user_id]);
-    $total_reports = (int)($stmt->fetch()['total_reports'] ?? 0);
-
     $dashboard_stats = [
         'total_todos'     => $total_todos,
         'completed_todos' => $completed_todos,
         'total_notes'     => $total_notes,
         'total_docs'      => $total_docs,
-        'total_reports'   => $total_reports
     ];
     setCache($cache_key_stats, $dashboard_stats, 600);
 } else {
@@ -41,13 +36,7 @@ if ($dashboard_stats === null) {
     $completed_todos = (int)$dashboard_stats['completed_todos'];
     $total_notes     = (int)$dashboard_stats['total_notes'];
     $total_docs      = (int)$dashboard_stats['total_docs'];
-    $total_reports   = (int)($dashboard_stats['total_reports'] ?? 0);
 }
-
-// Check today's daily report status (Feature #3 - Daily Reminder)
-$stmtTodayRep = $pdo->prepare("SELECT COUNT(*) as cnt FROM daily_reports WHERE user_id = ? AND report_date = CURDATE()");
-$stmtTodayRep->execute([$user_id]);
-$today_reports_count = (int)($stmtTodayRep->fetch()['cnt'] ?? 0);
 
 // Recent todos (next 7 days)
 $stmt = $pdo->prepare("SELECT * FROM todos WHERE user_id = ? AND todo_date >= CURDATE() AND todo_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY) ORDER BY todo_date ASC LIMIT 5");
@@ -80,15 +69,12 @@ if (isAdmin()) {
         $total_system_notes = (int)$stmt->fetch()['total_system_notes'];
         $stmt = $pdo->query("SELECT COUNT(*) as total_system_docs FROM documents");
         $total_system_docs = (int)$stmt->fetch()['total_system_docs'];
-        $stmt = $pdo->query("SELECT COUNT(*) as total_system_reports FROM daily_reports");
-        $total_system_reports = (int)($stmt->fetch()['total_system_reports'] ?? 0);
         $admin_stats = [
             'total_users'          => $total_users,
             'admin_users'          => $admin_users,
             'total_system_todos'   => $total_system_todos,
             'total_system_notes'   => $total_system_notes,
             'total_system_docs'    => $total_system_docs,
-            'total_system_reports' => $total_system_reports,
         ];
         setCache($cache_key_admin, $admin_stats, 900);
     } else {
@@ -106,14 +92,10 @@ $pct      = $total_todos > 0 ? round(($completed_todos / $total_todos) * 100) : 
 $hour     = (int)date('H');
 $greeting = $hour < 12 ? 'Selamat Pagi' : ($hour < 17 ? 'Selamat Siang' : 'Selamat Malam');
 
-// Get 7-Day Trend: Productivity (Todos) & Work Hours / Reports (Feature #4)
+// Get 7-Day Trend: Productivity (Todos)
 $productivity_data   = [];
-$work_hours_data     = [];
-$reports_count_data  = [];
 $labels              = [];
 $day_names           = ['Sun'=>'Min','Mon'=>'Sen','Tue'=>'Sel','Wed'=>'Rab','Thu'=>'Kam','Fri'=>'Jum','Sat'=>'Sab'];
-$total_hours_7d      = 0;
-$total_reports_7d    = 0;
 
 for ($i = 6; $i >= 0; $i--) {
     $date = date('Y-m-d', strtotime("-$i days"));
@@ -125,30 +107,7 @@ for ($i = 6; $i >= 0; $i--) {
     $stmtT = $pdo->prepare("SELECT COUNT(*) as count FROM todos WHERE user_id = ? AND completed = 1 AND todo_date = ?");
     $stmtT->execute([$user_id, $date]);
     $productivity_data[] = (int)($stmtT->fetch()['count'] ?? 0);
-
-    // Daily Reports & Hours
-    $stmtR = $pdo->prepare("SELECT start_time, end_time FROM daily_reports WHERE user_id = ? AND report_date = ?");
-    $stmtR->execute([$user_id, $date]);
-    $dayReps = $stmtR->fetchAll();
-    $cntReps = count($dayReps);
-    $reports_count_data[] = $cntReps;
-    $total_reports_7d += $cntReps;
-
-    $dayHours = 0;
-    foreach ($dayReps as $dr) {
-        if (!empty($dr['start_time']) && !empty($dr['end_time'])) {
-            $s = strtotime("1970-01-01 " . $dr['start_time']);
-            $e = strtotime("1970-01-01 " . $dr['end_time']);
-            if ($e > $s) {
-                $dayHours += ($e - $s) / 3600;
-            }
-        }
-    }
-    $dayHoursRounded = round($dayHours, 1);
-    $work_hours_data[] = $dayHoursRounded;
-    $total_hours_7d += $dayHours;
 }
-$total_hours_7d = round($total_hours_7d, 1);
 ?>
 
 <style>
@@ -231,54 +190,8 @@ $total_hours_7d = round($total_hours_7d, 1);
         </div>
     </div>
 
-    <!-- FEATURE #3: DAILY REPORT REMINDER BANNER (High Contrast) -->
-    <?php if ($today_reports_count === 0): ?>
-    <div class="mb-6 rounded-2xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
-         style="background:#fffbeb; border:1.5px solid #fcd34d">
-        <div class="flex items-center gap-3.5">
-            <div style="width:42px;height:42px;border-radius:12px;background:#d97706;color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 10px rgba(217,119,6,0.3)">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            </div>
-            <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span style="background:#d97706;color:#ffffff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase">Pengingat Laporan</span>
-                    <span style="color:#78350f;font-weight:800;font-size:12px"><?php echo date('d F Y'); ?></span>
-                </div>
-                <h2 style="color:#0f172a;font-weight:800;font-size:14px;margin:0 0 2px">Anda belum mengisi Laporan Kegiatan hari ini</h2>
-                <p style="color:#334155;font-weight:600;font-size:12.5px;margin:0">Dokumentasikan progres, kendala, foto kegiatan, dan jam kerja Anda hari ini agar rekapitulasi tersimpan rapi.</p>
-            </div>
-        </div>
-        <div class="flex items-center gap-2 flex-shrink-0 self-end sm:self-center">
-            <a href="?page=reports" style="background:#d97706;color:#ffffff;font-weight:800;font-size:12.5px;padding:9px 18px;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 10px rgba(217,119,6,0.25);transition:all .2s" class="hover:opacity-90">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                <span>+ Tulis Laporan Hari Ini</span>
-            </a>
-        </div>
-    </div>
-    <?php else: ?>
-    <div class="mb-6 rounded-2xl p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm"
-         style="background:#f0fdf4; border:1.5px solid #86efac">
-        <div class="flex items-center gap-3.5">
-            <div style="width:42px;height:42px;border-radius:12px;background:#059669;color:#ffffff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 10px rgba(5,150,105,0.3)">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-            </div>
-            <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <span style="background:#059669;color:#ffffff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:6px;letter-spacing:.05em;text-transform:uppercase">Laporan Terisi</span>
-                    <span style="color:#064e3b;font-weight:800;font-size:12px"><?php echo $today_reports_count; ?> kegiatan tercatat hari ini (<?php echo date('d M Y'); ?>)</span>
-                </div>
-                <p style="color:#1e293b;font-weight:700;font-size:13px;margin:0">Kerja bagus! Laporan kegiatan harian Anda untuk hari ini sudah lengkap tersimpan.</p>
-            </div>
-        </div>
-        <a href="?page=reports&date=<?php echo date('Y-m-d'); ?>" style="background:#059669;color:#ffffff;font-weight:800;font-size:12.5px;padding:9px 18px;border-radius:10px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;box-shadow:0 4px 10px rgba(5,150,105,0.25);transition:all .2s" class="hover:opacity-90 self-end sm:self-center">
-            <span>Buka Rekap Laporan</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
-        </a>
-    </div>
-    <?php endif; ?>
-
-    <!-- STAT CARDS (5 Columns) -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 mb-7">
+    <!-- STAT CARDS (4 Columns) -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-7">
         <!-- TUGAS -->
         <div class="dash-stat" style="background:linear-gradient(135deg,#6366f1,#4f46e5)">
             <div class="flex items-center justify-between">
@@ -294,19 +207,19 @@ $total_hours_7d = round($total_hours_7d, 1);
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
-        <!-- LAPORAN & JAM -->
-        <div class="dash-stat" style="background:linear-gradient(135deg,#0284c7,#0369a1)">
+        <!-- PROGRESS -->
+        <div class="dash-stat" style="background:linear-gradient(135deg,#d97706,#b45309)">
             <div class="flex items-center justify-between">
                 <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
-                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">JAM KERJA</span>
+                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">PROGRESS</span>
             </div>
             <div>
-                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $total_hours_7d; ?><span style="font-size:1.1rem;font-weight:700;margin-left:2px">j</span></div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $total_reports; ?> total laporan tercatat</div>
+                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $pct; ?>%</div>
+                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?> Tugas Selesai</div>
             </div>
-            <div class="pb-bg"><div class="pb-fill" style="width:<?php echo min(100, $total_hours_7d * 2.5); ?>%"></div></div>
+            <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- CATATAN -->
@@ -338,21 +251,6 @@ $total_hours_7d = round($total_hours_7d, 1);
             </div>
             <div class="pb-bg"><div class="pb-fill" style="width:<?php echo min(100, $total_docs * 10); ?>%"></div></div>
         </div>
-
-        <!-- PROGRESS -->
-        <div class="dash-stat col-span-2 md:col-span-1" style="background:linear-gradient(135deg,#d97706,#b45309)">
-            <div class="flex items-center justify-between">
-                <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:rgba(255,255,255,0.2)">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-                <span style="color:#ffffff;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase">PROGRESS</span>
-            </div>
-            <div>
-                <div style="font-size:2rem;font-weight:900;color:#fff;line-height:1"><?php echo $pct; ?>%</div>
-                <div style="color:#ffffff;font-size:12px;font-weight:700;margin-top:6px;opacity:0.95"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?> Tugas Selesai</div>
-            </div>
-            <div class="pb-bg"><div class="pb-fill" style="width:<?php echo $pct; ?>%"></div></div>
-        </div>
     </div>
 
     <!-- MAIN GRID -->
@@ -361,22 +259,12 @@ $total_hours_7d = round($total_hours_7d, 1);
         <!-- LEFT (8 Cols) -->
         <div class="lg:col-span-8 flex flex-col gap-6">
 
-            <!-- Productivity & Work Hours Chart -->
+            <!-- Productivity Chart -->
             <div class="d-section">
                 <div class="d-section-head flex-wrap gap-2">
                     <div>
-                        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Grafik Produktivitas &amp; Jam Kerja</h3>
-                        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">Tren 7 hari: tugas selesai &amp; jam kerja lapangan</p>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="hidden sm:inline-block px-3 py-1 rounded-xl bg-sky-50 dark:bg-sky-950/50 border border-sky-200 dark:border-sky-800 text-sky-800 dark:text-sky-300 font-bold text-xs">
-                            ⏱️ Total: <?php echo $total_hours_7d; ?> Jam
-                        </span>
-                        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
-                            <button type="button" onclick="switchChartMode('all')" id="btnChartAll" class="px-3 py-1 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all">Semua</button>
-                            <button type="button" onclick="switchChartMode('todos')" id="btnChartTodos" class="px-3 py-1 text-xs font-bold rounded-lg text-slate-700 dark:text-slate-300 hover:text-indigo-600 transition-all">Tugas</button>
-                            <button type="button" onclick="switchChartMode('hours')" id="btnChartHours" class="px-3 py-1 text-xs font-bold rounded-lg text-slate-700 dark:text-slate-300 hover:text-sky-600 transition-all">Jam Kerja</button>
-                        </div>
+                        <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Grafik Produktivitas Tugas</h3>
+                        <p class="text-xs text-slate-600 dark:text-slate-300 font-medium mt-0.5">Tren 7 hari penyelesaian tugas</p>
                     </div>
                 </div>
                 <div class="chart-container">
@@ -471,17 +359,6 @@ $total_hours_7d = round($total_hours_7d, 1);
                     <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aksi Cepat</h3>
                 </div>
                 <div style="padding:14px;display:flex;flex-direction:column;gap:10px">
-                    <!-- Daily Report Quick Link -->
-                    <a href="?page=reports" class="q-btn" style="background:#f0f9ff; border-color: #7dd3fc;">
-                        <div style="width:38px;height:38px;border-radius:12px;background:#0284c7;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(2,132,199,0.3)">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><circle cx="12" cy="14" r="2"/></svg>
-                        </div>
-                        <div>
-                            <div style="color:#0c4a6e;font-weight:800;font-size:13.5px">Laporan Kegiatan Harian</div>
-                            <div style="color:#0369a1;font-size:12px;font-weight:600">Isi, cetak PDF &amp; ekspor Excel</div>
-                        </div>
-                    </a>
-
                     <a href="?page=calendar" class="q-btn" style="background:#eef2ff; border-color: #a5b4fc;">
                         <div style="width:38px;height:38px;border-radius:12px;background:#4f46e5;color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 2px 6px rgba(79,70,229,0.3)">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -553,7 +430,6 @@ $total_hours_7d = round($total_hours_7d, 1);
                         ['Total Pengguna Terdaftar', $admin_stats['total_users']],
                         ['Administrator',           $admin_stats['admin_users']],
                         ['Total Tugas Sistem',      $admin_stats['total_system_todos']],
-                        ['Laporan Kegiatan',        $admin_stats['total_system_reports'] ?? 0],
                         ['Total Catatan Tim',       $admin_stats['total_system_notes']],
                         ['Total File Dokumen',      $admin_stats['total_system_docs']],
                     ] as $r): ?>
@@ -577,7 +453,6 @@ $total_hours_7d = round($total_hours_7d, 1);
 (function() {
     var labelsData = <?php echo json_encode($labels); ?>;
     var todosData = <?php echo json_encode($productivity_data); ?>;
-    var hoursData = <?php echo json_encode($work_hours_data); ?>;
 
     var chartCanvas = document.getElementById('productivityChart');
     if (!chartCanvas) return;
@@ -588,43 +463,27 @@ $total_hours_7d = round($total_hours_7d, 1);
     }
 
     window.taskflowProductivityChart = new Chart(ctx, {
-        type: 'bar',
+        type: 'line',
         data: {
             labels: labelsData,
             datasets: [
                 {
-                    type: 'line',
                     label: 'Tugas Selesai',
                     data: todosData,
                     borderColor: '#4f46e5',
                     backgroundColor: 'rgba(79, 70, 229, 0.1)',
                     borderWidth: 3,
                     tension: 0.35,
-                    fill: false,
+                    fill: true,
                     pointBackgroundColor: '#4f46e5',
                     pointRadius: 4,
                     pointHoverRadius: 6,
-                    yAxisID: 'y'
-                },
-                {
-                    type: 'bar',
-                    label: 'Jam Kerja Terlapor (Jam)',
-                    data: hoursData,
-                    backgroundColor: 'rgba(2, 132, 199, 0.75)',
-                    hoverBackgroundColor: '#0284c7',
-                    borderRadius: 6,
-                    barThickness: 20,
-                    yAxisID: 'y1'
                 }
             ]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
             plugins: {
                 legend: { 
                     display: true,
@@ -638,24 +497,11 @@ $total_hours_7d = round($total_hours_7d, 1);
                 },
                 tooltip: {
                     padding: 12,
-                    cornerRadius: 10,
-                    callbacks: {
-                        label: function(context) {
-                            let label = context.dataset.label || '';
-                            if (label) label += ': ';
-                            if (context.parsed.y !== null) {
-                                label += context.parsed.y + (context.datasetIndex === 1 ? ' Jam' : ' Tugas');
-                            }
-                            return label;
-                        }
-                    }
+                    cornerRadius: 10
                 }
             },
             scales: {
                 y: {
-                    type: 'linear',
-                    display: true,
-                    position: 'left',
                     beginAtZero: true,
                     ticks: {
                         stepSize: 1,
@@ -664,20 +510,6 @@ $total_hours_7d = round($total_hours_7d, 1);
                     },
                     grid: {
                         color: 'rgba(0,0,0,0.06)'
-                    }
-                },
-                y1: {
-                    type: 'linear',
-                    display: true,
-                    position: 'right',
-                    beginAtZero: true,
-                    ticks: {
-                        stepSize: 1,
-                        color: '#0284c7',
-                        font: { size: 11, weight: '700' }
-                    },
-                    grid: {
-                        drawOnChartArea: false
                     }
                 },
                 x: {
@@ -690,38 +522,5 @@ $total_hours_7d = round($total_hours_7d, 1);
             }
         }
     });
-
-    window.switchChartMode = function(mode) {
-        var btnAll = document.getElementById('btnChartAll');
-        var btnTodos = document.getElementById('btnChartTodos');
-        var btnHours = document.getElementById('btnChartHours');
-        var ch = window.taskflowProductivityChart;
-        if (!ch) return;
-
-        [btnAll, btnTodos, btnHours].forEach(function(b) {
-            if (b) b.className = 'px-3 py-1 text-xs font-bold rounded-lg text-slate-700 dark:text-slate-300 hover:text-indigo-600 transition-all';
-        });
-
-        if (mode === 'all') {
-            if (btnAll) btnAll.className = 'px-3 py-1 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all';
-            ch.data.datasets[0].hidden = false;
-            ch.data.datasets[1].hidden = false;
-            ch.options.scales.y.display = true;
-            ch.options.scales.y1.display = true;
-        } else if (mode === 'todos') {
-            if (btnTodos) btnTodos.className = 'px-3 py-1 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all';
-            ch.data.datasets[0].hidden = false;
-            ch.data.datasets[1].hidden = true;
-            ch.options.scales.y.display = true;
-            ch.options.scales.y1.display = false;
-        } else if (mode === 'hours') {
-            if (btnHours) btnHours.className = 'px-3 py-1 text-xs font-bold rounded-lg bg-white dark:bg-slate-700 text-sky-600 dark:text-sky-400 shadow-sm transition-all';
-            ch.data.datasets[0].hidden = true;
-            ch.data.datasets[1].hidden = false;
-            ch.options.scales.y.display = false;
-            ch.options.scales.y1.display = true;
-        }
-        ch.update();
-    };
 })();
 </script>
