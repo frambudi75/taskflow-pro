@@ -1,6 +1,6 @@
 <?php
 if (!defined('IN_APP')) exit('Akses Ditolak');
-// pages/settings.php - System Configuration & Official Letterhead (Kop Surat) Settings 2.0
+// pages/settings.php - System Configuration & Official Letterhead (Kop Surat) Settings 2.0 (Consistent Full-Width Layout)
 if (!isAdmin()) {
     die("Akses Ditolak.");
 }
@@ -266,7 +266,7 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
             <span>Kop Surat &amp; Logo</span>
         </button>
         <button type="button" onclick="switchTab('umum')" class="setting-tab px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 flex-shrink-0 <?php echo $active_tab === 'umum' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white border border-slate-200/90 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 shadow-2xs'; ?>" data-tab="umum" role="tab">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
             <span>Umum</span>
         </button>
         <button type="button" onclick="switchTab('notif')" class="setting-tab px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 flex-shrink-0 <?php echo $active_tab === 'notif' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white border border-slate-200/90 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 shadow-2xs'; ?>" data-tab="notif" role="tab">
@@ -279,7 +279,7 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
         </button>
     </div>
 
-    <!-- Main Settings Form Card -->
+    <!-- Main Settings Form Card (Uniform Full-Width Across All Tabs) -->
     <div class="bg-white/80 backdrop-blur-md rounded-3xl border border-white/90 shadow-sm overflow-hidden">
         <form method="POST" action="index.php?page=settings" enctype="multipart/form-data" data-no-ajax="true" id="settingsForm" class="p-6 md:p-8">
             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
@@ -378,107 +378,99 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
                 </div>
 
                 <!-- ============================================================== -->
-                <!-- TAB 2: UMUM (2-Column Setting Rows Pattern)                    -->
+                <!-- TAB 2: UMUM (Consistent Form Grid)                            -->
                 <!-- ============================================================== -->
-                <div id="pane-umum" class="tab-pane <?php echo $active_tab === 'umum' ? '' : 'hidden'; ?> divide-y divide-slate-100">
-                    
-                    <!-- Row 1: Nama Aplikasi -->
-                    <div class="py-5 first:pt-0 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Nama Aplikasi</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Nama sistem utama yang tampil pada bilah navigasi, header halaman login, tab peramban, dan footer email.
-                            </p>
+                <div id="pane-umum" class="tab-pane <?php echo $active_tab === 'umum' ? '' : 'hidden'; ?> space-y-6">
+                    <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-start gap-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </div>
-                        <div class="md:w-2/3 max-w-lg">
+                        <div>
+                            <h4 class="text-xs font-black text-indigo-950">Pengaturan Dasar Aplikasi</h4>
+                            <p class="text-[11px] text-indigo-700 leading-relaxed font-medium mt-0.5">Konfigurasi nama aplikasi publik, URL instalasi sistem, dan kebijakan pendaftaran akun mandiri.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Nama Aplikasi -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Nama Aplikasi</label>
                             <input type="text" name="app_name" value="<?php echo htmlspecialchars($app_name); ?>" required
                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
-                        </div>
-                    </div>
-
-                    <!-- Row 2: URL Situs -->
-                    <div class="py-5 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">URL Situs (App URL)</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Alamat tautan dasar instalasi aplikasi Anda. Digunakan untuk menghasilkan tautan berbagi dokumen publik dan callback webhook.
+                            <p class="mt-1.5 text-[11px] text-slate-400 font-medium leading-relaxed">
+                                Tampil pada navigasi, header halaman login, tab peramban, dan footer email.
                             </p>
                         </div>
-                        <div class="md:w-2/3 max-w-lg">
+
+                        <!-- URL Situs -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">URL Situs (App URL)</label>
                             <input type="url" name="app_url" value="<?php echo htmlspecialchars(getSetting('app_url')); ?>" placeholder="Contoh: http://localhost/taskflow"
                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
+                            <p class="mt-1.5 text-[11px] text-slate-400 font-medium leading-relaxed">
+                                Alamat dasar untuk tautan berbagi berkas publik dan callback webhook eksternal.
+                            </p>
                         </div>
                     </div>
 
-                    <!-- Row 3: Pendaftaran Mandiri -->
-                    <div class="py-5 last:pb-0 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Pendaftaran Pengguna Mandiri</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Kontrol otorisasi apakah pengunjung umum dapat mendaftarkan akun baru secara langsung dari halaman login.
-                            </p>
-                        </div>
-                        <div class="md:w-2/3 max-w-lg">
-                            <label class="inline-flex items-center gap-3 cursor-pointer select-none p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-colors">
-                                <input type="checkbox" name="allow_registration" value="1" <?php echo $allow_reg ? 'checked' : ''; ?> class="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-slate-300">
-                                <div>
-                                    <div class="text-xs font-bold text-slate-800">Izinkan Pendaftaran Publik</div>
-                                    <div class="text-[10px] text-slate-400">Pengguna baru akan otomatis mendapatkan kuota default sistem</div>
+                    <!-- Pendaftaran Mandiri Card -->
+                    <div class="pt-2">
+                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Kebijakan Akun Pengguna</label>
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 hover:bg-slate-100/60 transition-colors flex items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center flex-shrink-0 border border-indigo-100">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
                                 </div>
+                                <div>
+                                    <div class="text-xs font-extrabold text-slate-900">Izinkan Pendaftaran Pengguna Mandiri</div>
+                                    <p class="text-[11px] text-slate-400 font-medium">Bila diaktifkan, pengunjung umum dapat mendaftar akun baru melalui form portal.</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                                <input type="checkbox" name="allow_registration" value="1" <?php echo $allow_reg ? 'checked' : ''; ?> class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                             </label>
                         </div>
                     </div>
-
                 </div>
 
                 <!-- ============================================================== -->
-                <!-- TAB 3: NOTIFIKASI (Setting Rows + Live Token Verifier)         -->
+                <!-- TAB 3: NOTIFIKASI (Consistent Form Grid + Live Token Verifier) -->
                 <!-- ============================================================== -->
-                <div id="pane-notif" class="tab-pane <?php echo $active_tab === 'notif' ? '' : 'hidden'; ?> divide-y divide-slate-100">
-                    
-                    <!-- Row 1: Bot Token Telegram -->
-                    <div class="py-5 first:pt-0 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Bot Token Telegram</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Kunci API otentikasi bot resmi dari <a href="https://t.me/BotFather" target="_blank" class="text-indigo-600 hover:underline font-bold">@BotFather</a> untuk mengirim notifikasi tugas dan laporan harian secara real-time.
-                            </p>
+                <div id="pane-notif" class="tab-pane <?php echo $active_tab === 'notif' ? '' : 'hidden'; ?> space-y-6">
+                    <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-start gap-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
                         </div>
-                        <div class="md:w-2/3 max-w-lg space-y-3">
-                            <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:bg-white transition-all">
-                                <input type="password" name="telegram_bot_token" id="tgTokenInput" value="<?php echo htmlspecialchars($tg_token); ?>" placeholder="123456789:ABCDEF..."
-                                       class="w-full bg-transparent text-xs font-mono font-bold text-slate-900 outline-none placeholder:text-slate-400 pr-16">
-                                
-                                <div class="absolute right-2.5 flex items-center gap-1 text-slate-400">
-                                    <!-- Toggle Eye Icon -->
-                                    <button type="button" onclick="toggleTgTokenVisibility()" class="p-1 hover:text-slate-700 transition-colors" title="Lihat/Sembunyikan Token">
-                                        <svg id="tgEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Bot Verification Actions & Status Pill -->
-                            <div class="flex flex-wrap items-center gap-2.5">
-                                <button type="button" onclick="testTelegramBot()" id="btnTestBot"
-                                        class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200/90 flex items-center gap-1.5 active:scale-95 shadow-2xs">
-                                    <svg id="botTestIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-indigo-600"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
-                                    <span id="botTestText">Tes Koneksi Bot</span>
-                                </button>
-                                
-                                <span id="botStatusBadge" class="hidden text-xs font-bold px-3 py-1 rounded-xl border"></span>
-                            </div>
+                        <div>
+                            <h4 class="text-xs font-black text-indigo-950">Integrasi Notifikasi Telegram &amp; Jadwal Rekap</h4>
+                            <p class="text-[11px] text-indigo-700 leading-relaxed font-medium mt-0.5">Konfigurasi token bot Telegram untuk pengiriman notifikasi instan serta jadwal rekapitulasi harian ke seluruh pengguna.</p>
                         </div>
                     </div>
 
-                    <!-- Row 2: Jadwal Pengiriman -->
-                    <div class="py-5 last:pb-0 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Jadwal Rekap Harian (WIB)</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- Bot Token Telegram -->
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Bot Token Telegram</label>
+                                <a href="https://t.me/BotFather" target="_blank" class="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 transition-colors">Buat Bot via @BotFather ↗</a>
+                            </div>
+                            <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:bg-white transition-all">
+                                <input type="password" name="telegram_bot_token" id="tgTokenInput" value="<?php echo htmlspecialchars($tg_token); ?>" placeholder="123456789:ABCDEF..."
+                                       class="w-full bg-transparent text-xs font-mono font-bold text-slate-900 outline-none placeholder:text-slate-400 pr-10">
+                                
+                                <button type="button" onclick="toggleTgTokenVisibility()" class="absolute right-3 text-slate-400 hover:text-slate-700 transition-colors" title="Lihat/Sembunyikan Token">
+                                    <svg id="tgEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                </button>
+                            </div>
                             <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Jam pengiriman rekapitulasi ringkasan tugas dan batas tenggat ke Telegram seluruh pengguna terdaftar.
+                                Kunci API resmi bot Telegram untuk mengirimkan pengingat tugas otomatis.
                             </p>
                         </div>
-                        <div class="md:w-2/3 max-w-lg">
+
+                        <!-- Jadwal Pengiriman -->
+                        <div class="space-y-2">
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest">Jadwal Rekap Harian (WIB)</label>
                             <select name="notif_time" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer">
                                 <?php 
                                 $currentTime = getSetting('notif_time', '08');
@@ -490,114 +482,126 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
                                     </option>
                                 <?php endfor; ?>
                             </select>
+                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
+                                Waktu rutin server mengirimkan ringkasan agenda kerja harian ke seluruh tim.
+                            </p>
                         </div>
                     </div>
 
+                    <!-- Bot Verification Action Box -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-indigo-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 2L2 8.66l10 2.66 2.66 10L22 2z"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-800">Verifikasi Koneksi API Bot Telegram</div>
+                                <div class="text-[11px] text-slate-400">Pastikan bot aktif dan siap merespons sebelum menyimpan token.</div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 flex-shrink-0">
+                            <span id="botStatusBadge" class="hidden text-xs font-bold px-3 py-1 rounded-xl border"></span>
+                            <button type="button" onclick="testTelegramBot()" id="btnTestBot"
+                                    class="px-4 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 text-xs font-bold transition-all border border-slate-200 flex items-center gap-1.5 active:scale-95 shadow-2xs">
+                                <svg id="botTestIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-indigo-600"><polyline points="20 6 9 17 4 12"/></svg>
+                                <span id="botTestText">Tes Koneksi Bot</span>
+                            </button>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- ============================================================== -->
-                <!-- TAB 4: EMAIL SMTP (Setting Rows + Security + Test Mail)        -->
+                <!-- TAB 4: EMAIL SMTP (Consistent Form Grid + Encryption + Test)   -->
                 <!-- ============================================================== -->
-                <div id="pane-email" class="tab-pane <?php echo $active_tab === 'email' ? '' : 'hidden'; ?> divide-y divide-slate-100">
-                    
-                    <!-- Row 1: From Email -->
-                    <div class="py-5 first:pt-0 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">From Email (Pengirim)</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Alamat surat elektronik yang akan tertera sebagai identitas pengirim pada kotak masuk penerima.
-                            </p>
+                <div id="pane-email" class="tab-pane <?php echo $active_tab === 'email' ? '' : 'hidden'; ?> space-y-6">
+                    <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-start gap-3.5">
+                        <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center flex-shrink-0">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                         </div>
-                        <div class="md:w-2/3 max-w-lg">
+                        <div>
+                            <h4 class="text-xs font-black text-indigo-950">Konfigurasi Pengiriman Email SMTP</h4>
+                            <p class="text-[11px] text-indigo-700 leading-relaxed font-medium mt-0.5">Pengaturan server surat elektronik terenkripsi untuk notifikasi akun, tugas baru, dan layanan reset kata sandi.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <!-- From Email -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">From Email (Nama Pengirim)</label>
                             <input type="email" name="smtp_from" value="<?php echo htmlspecialchars(getSetting('smtp_from')); ?>" placeholder="noreply@domain.com"
                                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
+                            <p class="mt-1.5 text-[11px] text-slate-400 font-medium">Alamat surat resmi yang tertera sebagai pengirim notifikasi.</p>
                         </div>
-                    </div>
 
-                    <!-- Row 2: Host & Port & Encryption -->
-                    <div class="py-5 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Server SMTP &amp; Enkripsi</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Nama host server surat, nomor port komunikasi, dan protokol keamanan enkripsi handshake (TLS/SSL).
-                            </p>
+                        <!-- Enkripsi Keamanan -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Enkripsi Keamanan (Security)</label>
+                            <select name="smtp_crypto" id="smtpCryptoSelect" onchange="autoSyncPort(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer">
+                                <option value="tls" <?php echo $smtp_crypto === 'tls' ? 'selected' : ''; ?>>TLS (STARTTLS - Port 587, Rekomendasi)</option>
+                                <option value="ssl" <?php echo $smtp_crypto === 'ssl' ? 'selected' : ''; ?>>SSL (SMTPS - Port 465)</option>
+                                <option value="none" <?php echo $smtp_crypto === 'none' ? 'selected' : ''; ?>>None (Tanpa Enkripsi - Port 25)</option>
+                            </select>
+                            <p class="mt-1.5 text-[11px] text-slate-400 font-medium">Memilih opsi ini akan otomatis menyesuaikan port default.</p>
                         </div>
-                        <div class="md:w-2/3 max-w-lg space-y-3">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">SMTP Host</label>
-                                    <input type="text" name="smtp_host" value="<?php echo htmlspecialchars(getSetting('smtp_host')); ?>" placeholder="smtp.gmail.com"
-                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">SMTP Port</label>
-                                    <input type="text" name="smtp_port" id="smtpPortInput" value="<?php echo htmlspecialchars(getSetting('smtp_port', '587')); ?>" placeholder="587"
-                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
-                                </div>
-                            </div>
 
-                            <div>
-                                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">Enkripsi Keamanan (Security)</label>
-                                <select name="smtp_crypto" id="smtpCryptoSelect" onchange="autoSyncPort(this.value)" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all cursor-pointer">
-                                    <option value="tls" <?php echo $smtp_crypto === 'tls' ? 'selected' : ''; ?>>TLS (STARTTLS - Port 587, Rekomendasi)</option>
-                                    <option value="ssl" <?php echo $smtp_crypto === 'ssl' ? 'selected' : ''; ?>>SSL (SMTPS - Port 465)</option>
-                                    <option value="none" <?php echo $smtp_crypto === 'none' ? 'selected' : ''; ?>>None (Tanpa Enkripsi - Port 25)</option>
-                                </select>
-                            </div>
+                        <!-- SMTP Host -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">SMTP Host Server</label>
+                            <input type="text" name="smtp_host" value="<?php echo htmlspecialchars(getSetting('smtp_host')); ?>" placeholder="smtp.gmail.com atau mail.perusahaan.com"
+                                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
                         </div>
-                    </div>
 
-                    <!-- Row 3: Credentials -->
-                    <div class="py-5 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Kredensial Otentikasi</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Nama pengguna akun dan kata sandi aplikasi (App Password) untuk otentikasi login ke server SMTP.
-                            </p>
+                        <!-- SMTP Port -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">SMTP Port</label>
+                            <input type="text" name="smtp_port" id="smtpPortInput" value="<?php echo htmlspecialchars(getSetting('smtp_port', '587')); ?>" placeholder="587"
+                                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
                         </div>
-                        <div class="md:w-2/3 max-w-lg space-y-3">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">SMTP User / Akun</label>
-                                    <input type="text" name="smtp_user" value="<?php echo htmlspecialchars(getSetting('smtp_user')); ?>" placeholder="user@gmail.com"
-                                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1">SMTP Password</label>
-                                    <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:bg-white transition-all">
-                                        <input type="password" name="smtp_pass" id="smtpPassInput" value="<?php echo htmlspecialchars(getSetting('smtp_pass')); ?>" placeholder="••••••••"
-                                               class="w-full bg-transparent text-xs font-mono font-bold text-slate-800 outline-none pr-8">
-                                        <button type="button" onclick="togglePassVisibility()" class="absolute right-2.5 text-slate-400 hover:text-slate-700 transition-colors">
-                                            <svg id="smtpEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Row 4: Kirim Email Uji Coba Action -->
-                    <div class="py-5 last:pb-0 flex flex-col md:flex-row md:items-start justify-between gap-5">
-                        <div class="md:w-1/3">
-                            <h4 class="text-xs font-black text-slate-800 uppercase tracking-wider mb-1">Uji Coba Handshake Email</h4>
-                            <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
-                                Kirim email uji coba ke alamat Anda untuk memastikan kredensial dan enkripsi SMTP telah berfungsi normal.
-                            </p>
+                        <!-- SMTP User -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">SMTP User / Akun Email</label>
+                            <input type="text" name="smtp_user" value="<?php echo htmlspecialchars(getSetting('smtp_user')); ?>" placeholder="user@domain.com"
+                                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-mono font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all">
                         </div>
-                        <div class="md:w-2/3 max-w-lg space-y-3">
-                            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-                                <input type="email" id="testEmailRecipient" value="<?php echo htmlspecialchars($adminEmail); ?>" placeholder="email@tujuan-tes.com"
-                                       class="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
-                                <button type="button" onclick="sendTestEmail()" id="btnSendTestEmail"
-                                        class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all border border-slate-200/90 flex items-center justify-center gap-1.5 active:scale-95 shadow-2xs">
-                                    <svg id="emailTestIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-indigo-600"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                                    <span id="emailTestText">Kirim Email Uji Coba</span>
+
+                        <!-- SMTP Password -->
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">SMTP Password / App Password</label>
+                            <div class="relative flex items-center bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 focus-within:border-indigo-500 focus-within:ring-2 focus-within:ring-indigo-500/20 focus-within:bg-white transition-all">
+                                <input type="password" name="smtp_pass" id="smtpPassInput" value="<?php echo htmlspecialchars(getSetting('smtp_pass')); ?>" placeholder="••••••••"
+                                       class="w-full bg-transparent text-xs font-mono font-bold text-slate-800 outline-none pr-8">
+                                <button type="button" onclick="togglePassVisibility()" class="absolute right-3 text-slate-400 hover:text-slate-700 transition-colors">
+                                    <svg id="smtpEyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                 </button>
                             </div>
-                            <span id="smtpStatusBadge" class="hidden text-xs font-bold px-3 py-1 rounded-xl border block w-fit"></span>
                         </div>
                     </div>
 
+                    <!-- Kirim Email Uji Coba Action Card -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-indigo-600 flex items-center justify-center flex-shrink-0 shadow-2xs">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-xs font-bold text-slate-800">Uji Coba Handshake Pengiriman Email</div>
+                                <div class="text-[11px] text-slate-400">Kirim email percobaan untuk memverifikasi kredensial dan enkripsi server sebelum digunakan.</div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 pt-1">
+                            <input type="email" id="testEmailRecipient" value="<?php echo htmlspecialchars($adminEmail); ?>" placeholder="email@tujuan-tes.com"
+                                   class="flex-1 bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+                            <button type="button" onclick="sendTestEmail()" id="btnSendTestEmail"
+                                    class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm shadow-indigo-600/25 flex-shrink-0">
+                                <svg id="emailTestIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                                <span id="emailTestText">Kirim Email Uji Coba</span>
+                            </button>
+                        </div>
+                        <span id="smtpStatusBadge" class="hidden text-xs font-bold px-3 py-1.5 rounded-xl border block w-fit"></span>
+                    </div>
                 </div>
 
                 <!-- Global Action Footer Section -->
@@ -763,7 +767,7 @@ function sendTestEmail() {
     const recipient = emailInput ? emailInput.value.trim() : '';
 
     if (!recipient) {
-        badge.className = 'text-xs font-bold px-3 py-1 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 block w-fit';
+        badge.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 block w-fit';
         badge.textContent = 'Masukkan alamat email penerima tes!';
         badge.classList.remove('hidden');
         return;
@@ -771,7 +775,7 @@ function sendTestEmail() {
 
     btn.disabled = true;
     textEl.textContent = 'Mengirim...';
-    badge.className = 'text-xs font-bold px-3 py-1 rounded-xl border bg-slate-50 text-slate-600 border-slate-200 block w-fit';
+    badge.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border bg-slate-50 text-slate-600 border-slate-200 block w-fit';
     badge.textContent = 'Menghubungkan ke SMTP Server...';
     badge.classList.remove('hidden');
 
@@ -790,17 +794,17 @@ function sendTestEmail() {
         btn.disabled = false;
         textEl.textContent = 'Kirim Email Uji Coba';
         if (data.success) {
-            badge.className = 'text-xs font-bold px-3 py-1 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 block w-fit';
+            badge.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border bg-emerald-50 text-emerald-700 border-emerald-200 block w-fit';
             badge.textContent = '✓ ' + data.message;
         } else {
-            badge.className = 'text-xs font-bold px-3 py-1 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 block w-fit';
+            badge.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 block w-fit';
             badge.textContent = '✗ ' + (data.message || 'Gagal mengirim email tes');
         }
     })
     .catch(err => {
         btn.disabled = false;
         textEl.textContent = 'Kirim Email Uji Coba';
-        badge.className = 'text-xs font-bold px-3 py-1 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 block w-fit';
+        badge.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border bg-rose-50 text-rose-700 border-rose-200 block w-fit';
         badge.textContent = '✗ Kesalahan jaringan: ' + err;
     });
 }
