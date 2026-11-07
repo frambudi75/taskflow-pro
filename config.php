@@ -622,7 +622,15 @@ function sendEmailNotif($to, $subject, $message) {
         $mail->SMTPAuth   = !empty($user);
         $mail->Username   = $user;
         $mail->Password   = $pass;
-        $mail->SMTPSecure = ($port == '465') ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        $crypto = strtolower(getSetting('smtp_crypto', ($port == '465' ? 'ssl' : 'tls')));
+        if ($crypto === 'ssl' || $port == '465') {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($crypto === 'none') {
+            $mail->SMTPSecure = false;
+            $mail->SMTPAutoTLS = false;
+        } else {
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
         $mail->Port       = $port;
 
         // Recipients
