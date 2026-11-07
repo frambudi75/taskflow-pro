@@ -222,7 +222,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 
     <!-- Bottom Security & Copyright Footer -->
     <footer class="w-full max-w-5xl mx-auto py-4 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-between gap-2">
-        <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($company_name); ?>. Hak Cipta Dilindungi.</p>
+        <p>&copy; <?php echo date('Y'); ?> <?php echo htmlspecialchars($company_name); ?> v<?php echo APP_VERSION; ?>. Hak Cipta Dilindungi.</p>
         <div class="flex items-center gap-1.5 text-[11px] text-slate-500">
             <svg class="w-3.5 h-3.5 text-emerald-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
             <span>Koneksi Aman Terenkripsi TLS</span>

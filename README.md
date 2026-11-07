@@ -1,67 +1,95 @@
-# TaskFlow Pro: Professional Edition
+# TaskFlow Pro: Enterprise Cloud Platform
 
-![Version](https://img.shields.io/badge/version-3.1.0-blue)
+![Version](https://img.shields.io/badge/version-3.2.0-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-indigo)
 ![Tailwind](https://img.shields.io/badge/Styling-Tailwind_CSS-sky)
+![PWA](https://img.shields.io/badge/PWA-Ready-purple)
 ![Production](https://img.shields.io/badge/Status-Production_Ready-emerald)
 
-TaskFlow Pro adalah aplikasi manajemen produktivitas terpadu untuk mengelola tugas, catatan, kalender kerja, dan arsip dokumen dalam satu tempat kerja terstruktur.
+**TaskFlow Pro** adalah ruang kendali modern terpadu untuk manajemen tugas, dokumen terkompresi cerdas, kalender kerja, audit log real-time, dan kolaborasi tim profesional dengan antarmuka *frosted glass* 100% *full-width*.
 
 ---
 
-## Fitur Utama
+## 🚀 Fitur Utama & Keunggulan
 
-- **Notifikasi Terjadwal**: Ringkasan tugas harian otomatis dikirim ke Telegram dan Email (SMTP) sesuai jadwal yang ditentukan.
-- **Pengaturan Jadwal Notifikasi**: Atur jam pengiriman notifikasi (00:00 - 23:00) langsung dari panel pengaturan sistem.
-- **Tata Letak Responsif**: Tampilan antarmuka optimal untuk perangkat mobile dan desktop.
-- **Manajemen Dokumen**: Simpan, pratinjau, dan kelola dokumen dengan sistem penyimpanan file terisolasi.
-- **Analitik Produktivitas**: Pantau kemajuan penyelesaian tugas melalui grafik mingguan.
-- **Multi-User & Hak Akses**: Manajemen peran akun Administrator dan User standar dengan kontrol akses terpisah.
-- **Pencadangan Sistem**: Ekspor database dan file pendukung kapan saja melalui fitur backup sekali klik.
+- **📂 Pusat Dokumen 2.0 & Aksi Massal (*Bulk Actions*)**:
+  - Seleksi ganda multi-dokumen dengan *Floating Multi-Action Bar*.
+  - Unduh dokumen terpilih sekaligus dalam satu berkas `.zip` via native `ZipArchive`.
+  - Pemindai & pembersih otomatis entri dokumen rusak/tanpa berkas fisik (*Broken Records Cleaner*).
+  - Unggah berkas interaktif via *Drag-and-Drop fullscreen overlay*.
+  - Kompresi berkas otomatis dan kontrol kuota penyimpanan per-pengguna.
+- **📱 Dukungan Progressive Web App (PWA)**:
+  - Dilengkapi `manifest.json` dan Service Worker `sw.js` untuk caching cerdas.
+  - Dapat diinstal langsung ke layar utama ponsel (*Add to Home Screen*) seperti aplikasi native mobile di Android dan iOS.
+- **🔍 Navigasi Global Command Palette (`Ctrl + K` / `Cmd + K`)**:
+  - Akses cepat pencarian halaman dan aksi penting dari mana saja dengan navigasi keyboard (`ArrowDown`, `ArrowUp`, `Enter`, `Esc`).
+- **📄 Ekspor & Cetak Rekap Laporan Resmi Ber-KOP Surat**:
+  - Rekap audit aktivitas otomatis dilengkapi KOP Surat resmi perusahaan (Logo, Nama Instansi, Alamat, Hotline, Email, Website) dan blok validasi tanda tangan administrator.
+- **📌 Papan Kanban & Kalender Produktivitas**:
+  - Alur kerja 3 kolom (*Todo*, *In Progress*, *Done*) dengan paginasi interaktif dan sinkronisasi instan.
+- **👤 Profil & Keamanan 2.0**:
+  - Tata letak *Master-Detail 2-Kolom* bersih dengan tab *Informasi Profil* dan *Keamanan / Password*.
+  - Ganti avatar langsung pada foto profil.
+  - Integrasi Telegram Chat ID dengan indikator status koneksi dan tombol tes notifikasi.
+- **⚙️ Pengaturan Sistem Terpadu**:
+  - Tampilan baris 2-kolom ala GitHub/Vercel settings.
+  - Verifikasi koneksi Telegram Bot Token instan.
+  - Pilihan enkripsi SMTP (TLS / SSL / None) dan fitur *Kirim Email Uji Coba*.
+- **🔐 Portal Autentikasi Eksekutif**:
+  - Tampilan *ambient canvas* modern dengan *toggle password visibility* dan alur proteksi sesi anti-session fixation.
+- **📐 100% Full-Width Cohesive Layout**:
+  - Standarisasi tata letak di seluruh 11 halaman sistem (`w-full space-y-6 p-4 md:p-8`), bebas pergeseran visual saat berpindah tab.
 
 ---
 
-## Spesifikasi Teknis
+## 🛠️ Spesifikasi Teknis
 
-- **Backend**: PHP 8.0+ (Native PDO)
-- **Database**: MariaDB / MySQL
-- **CSS**: Tailwind CSS
-- **Email**: PHPMailer (dukungan SMTP)
-- **Notifikasi**: Telegram Bot API
-- **Komponen Visual**: Chart.js, Google Fonts (Inter)
+- **Bahasa & Runtime**: PHP 8.0+ (Native PDO, ZipArchive, cURL)
+- **Basis Data**: MariaDB / MySQL
+- **CSS Framework**: Tailwind CSS (JIT & Dark Mode Support)
+- **Komponen Visual**: Chart.js, Google Fonts (Plus Jakarta Sans & Inter)
+- **Protokol Email**: PHPMailer dengan enkripsi TLS/SSL
+- **Integrasi Webhook**: Telegram Bot API
+- **Standar PWA**: Web App Manifest v1 & Service Worker Cache API
 
 ---
 
-## Panduan Instalasi Singkat
+## 📦 Panduan Instalasi Singkat
 
 1. **Clone Repositori**:
    ```bash
    git clone https://github.com/frambudi75/taskflow-pro.git
+   cd taskflow-pro
    ```
-2. **Konfigurasi Database**:
-   - Impor `database.sql` ke database MySQL Anda.
-   - Sesuaikan `DB_HOST`, `DB_NAME`, `DB_USER`, dan `DB_PASS` di file `config.php`.
-3. **Pengaturan Telegram & SMTP**:
-   - Masuk dengan akun Administrator.
-   - Buka menu Pengaturan.
-   - Masukkan token bot Telegram dan konfigurasi SMTP (Host, Port, User, Password).
-4. **Jalankan Cron Job Notifikasi**:
-   Tambahkan cron job pada server Anda untuk pemeriksaan berkala:
-   ```bash
-   0 * * * * php /path/to/taskflow/notif_harian.php
-   ```
+2. **Konfigurasi Basis Data**:
+   - Impor skema basis data `database.sql` ke MySQL / MariaDB Anda.
+   - Buka berkas `config.php` dan sesuaikan kredensial koneksi:
+     ```php
+     define('DB_HOST', 'localhost');
+     define('DB_NAME', 'taskflow_db');
+     define('DB_USER', 'root');
+     define('DB_PASS', '');
+     ```
+3. **Pengaturan Sistem**:
+   - Masuk ke portal sistem menggunakan akun Administrator.
+   - Buka menu **Pengaturan Sistem** untuk mengunggah logo perusahaan, mengisi KOP surat, menyetel token bot Telegram, dan mengonfigurasi email SMTP.
+4. **Otomatisasi Cron Notifikasi**:
+   - Jalankan cron job pada server untuk pengiriman ringkasan harian terjadwal:
+     ```bash
+     0 * * * * php /path/to/taskflow/notif_harian.php
+     ```
 
 ---
 
-## Dokumentasi Tambahan
+## 📚 Dokumentasi & Catatan Rilis
 
-Untuk petunjuk penggunaan lebih detail:
-- [Panduan Fitur Lengkap](docs/DOCUMENTATION.md)
-- [Troubleshooting & Debugging](docs/troubleshooting.md)
-- [Panduan Instalasi Lengkap](docs/INSTALLATION.md)
+- [📘 Panduan Lengkap Arsitektur & Fitur](docs/DOCUMENTATION.md)
+- [📝 Catatan Rilis Lengkap (CHANGELOG)](CHANGELOG.md)
+- [🔧 Panduan Troubleshooting & Masalah Umum](docs/troubleshooting.md)
+- [🚀 Panduan Instalasi Server & Docker](docs/INSTALLATION.md)
 
 ---
 
-## Lisensi
+## 📄 Lisensi
 
-(c) 2026 TaskFlow Pro. Dikembangkan oleh Habib Frambudi.
+&copy; 2026 **TaskFlow Pro**. Dikembangkan oleh **Habib Frambudi**. Hak Cipta Dilindungi.

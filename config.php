@@ -1,6 +1,8 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
 
+define('APP_VERSION', '3.2.0');
+
 // PHP 8.0 Polyfills for backward compatibility (PHP 7.4)
 if (!function_exists('str_starts_with')) {
     function str_starts_with($haystack, $needle) {

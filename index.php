@@ -681,7 +681,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             }
             ?>
             <footer class="py-6 px-6 mt-auto text-center border-t border-slate-200/60 bg-transparent flex-shrink-0">
-                <p class="text-slate-400 text-xs font-medium">© 2026 TaskFlow. Dibuat oleh Habib Frambudi</p>
+                <p class="text-slate-400 text-xs font-medium">© 2026 TaskFlow Pro v<?php echo APP_VERSION; ?> &bull; Dibuat oleh Habib Frambudi</p>
             </footer>
         </div>
     </main>
