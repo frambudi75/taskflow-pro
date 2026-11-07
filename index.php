@@ -63,13 +63,15 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #f1f5f9;
-            --bg-card: #ffffff;
+            --bg-canvas: #f3f6fb;
+            --bg-surface: #ffffff;
+            --brand-primary: #5148d9;
+            --brand-navy: #0b1220;
+            --color-success: #16a37a;
             --text-main: #0f172a;
             --text-muted: #64748b;
-            --border-color: #f1f5f9;
-            --sidebar-grad-start: #0f172a;
-            --sidebar-grad-end: #1e293b;
+            --sidebar-grad-start: #0b1220;
+            --sidebar-grad-end: #0f172a;
             --sidebar-text: rgba(203,213,225,0.85);
             --sidebar-icon-bg: rgba(255,255,255,0.06);
         }
@@ -538,7 +540,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         </aside>
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-hidden flex flex-col relative bg-slate-100/70 dark:bg-[#090d16]" style="min-width:0">
+    <main class="flex-1 overflow-hidden flex flex-col relative bg-[#f3f6fb] dark:bg-[#090d16]" style="min-width:0">
         <!-- Ambient Glassmorphism Atmospheric Lighting Orbs (Visible through frosted glass) -->
         <div class="fixed top-[-80px] right-[-80px] w-[650px] h-[650px] bg-gradient-to-br from-indigo-400/25 via-purple-300/20 to-transparent dark:from-indigo-600/20 dark:via-purple-600/10 dark:to-transparent rounded-full blur-[100px] pointer-events-none z-0"></div>
         <div class="fixed bottom-[-60px] left-64 w-[550px] h-[550px] bg-gradient-to-tr from-sky-400/20 via-indigo-300/15 to-transparent dark:from-sky-600/15 dark:via-indigo-900/15 dark:to-transparent rounded-full blur-[90px] pointer-events-none z-0"></div>
