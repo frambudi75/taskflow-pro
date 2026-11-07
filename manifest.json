@@ -1,0 +1,19 @@
+{
+  "name": "TaskFlow Pro",
+  "short_name": "TaskFlow",
+  "description": "Enterprise Cloud Platform - Manajemen Tugas, Dokumen & Kolaborasi Tim",
+  "start_url": "./index.php",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1220",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

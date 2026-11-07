@@ -3,6 +3,13 @@ if (!defined('IN_APP')) exit('Akses Ditolak');
 // pages/activities.php - Aktivitas 2.0 (Modern Executive Audit Log & Real-time Timeline with Rich Pagination)
 $isAdmin = isAdmin();
 $user_id = (int)$_SESSION['user_id'];
+$company_name = getSetting('company_name', getSetting('app_name', 'TaskFlow Pro'));
+$company_tagline = getSetting('company_tagline', 'Manajemen Tugas, Dokumen & Kolaborasi Tim');
+$company_address = getSetting('company_address', '');
+$company_phone = getSetting('company_phone', '');
+$company_email = getSetting('company_email', '');
+$company_website = getSetting('company_website', '');
+$app_logo_info = getAppLogoInfo();
 
 // Fetch all activities with user info (safely via LEFT JOIN)
 $stmt = $pdo->prepare("
@@ -179,7 +186,7 @@ function renderTimeline($activities, $tabId) {
 
     // Pagination Bar
     echo '
-    <div id="pagination-' . $tabId . '" class="activity-pagination-bar mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
+    <div id="pagination-' . $tabId . '" class="activity-pagination-bar no-print mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
         <div class="flex items-center gap-3 text-xs font-bold text-slate-500">
             <span id="info-' . $tabId . '" class="pagination-info">Menampilkan...</span>
             <span class="text-slate-300">•</span>
@@ -201,6 +208,38 @@ function renderTimeline($activities, $tabId) {
 ?>
 
 <div class="p-4 md:p-8 w-full space-y-6">
+
+    <!-- Printable Official Letterhead (Only visible during print / PDF export) -->
+    <div class="hidden print:block pb-6 mb-6 border-b-2 border-slate-900">
+        <div class="flex items-center justify-between gap-6 pb-4">
+            <div class="flex items-center gap-4">
+                <?php if ($app_logo_info['is_custom']): ?>
+                    <img src="<?php echo htmlspecialchars($app_logo_info['url']); ?>" alt="Logo" class="h-16 max-w-[140px] object-contain">
+                <?php else: ?>
+                    <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center font-black text-xl">TF</div>
+                <?php endif; ?>
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 uppercase tracking-tight"><?php echo htmlspecialchars($company_name); ?></h2>
+                    <p class="text-xs font-bold text-slate-600"><?php echo htmlspecialchars($company_tagline); ?></p>
+                    <?php if (!empty($company_address)): ?>
+                    <p class="text-[11px] text-slate-500 mt-1"><?php echo htmlspecialchars($company_address); ?></p>
+                    <?php endif; ?>
+                    <div class="flex items-center gap-3 text-[10px] text-slate-500 font-semibold mt-0.5">
+                        <?php if (!empty($company_phone)): ?><span>Telp: <?php echo htmlspecialchars($company_phone); ?></span><?php endif; ?>
+                        <?php if (!empty($company_email)): ?><span>&bull; Email: <?php echo htmlspecialchars($company_email); ?></span><?php endif; ?>
+                        <?php if (!empty($company_website)): ?><span>&bull; Web: <?php echo htmlspecialchars($company_website); ?></span><?php endif; ?>
+                    </div>
+                </div>
+            </div>
+            <div class="text-right">
+                <span class="inline-block px-3 py-1 bg-slate-100 text-slate-900 font-black text-xs uppercase tracking-wider rounded-lg border border-slate-300">
+                    REKAP AUDIT AKTIVITAS
+                </span>
+                <p class="text-[10px] text-slate-500 font-semibold mt-1.5">Tanggal: <?php echo date('d F Y, H:i'); ?> WIB</p>
+                <p class="text-[10px] text-slate-500 font-semibold">Oleh: <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'Administrator'); ?></p>
+            </div>
+        </div>
+    </div>
     
     <!-- Executive Header Section (Glassmorphic) -->
     <div class="rounded-3xl p-6 md:p-7 bg-white/76 backdrop-blur-xl border border-white/85 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -215,7 +254,12 @@ function renderTimeline($activities, $tabId) {
             </p>
         </div>
         
-        <div class="flex items-center gap-3 flex-shrink-0">
+        <div class="flex items-center gap-3 flex-shrink-0 no-print">
+            <button type="button" onclick="window.print()" 
+                    class="px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 border border-slate-200/90 text-xs font-bold transition-all shadow-xs flex items-center gap-2">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                <span>Cetak Rekap Laporan</span>
+            </button>
             <div class="bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200/90 shadow-xs flex items-center gap-3.5">
                 <div class="text-right">
                     <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Log</div>
@@ -229,7 +273,7 @@ function renderTimeline($activities, $tabId) {
     </div>
 
     <!-- Controls: Search & Tabs -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 no-print">
         <!-- Segmented Tabs -->
         <div class="inline-flex p-1 rounded-2xl bg-slate-100 border border-slate-200/90">
             <button onclick="switchActTab('all')" id="tab-btn-all" 
@@ -266,6 +310,23 @@ function renderTimeline($activities, $tabId) {
 
         <div id="tab-content-system" class="hidden">
             <?php renderTimeline($system_activities, 'system'); ?>
+        </div>
+    </div>
+
+    <!-- Printable Official Signature Block (Only visible during print) -->
+    <div class="hidden print:block pt-10 mt-10 border-t border-slate-300">
+        <div class="flex justify-between items-end text-xs">
+            <div>
+                <p class="text-slate-500 mb-1 font-bold">Catatan Sistem &amp; Validasi:</p>
+                <p class="font-medium text-slate-600 max-w-sm leading-relaxed text-[11px]">
+                    Dokumen ini adalah rekaman audit jejak aktivitas sistem resmi yang dihasilkan secara otomatis oleh platform <?php echo htmlspecialchars($company_name); ?>. Data ini sah dan terenkripsi dalam basis data internal.
+                </p>
+            </div>
+            <div class="text-center w-56">
+                <p class="text-slate-600 mb-16 font-semibold">Penanggung Jawab / Admin,</p>
+                <div class="border-b border-slate-900 pb-1 font-bold text-slate-900"><?php echo htmlspecialchars($_SESSION['display_name'] ?? 'Habib Frambudi'); ?></div>
+                <p class="text-[10px] text-slate-500 uppercase mt-0.5"><?php echo strtoupper($_SESSION['role'] ?? 'Super Admin'); ?></p>
+            </div>
         </div>
     </div>
 </div>

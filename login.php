@@ -56,7 +56,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>Masuk ke Akun &bull; <?php echo htmlspecialchars($app_name); ?></title>
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="<?php echo $app_logo_info['mime']; ?>" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
@@ -290,6 +294,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                     icon.outerHTML = '<svg class="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
                 }
             }
+        });
+    }
+    // Service Worker Registration for PWA
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
         });
     }
     </script>

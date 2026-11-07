@@ -57,7 +57,11 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow Pro')); ?></title>
+    <link rel="manifest" href="manifest.json">
     <link rel="icon" type="<?php echo $app_logo_info['mime']; ?>" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
@@ -432,10 +436,15 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
              <?php endif; ?>
              <span class="text-white font-bold text-sm uppercase tracking-tight"><?php echo htmlspecialchars(getSetting('app_name', 'TaskFlow')); ?></span>
         </div>
-        <button onclick="toggleSidebar()" aria-label="Buka menu navigasi" class="w-11 h-11 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
-             <svg id="iconMenu" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-             <svg id="iconClose" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+        <div class="flex items-center gap-2">
+            <button onclick="openCmdPalette()" aria-label="Pencarian Cepat" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 hover:text-white transition-colors">
+                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+            </button>
+            <button onclick="toggleSidebar()" aria-label="Buka menu navigasi" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white">
+                 <svg id="iconMenu" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                 <svg id="iconClose" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
     </header>
 
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
@@ -474,6 +483,18 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             ?>
 
             <nav class="flex-1 overflow-y-auto sidebar-scrollbar py-2 relative z-20">
+
+                <!-- Quick Search / Command Palette Trigger Button -->
+                <div class="px-2.5 mb-2">
+                    <button type="button" onclick="openCmdPalette()" 
+                            class="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 text-slate-300 text-xs font-semibold transition-all group shadow-2xs">
+                        <span class="flex items-center gap-2 truncate">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-400 group-hover:text-indigo-300"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                            <span class="truncate">Pencarian Cepat</span>
+                        </span>
+                        <kbd class="px-1.5 py-0.5 text-[9px] font-black uppercase text-slate-400 bg-black/30 border border-white/10 rounded-md">Ctrl+K</kbd>
+                    </button>
+                </div>
 
                 <!-- Main -->
                 <div class="sidebar-section-label">Menu Utama</div>
@@ -1042,6 +1063,14 @@ function checkUrlNotifications() {
         let msg = 'Operasi berhasil dilakukan!';
         if (success === 'uploaded') msg = 'Dokumen berhasil diunggah dengan kompresi optimal!';
         if (success === 'deleted') msg = 'Data berhasil dihapus dari sistem.';
+        if (success === 'bulk_deleted') {
+            const count = params.get('count') || '';
+            msg = (count ? count + ' ' : '') + 'dokumen berhasil dihapus massal.';
+        }
+        if (success === 'cleaned_broken') {
+            const count = params.get('count') || '0';
+            msg = count + ' entri dokumen tanpa berkas fisik berhasil dibersihkan.';
+        }
         if (success === 'shared') msg = 'Hak akses dokumen berhasil dibagikan!';
         if (success === 'revoked') msg = 'Hak akses berbagi telah dicabut.';
         if (success === 'public_shared') msg = 'Tautan publik siap dibagikan!';
@@ -1065,8 +1094,10 @@ function checkUrlNotifications() {
 document.addEventListener('DOMContentLoaded', checkUrlNotifications);
 
 // ==============================================================
-// 2. COMMAND PALETTE LOGIC (Ctrl + K / Cmd + K)
+// 2. COMMAND PALETTE LOGIC (Ctrl + K / Cmd + K) WITH KEYBOARD NAV
 // ==============================================================
+let cmdSelectedIndex = -1;
+
 window.openCmdPalette = function() {
     const modal = document.getElementById('cmdPaletteModal');
     const input = document.getElementById('cmdInput');
@@ -1075,6 +1106,7 @@ window.openCmdPalette = function() {
     modal.classList.remove('hidden');
     modal.style.display = 'flex';
     input.value = '';
+    cmdSelectedIndex = -1;
     filterCmdList('');
     setTimeout(() => input.focus(), 50);
 };
@@ -1084,30 +1116,72 @@ window.closeCmdPalette = function() {
     if (modal) {
         modal.classList.add('hidden');
         modal.style.display = 'none';
+        cmdSelectedIndex = -1;
     }
 };
 
 window.filterCmdList = function(query) {
     const q = (query || '').toLowerCase().trim();
     const items = document.querySelectorAll('#cmdItemsList .cmd-item');
-    items.forEach(el => {
+    let firstVisible = -1;
+    items.forEach((el, index) => {
         const text = el.textContent.toLowerCase();
-        el.style.display = (!q || text.includes(q)) ? 'flex' : 'none';
+        const visible = (!q || text.includes(q));
+        el.style.display = visible ? 'flex' : 'none';
+        el.classList.remove('bg-indigo-50', 'ring-2', 'ring-indigo-500/20');
+        if (visible && firstVisible === -1) firstVisible = index;
     });
+    cmdSelectedIndex = -1;
+    if (firstVisible !== -1) {
+        updateCmdHighlight(firstVisible);
+    }
 };
 
-// Global Hotkeys: Ctrl+K / Cmd+K / Escape
+function getVisibleCmdItems() {
+    return Array.from(document.querySelectorAll('#cmdItemsList .cmd-item')).filter(el => el.style.display !== 'none');
+}
+
+function updateCmdHighlight(index) {
+    const items = getVisibleCmdItems();
+    if (!items.length) return;
+    items.forEach(el => el.classList.remove('bg-indigo-50', 'ring-2', 'ring-indigo-500/20'));
+    if (index >= 0 && index < items.length) {
+        cmdSelectedIndex = index;
+        items[index].classList.add('bg-indigo-50', 'ring-2', 'ring-indigo-500/20');
+        items[index].scrollIntoView({ block: 'nearest' });
+    }
+}
+
+// Global Hotkeys: Ctrl+K / Cmd+K / Escape / Arrow Navigation
 document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('cmdPaletteModal');
+    const isModalOpen = modal && !modal.classList.contains('hidden') && modal.style.display === 'flex';
+
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
         e.preventDefault();
-        const modal = document.getElementById('cmdPaletteModal');
-        if (modal && !modal.classList.contains('hidden') && modal.style.display === 'flex') {
+        if (isModalOpen) {
             closeCmdPalette();
         } else {
             openCmdPalette();
         }
-    } else if (e.key === 'Escape') {
+    } else if (e.key === 'Escape' && isModalOpen) {
         closeCmdPalette();
+    } else if (isModalOpen) {
+        const visibleItems = getVisibleCmdItems();
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const next = (cmdSelectedIndex + 1) >= visibleItems.length ? 0 : cmdSelectedIndex + 1;
+            updateCmdHighlight(next);
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prev = (cmdSelectedIndex - 1) < 0 ? visibleItems.length - 1 : cmdSelectedIndex - 1;
+            updateCmdHighlight(prev);
+        } else if (e.key === 'Enter') {
+            if (cmdSelectedIndex >= 0 && cmdSelectedIndex < visibleItems.length) {
+                e.preventDefault();
+                visibleItems[cmdSelectedIndex].click();
+            }
+        }
     }
 });
 
@@ -1115,6 +1189,13 @@ document.addEventListener('keydown', function(e) {
 document.getElementById('cmdPaletteModal')?.addEventListener('click', function(e) {
     if (e.target === this) closeCmdPalette();
 });
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(() => {});
+    });
+}
 
 
 </script>

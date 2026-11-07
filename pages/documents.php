@@ -198,6 +198,140 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_doc'])) {
 }
 
 // -------------------------------------------------------------
+// 7. Handle Bulk Delete Documents
+// -------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_delete_docs'])) {
+    if (validateCSRF($_POST['csrf_token'] ?? '')) {
+        $selected_ids = isset($_POST['doc_ids']) && is_array($_POST['doc_ids']) ? array_map('intval', $_POST['doc_ids']) : [];
+        $deleted_count = 0;
+        
+        if (!empty($selected_ids)) {
+            $inClause = implode(',', array_fill(0, count($selected_ids), '?'));
+            $whereUser = isAdmin() ? "" : " AND user_id = " . (int)$user_id;
+            $stmt = $pdo->prepare("SELECT id, name, file_path FROM documents WHERE id IN ($inClause) $whereUser");
+            $stmt->execute($selected_ids);
+            $docsToDelete = $stmt->fetchAll();
+            
+            foreach ($docsToDelete as $d) {
+                if (!empty($d['file_path'])) {
+                    $clean = str_replace('\\', '/', $d['file_path']);
+                    $real = realpath(__DIR__ . '/../' . $clean);
+                    if ($real && file_exists($real)) {
+                        @unlink($real);
+                    }
+                }
+                $del = $pdo->prepare("DELETE FROM documents WHERE id = ?");
+                $del->execute([$d['id']]);
+                $deleted_count++;
+            }
+            
+            if ($deleted_count > 0) {
+                logActivity("Menghapus massal $deleted_count dokumen", "document_bulk_delete");
+                header("Location: index.php?page=documents&tab=" . $tab . "&success=bulk_deleted&count=" . $deleted_count);
+                exit;
+            }
+        }
+        header("Location: index.php?page=documents&tab=" . $tab);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 8. Handle Bulk Download as ZIP
+// -------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bulk_download_zip'])) {
+    if (validateCSRF($_POST['csrf_token'] ?? '')) {
+        $selected_ids = isset($_POST['doc_ids']) && is_array($_POST['doc_ids']) ? array_map('intval', $_POST['doc_ids']) : [];
+        
+        if (!empty($selected_ids) && class_exists('ZipArchive')) {
+            $inClause = implode(',', array_fill(0, count($selected_ids), '?'));
+            $wherePerm = isAdmin() ? "" : " AND (user_id = $user_id OR id IN (SELECT document_id FROM document_shares WHERE shared_with_user_id = $user_id))";
+            $stmt = $pdo->prepare("SELECT id, name, file_path, file_type FROM documents WHERE id IN ($inClause) $wherePerm");
+            $stmt->execute($selected_ids);
+            $docsToZip = $stmt->fetchAll();
+            
+            $zip = new ZipArchive();
+            $tempZipFile = tempnam(sys_get_temp_dir(), 'tf_zip_');
+            
+            if ($zip->open($tempZipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) === true) {
+                $addedCount = 0;
+                $usedNames = [];
+                
+                foreach ($docsToZip as $d) {
+                    if (empty($d['file_path'])) continue;
+                    $clean = str_replace('\\', '/', $d['file_path']);
+                    $abs = realpath(__DIR__ . '/../' . $clean);
+                    
+                    if ($abs && file_exists($abs)) {
+                        $ext = pathinfo($abs, PATHINFO_EXTENSION);
+                        $entryName = preg_replace('/[^a-zA-Z0-9_\-\. ]/', '_', $d['name']);
+                        if ($ext && !str_ends_with(strtolower($entryName), '.' . strtolower($ext))) {
+                            $entryName .= '.' . $ext;
+                        }
+                        
+                        // Prevent duplicate filenames in zip
+                        if (isset($usedNames[$entryName])) {
+                            $usedNames[$entryName]++;
+                            $entryName = pathinfo($entryName, PATHINFO_FILENAME) . '_' . $usedNames[$entryName] . '.' . $ext;
+                        } else {
+                            $usedNames[$entryName] = 1;
+                        }
+                        
+                        $zip->addFile($abs, $entryName);
+                        $addedCount++;
+                    }
+                }
+                
+                $zip->close();
+                
+                if ($addedCount > 0 && file_exists($tempZipFile)) {
+                    while (ob_get_level()) { ob_end_clean(); }
+                    header('Content-Type: application/zip');
+                    header('Content-Disposition: attachment; filename="TaskFlow-Dokumen-' . date('Ymd-His') . '.zip"');
+                    header('Content-Length: ' . filesize($tempZipFile));
+                    header('Pragma: no-cache');
+                    header('Expires: 0');
+                    readfile($tempZipFile);
+                    @unlink($tempZipFile);
+                    exit;
+                }
+            }
+            if (file_exists($tempZipFile)) @unlink($tempZipFile);
+        }
+        header("Location: index.php?page=documents&tab=" . $tab);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
+// 9. Handle Cleanup Broken Document Records
+// -------------------------------------------------------------
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clean_broken_docs'])) {
+    if (validateCSRF($_POST['csrf_token'] ?? '')) {
+        $whereUser = isAdmin() ? "" : " WHERE user_id = " . (int)$user_id;
+        $stmt = $pdo->query("SELECT id, name, file_path FROM documents" . $whereUser);
+        $allDocs = $stmt->fetchAll();
+        $cleaned = 0;
+        
+        foreach ($allDocs as $d) {
+            $clean = !empty($d['file_path']) ? str_replace('\\', '/', $d['file_path']) : '';
+            $exists = !empty($clean) && file_exists(__DIR__ . '/../' . $clean);
+            if (!$exists) {
+                $del = $pdo->prepare("DELETE FROM documents WHERE id = ?");
+                $del->execute([$d['id']]);
+                $cleaned++;
+            }
+        }
+        
+        if ($cleaned > 0) {
+            logActivity("Membersihkan $cleaned data entri berkas rusak", "document_cleanup");
+        }
+        header("Location: index.php?page=documents&tab=" . $tab . "&success=cleaned_broken&count=" . $cleaned);
+        exit;
+    }
+}
+
+// -------------------------------------------------------------
 // Queries & Data Aggregation
 // -------------------------------------------------------------
 // 1. My Documents
@@ -519,12 +653,44 @@ function docIconSvg($type, $color) {
             <?php 
             if($_GET['success'] === 'uploaded') echo "Dokumen berhasil diunggah dan dikompresi secara cerdas."; 
             if($_GET['success'] === 'deleted') echo "Dokumen berhasil dihapus permanen dari sistem."; 
+            if($_GET['success'] === 'bulk_deleted') echo "Dokumen terpilih (" . htmlspecialchars($_GET['count'] ?? '') . ") berhasil dihapus massal dari sistem."; 
+            if($_GET['success'] === 'cleaned_broken') echo "Data entri dokumen tanpa berkas fisik (" . htmlspecialchars($_GET['count'] ?? '') . ") berhasil dibersihkan."; 
             if($_GET['success'] === 'shared') echo "Hak akses dokumen berhasil dibagikan ke pengguna tim."; 
             if($_GET['success'] === 'revoked') echo "Hak akses berbagi dokumen berhasil dicabut."; 
             if($_GET['success'] === 'public_shared') echo "Tautan publik berbatas waktu berhasil dibuat dan siap dibagikan!"; 
             if($_GET['success'] === 'public_revoked') echo "Tautan publik berhasil dinonaktifkan."; 
             ?>
         </span>
+    </div>
+    <?php endif; ?>
+
+    <?php
+    // Scan for broken / orphaned documents without physical files
+    $broken_docs_count = 0;
+    foreach ($documents as $dChk) {
+        $cp = !empty($dChk['file_path']) ? str_replace('\\', '/', $dChk['file_path']) : '';
+        if (empty($cp) || !file_exists(__DIR__ . '/../' . $cp)) {
+            $broken_docs_count++;
+        }
+    }
+    ?>
+    <?php if ($broken_docs_count > 0): ?>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-50/90 border border-amber-200 text-amber-900 shadow-xs">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-xl bg-amber-100 border border-amber-200 flex items-center justify-center text-amber-700 flex-shrink-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div>
+                <div class="text-xs font-black">Terdeteksi <?php echo $broken_docs_count; ?> Entri Dokumen Tanpa Berkas Fisik</div>
+                <div class="text-[11px] text-amber-700 font-medium leading-relaxed">Terdapat berkas lama tanpa file fisik di penyimpanan server. Bersihkan database agar sinkron dan rapi.</div>
+            </div>
+        </div>
+        <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membersihkan seluruh data dokumen tanpa berkas fisik?');" class="flex-shrink-0">
+            <input type="hidden" name="csrf_token" value="<?php echo generateCSRF(); ?>">
+            <button type="submit" name="clean_broken_docs" class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-transform active:scale-95">
+                Bersihkan Sekarang
+            </button>
+        </form>
     </div>
     <?php endif; ?>
 
@@ -699,10 +865,19 @@ function docIconSvg($type, $color) {
                 $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
                 $isImage            = !empty($info['is_image']) && $has_physical_file && !empty($serve_view_url);
             ?>
-            <div class="doc-grid-card rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden flex flex-col justify-between group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-indigo-300"
+            <div class="doc-grid-card relative rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden flex flex-col justify-between group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-indigo-300"
+                 data-id="<?php echo $doc['id']; ?>"
                  data-name="<?php echo htmlspecialchars($doc['name']); ?>"
                  data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>"
                  onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')">
+                
+                <!-- Multi-select Checkbox in Corner -->
+                <div class="absolute top-2.5 left-2.5 z-20" onclick="event.stopPropagation()">
+                    <label class="cursor-pointer p-1 rounded-lg bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs flex items-center justify-center hover:bg-white transition-colors">
+                        <input type="checkbox" class="doc-select-chk w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer" 
+                               value="<?php echo $doc['id']; ?>" onchange="onDocSelectChange()">
+                    </label>
+                </div>
                 
                 <div>
                     <!-- Consistent Fixed-Height (h-36) Header for Perfect Grid Alignment -->
@@ -843,6 +1018,11 @@ function docIconSvg($type, $color) {
                 <table class="w-full text-left text-xs">
                     <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
                         <tr>
+                            <th class="w-10 px-4 py-3.5 text-center">
+                                <input type="checkbox" id="selectAllDocsHeader" onchange="toggleSelectAllDocs(this.checked)" 
+                                       class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer"
+                                       title="Pilih Semua Dokumen">
+                            </th>
                             <th class="px-5 py-3.5">Dokumen</th>
                             <th class="px-4 py-3.5">Ukuran</th>
                             <th class="px-4 py-3.5">Tanggal</th>
@@ -861,7 +1041,11 @@ function docIconSvg($type, $color) {
                             $is_owner           = ((int)$doc['user_id'] === $user_id);
                             $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
                         ?>
-                        <tr class="doc-table-row" data-name="<?php echo htmlspecialchars($doc['name']); ?>" data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>">
+                        <tr class="doc-table-row" data-id="<?php echo $doc['id']; ?>" data-name="<?php echo htmlspecialchars($doc['name']); ?>" data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>">
+                            <td class="px-4 py-3.5 text-center" onclick="event.stopPropagation()">
+                                <input type="checkbox" class="doc-select-chk w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer" 
+                                       value="<?php echo $doc['id']; ?>" onchange="onDocSelectChange()">
+                            </td>
                             <td class="px-5 py-3.5">
                                 <div class="flex items-center gap-3">
                                     <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border"
@@ -1232,6 +1416,57 @@ function docIconSvg($type, $color) {
     </div>
 </div>
 
+<!-- ============================================================== -->
+<!-- 3. DRAG AND DROP FULLSCREEN OVERLAY -->
+<!-- ============================================================== -->
+<div id="dragDropOverlay" class="fixed inset-0 z-50 bg-indigo-950/70 backdrop-blur-md hidden items-center justify-center p-6 border-4 border-dashed border-indigo-400/80 m-4 rounded-3xl pointer-events-none transition-all">
+    <div class="text-center text-white">
+        <div class="w-20 h-20 rounded-3xl bg-white/20 border border-white/30 flex items-center justify-center mx-auto mb-4 animate-bounce">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <h3 class="text-2xl font-black mb-1.5 tracking-tight">Lepaskan Berkas di Sini</h3>
+        <p class="text-xs sm:text-sm font-semibold text-indigo-200">Berkas akan langsung disiapkan untuk diunggah dengan kompresi cerdas.</p>
+    </div>
+</div>
+
+<!-- ============================================================== -->
+<!-- 4. FLOATING MULTI-ACTION BAR (BULK ACTIONS) -->
+<!-- ============================================================== -->
+<div id="bulkActionBar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 hidden items-center gap-3 px-5 py-3 rounded-2xl bg-slate-900/90 text-white backdrop-blur-xl border border-white/20 shadow-2xl transition-all duration-300">
+    <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 animate-pulse"></span>
+        <span id="bulkSelectedCount" class="text-xs font-black">0 Dokumen Dipilih</span>
+    </div>
+    <div class="h-4 w-px bg-white/20"></div>
+    <button type="button" onclick="selectAllDocs(true)" class="text-xs font-bold text-slate-300 hover:text-white transition-colors">
+        Pilih Semua
+    </button>
+    <button type="button" onclick="selectAllDocs(false)" class="text-xs font-bold text-slate-400 hover:text-white transition-colors">
+        Batal
+    </button>
+    <div class="h-4 w-px bg-white/20"></div>
+    <!-- Bulk ZIP Download Form -->
+    <form id="bulkZipForm" method="POST" action="index.php?page=documents&tab=<?php echo $tab; ?>" class="inline">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCSRF(); ?>">
+        <input type="hidden" name="bulk_download_zip" value="1">
+        <div id="bulkZipInputs"></div>
+        <button type="button" onclick="submitBulkZip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-transform active:scale-95 shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            <span>Unduh ZIP</span>
+        </button>
+    </form>
+    <!-- Bulk Delete Form -->
+    <form id="bulkDeleteForm" method="POST" action="index.php?page=documents&tab=<?php echo $tab; ?>" class="inline">
+        <input type="hidden" name="csrf_token" value="<?php echo generateCSRF(); ?>">
+        <input type="hidden" name="bulk_delete_docs" value="1">
+        <div id="bulkDeleteInputs"></div>
+        <button type="button" onclick="confirmBulkDelete()" class="px-3.5 py-1.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 transition-transform active:scale-95 shadow-sm">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            <span>Hapus Terpilih</span>
+        </button>
+    </form>
+</div>
+
 <script>
 (function() {
     // -------------------------------------------------------------
@@ -1552,6 +1787,140 @@ function docIconSvg($type, $color) {
             document.getElementById('deleteForm').submit();
         }
     };
+
+    // -------------------------------------------------------------
+    // Multi-Select & Bulk Actions
+    // -------------------------------------------------------------
+    window.getSelectedDocIds = function() {
+        const checkedBoxes = document.querySelectorAll('.doc-select-chk:checked');
+        const ids = [];
+        checkedBoxes.forEach(chk => {
+            if (chk.value && !ids.includes(chk.value)) ids.push(chk.value);
+        });
+        return ids;
+    };
+
+    window.onDocSelectChange = function() {
+        const ids = getSelectedDocIds();
+        const bar = document.getElementById('bulkActionBar');
+        const countEl = document.getElementById('bulkSelectedCount');
+        const headerChk = document.getElementById('selectAllDocsHeader');
+
+        if (countEl) countEl.textContent = ids.length + ' Dokumen Dipilih';
+
+        if (bar) {
+            if (ids.length > 0) {
+                bar.classList.remove('hidden');
+                bar.classList.add('flex');
+            } else {
+                bar.classList.add('hidden');
+                bar.classList.remove('flex');
+            }
+        }
+
+        const totalBoxes = document.querySelectorAll('.doc-select-chk').length;
+        if (headerChk) {
+            headerChk.checked = (ids.length > 0 && ids.length === totalBoxes);
+            headerChk.indeterminate = (ids.length > 0 && ids.length < totalBoxes);
+        }
+    };
+
+    window.toggleSelectAllDocs = function(checked) {
+        document.querySelectorAll('.doc-select-chk').forEach(chk => {
+            chk.checked = checked;
+        });
+        onDocSelectChange();
+    };
+
+    window.selectAllDocs = function(selectAll) {
+        document.querySelectorAll('.doc-select-chk').forEach(chk => {
+            chk.checked = selectAll;
+        });
+        const headerChk = document.getElementById('selectAllDocsHeader');
+        if (headerChk) headerChk.checked = selectAll;
+        onDocSelectChange();
+    };
+
+    window.submitBulkZip = function() {
+        const ids = getSelectedDocIds();
+        if (ids.length === 0) {
+            alert('Pilih setidaknya satu dokumen untuk diunduh.');
+            return;
+        }
+        const container = document.getElementById('bulkZipInputs');
+        if (!container) return;
+        container.innerHTML = '';
+        ids.forEach(id => {
+            const inp = document.createElement('input');
+            inp.type = 'hidden';
+            inp.name = 'doc_ids[]';
+            inp.value = id;
+            container.appendChild(inp);
+        });
+        document.getElementById('bulkZipForm').submit();
+    };
+
+    window.confirmBulkDelete = function() {
+        const ids = getSelectedDocIds();
+        if (ids.length === 0) {
+            alert('Pilih setidaknya satu dokumen untuk dihapus.');
+            return;
+        }
+        if (confirm('Apakah Anda yakin ingin menghapus ' + ids.length + ' dokumen terpilih? Berkas akan dihapus permanen dari server.')) {
+            const container = document.getElementById('bulkDeleteInputs');
+            if (!container) return;
+            container.innerHTML = '';
+            ids.forEach(id => {
+                const inp = document.createElement('input');
+                inp.type = 'hidden';
+                inp.name = 'doc_ids[]';
+                inp.value = id;
+                container.appendChild(inp);
+            });
+            document.getElementById('bulkDeleteForm').submit();
+        }
+    };
+
+    // -------------------------------------------------------------
+    // Global Drag & Drop Upload Handlers
+    // -------------------------------------------------------------
+    let dragCounter = 0;
+    window.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        dragCounter++;
+        const overlay = document.getElementById('dragDropOverlay');
+        if (overlay) overlay.classList.remove('hidden'), overlay.classList.add('flex');
+    });
+
+    window.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        dragCounter--;
+        if (dragCounter <= 0) {
+            dragCounter = 0;
+            const overlay = document.getElementById('dragDropOverlay');
+            if (overlay) overlay.classList.add('hidden'), overlay.classList.remove('flex');
+        }
+    });
+
+    window.addEventListener('dragover', function(e) {
+        e.preventDefault();
+    });
+
+    window.addEventListener('drop', function(e) {
+        e.preventDefault();
+        dragCounter = 0;
+        const overlay = document.getElementById('dragDropOverlay');
+        if (overlay) overlay.classList.add('hidden'), overlay.classList.remove('flex');
+
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const fileInput = document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.files = e.dataTransfer.files;
+                openUploadModal();
+                handleFileSelect(fileInput);
+            }
+        }
+    });
 
     // Close modals on Escape key
     document.addEventListener('keydown', function(e) {
