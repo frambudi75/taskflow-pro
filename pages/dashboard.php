@@ -100,11 +100,6 @@ $days_id   = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 
 $months_id = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
 $indo_date = ($days_id[date('l')] ?? date('l')) . ', ' . date('d') . ' ' . ($months_id[date('F')] ?? date('F')) . ' ' . date('Y');
 
-// Circular Progress Ring Math
-$ring_radius = 18;
-$ring_circ = round(2 * 3.14159265 * $ring_radius, 2);
-$ring_offset = round($ring_circ * (1 - ($pct / 100)), 2);
-
 // Get 7-Day Trend: Productivity (Todos)
 $productivity_data   = [];
 $labels              = [];
@@ -294,11 +289,12 @@ if (!function_exists('formatActivityAction')) {
 <div class="p-4 md:p-8 w-full space-y-6">
 
     <!-- Dashboard Header Section (Clean Executive Standard) -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-t-[3px] border-t-indigo-600 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+    <div class="rounded-3xl p-6 md:p-7 bg-gradient-to-br from-white via-slate-50/50 to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20 border border-slate-200/90 dark:border-slate-800 border-t-[3px] border-t-indigo-600 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <!-- Left: User Identity & Greeting -->
         <div class="flex items-center gap-4 md:gap-5 min-w-0">
-            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl p-0.5 border border-slate-200/90 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex-shrink-0 shadow-xs">
+            <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-2xl p-0.5 border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0 shadow-xs">
                 <img src="<?php echo htmlspecialchars($avatarSrc); ?>" alt="Avatar" class="w-full h-full object-cover rounded-[14px]">
+                <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
             </div>
             <div class="min-w-0">
                 <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold uppercase tracking-wider mb-1.5">
@@ -316,45 +312,26 @@ if (!function_exists('formatActivityAction')) {
             </div>
         </div>
 
-        <!-- Middle: Contextual Status Divider (Fills the desktop void with clean real metrics) -->
-        <div class="hidden xl:flex items-center gap-6 border-x border-slate-100 dark:border-slate-800 px-6 flex-shrink-0">
-            <div>
-                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Status Agenda</div>
-                <div class="text-sm font-black text-slate-900 dark:text-white mt-0.5 flex items-center gap-1.5">
-                    <span class="w-2 h-2 rounded-full <?php echo ($total_todos - $completed_todos) > 0 ? 'bg-amber-500' : 'bg-emerald-500'; ?>"></span>
-                    <span><?php echo ($total_todos - $completed_todos) > 0 ? ($total_todos - $completed_todos) . ' Menunggu' : 'Semua Tuntas'; ?></span>
-                </div>
-            </div>
-            <div>
-                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tingkat Capaian</div>
-                <div class="text-sm font-black text-slate-900 dark:text-white mt-0.5">
-                    <?php echo $pct; ?>% <span class="text-[11px] font-medium text-slate-400 font-normal">(<?php echo $completed_todos; ?>/<?php echo $total_todos; ?>)</span>
-                </div>
-            </div>
-        </div>
-
         <!-- Right Side: Clean Progress Widget + Quick Task Action -->
         <div class="flex flex-wrap items-center gap-3.5 flex-shrink-0">
-            <!-- Progress Pill Card -->
-            <div class="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 shadow-xs">
-                <div class="relative w-11 h-11 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-11 h-11 transform -rotate-90" viewBox="0 0 44 44">
-                        <circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="3.5" fill="none" class="text-slate-200 dark:text-slate-700" />
-                        <circle cx="22" cy="22" r="18" stroke="#10b981" stroke-width="3.5" fill="none" stroke-linecap="round"
-                                stroke-dasharray="<?php echo $ring_circ; ?>"
-                                stroke-dashoffset="<?php echo $ring_offset; ?>"
-                                class="transition-all duration-700 ease-out" />
-                    </svg>
-                    <span class="absolute text-xs font-black text-slate-900 dark:text-white"><?php echo $pct; ?>%</span>
+            <!-- Polished Horizontal Target & Progress Card -->
+            <div class="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 shadow-xs">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-xs border border-emerald-200/70 dark:border-emerald-800/50 shrink-0">
+                    <?php echo $pct; ?>%
                 </div>
-                <div>
-                    <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Progres Hari Ini</div>
-                    <div class="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tuntas</div>
+                <div class="min-w-[130px]">
+                    <div class="flex items-center justify-between text-[11px] mb-1">
+                        <span class="font-extrabold text-slate-700 dark:text-slate-300">Target Hari Ini</span>
+                        <span class="font-black text-emerald-600 dark:text-emerald-400"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?></span>
+                    </div>
+                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-700" style="width: <?php echo $pct; ?>%"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- Single Purpose Primary Button -->
-            <a href="?page=calendar" class="px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs transition-colors flex items-center gap-2 shadow-sm shadow-indigo-600/20">
+            <a href="?page=calendar" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs transition-colors flex items-center gap-2 shadow-sm shadow-indigo-600/20">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>+ Buat Tugas Cepat</span>
             </a>
@@ -430,8 +407,9 @@ if (!function_exists('formatActivityAction')) {
             </div>
             <!-- Bottom Row: Status pill & micro-copy neatly aligned at bottom left -->
             <div class="flex items-center gap-2 mt-auto">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/60">
-                    📝 <?php echo $total_notes; ?> catatan aktif
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                    <?php echo $total_notes; ?> catatan aktif
                 </span>
             </div>
             <!-- Progress Bar -->
@@ -453,8 +431,9 @@ if (!function_exists('formatActivityAction')) {
             </div>
             <!-- Bottom Row: Status pill & micro-copy neatly aligned at bottom left -->
             <div class="flex items-center gap-2 mt-auto">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/60">
-                    🔒 <?php echo $total_docs; ?> berkas tersimpan
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                    <?php echo $total_docs; ?> berkas tersimpan
                 </span>
             </div>
             <!-- Progress Bar -->
