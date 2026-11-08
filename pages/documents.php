@@ -1145,7 +1145,7 @@ function docIconSvg($type, $color) {
 <!-- 0. DEDICATED UPLOAD MODAL (Clean, Non-Redundant & Focused) -->
 <!-- ============================================================== -->
 <div id="uploadModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
-    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200" onclick="event.stopPropagation()">
+    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-modal-pop" onclick="event.stopPropagation()">
         
         <!-- Modal Header -->
         <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/70">
@@ -1239,7 +1239,7 @@ function docIconSvg($type, $color) {
 <!-- 1. SHARE MODAL (Public Links with Expiry & Internal Sharing) -->
 <!-- ============================================================== -->
 <div id="shareModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
-    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-modal-pop">
         
         <!-- Modal Header -->
         <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/60">
@@ -1388,7 +1388,7 @@ function docIconSvg($type, $color) {
 <!-- 2. DOCUMENT PREVIEW MODAL (LIGHTBOX) -->
 <!-- ============================================================== -->
 <div id="viewModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
-    <div class="bg-white rounded-3xl max-w-5xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200">
+    <div class="bg-white rounded-3xl max-w-5xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 animate-modal-pop">
         
         <!-- Modal Top Bar -->
         <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0 bg-slate-50/70">

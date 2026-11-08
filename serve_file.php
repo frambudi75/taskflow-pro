@@ -3,6 +3,10 @@
 require_once 'config.php';
 
 if (!isLoggedIn()) {
+    if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) && (!isset($_SERVER['HTTP_SEC_FETCH_DEST']) || $_SERVER['HTTP_SEC_FETCH_DEST'] === 'document')) {
+        header('Location: login.php');
+        exit;
+    }
     http_response_code(403);
     exit('Forbidden');
 }
@@ -11,6 +15,10 @@ $user_id = (int)$_SESSION['user_id'];
 $file    = isset($_GET['file']) ? trim($_GET['file']) : '';
 
 if (empty($file)) {
+    if (empty($_SERVER['HTTP_X_REQUESTED_WITH']) && (!isset($_SERVER['HTTP_SEC_FETCH_DEST']) || $_SERVER['HTTP_SEC_FETCH_DEST'] === 'document')) {
+        header('Location: index.php?page=documents');
+        exit;
+    }
     http_response_code(400);
     exit('Bad Request: Parameter file tidak boleh kosong.');
 }

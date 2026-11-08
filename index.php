@@ -420,6 +420,73 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
             }
         }
 
+        /* ============================================================== */
+        /* EXECUTIVE MICRO-INTERACTIONS & FLUID ANIMATIONS                */
+        /* ============================================================== */
+        @keyframes fadeSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .page-animate-enter {
+            animation: fadeSlideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes modalPop {
+            0% {
+                opacity: 0;
+                transform: scale(0.95) translateY(8px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .animate-modal-pop {
+            animation: modalPop 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes checkBounce {
+            0% { transform: scale(0.85); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
+        input[type="checkbox"]:checked {
+            animation: checkBounce 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        /* Tactile touch and click response for interactive elements */
+        button:active:not(:disabled),
+        .btn-press:active:not(:disabled),
+        a.btn-press:active {
+            transform: scale(0.97);
+            transition: transform 0.08s ease;
+        }
+
+        /* Smooth spring physics for toast notifications */
+        @keyframes toastSpring {
+            0% { opacity: 0; transform: translateY(16px) scale(0.94); }
+            60% { opacity: 1; transform: translateY(-2px) scale(1.01); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .animate-toast-spring {
+            animation: toastSpring 0.32s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* Ambient floating physics for cards */
+        .interactive-card {
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.22s ease;
+        }
+        .interactive-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -6px rgba(99, 102, 241, 0.1), 0 4px 8px -2px rgba(15, 23, 42, 0.04);
+        }
+
     </style>
 </head>
 <body class="bg-slate-50 overflow-hidden h-screen flex flex-col">
@@ -661,7 +728,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
         <div class="fixed bottom-[-80px] left-64 w-[600px] h-[600px] bg-gradient-to-tr from-sky-400/18 via-indigo-300/14 to-emerald-300/12 rounded-full blur-[110px] pointer-events-none z-0"></div>
         <div class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[750px] bg-gradient-to-r from-purple-300/12 via-indigo-200/18 to-transparent rounded-full blur-[130px] pointer-events-none z-0"></div>
 
-        <div id="ajaxContent" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col relative z-10">
+        <div id="ajaxContent" class="flex-1 overflow-y-auto custom-scrollbar flex flex-col relative z-10 page-animate-enter">
             <?php
             // Simple Page Router
             switch($page) {
@@ -692,7 +759,7 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     <!-- GLOBAL COMMAND PALETTE MODAL (Ctrl + K / Cmd + K) -->
     <!-- ============================================================== -->
     <div id="cmdPaletteModal" class="fixed inset-0 hidden z-50 items-start justify-center pt-20 md:pt-28 p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true">
-        <div class="bg-white/95 backdrop-blur-2xl rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col transition-all">
+        <div class="bg-white/95 backdrop-blur-2xl rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col transition-all animate-modal-pop">
             <!-- Search bar -->
             <div class="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50/60">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -1017,7 +1084,7 @@ window.showToast = function(message, type = 'success', duration = 3800) {
     if (!container) return;
 
     const toast = document.createElement('div');
-    toast.className = 'pointer-events-auto transform transition-all duration-300 translate-y-4 opacity-0 flex items-center gap-3 p-4 rounded-2xl shadow-xl border text-xs font-bold';
+    toast.className = 'pointer-events-auto transform transition-all duration-300 animate-toast-spring flex items-center gap-3 p-4 rounded-2xl shadow-xl border text-xs font-bold';
     
     if (type === 'error' || type === 'danger') {
         toast.className += ' bg-white/95 border-rose-200 text-rose-900 shadow-rose-500/10';
@@ -1040,11 +1107,6 @@ window.showToast = function(message, type = 'success', duration = 3800) {
     }
 
     container.appendChild(toast);
-
-    // Slide in
-    setTimeout(() => {
-        toast.classList.remove('translate-y-4', 'opacity-0');
-    }, 20);
 
     // Auto dismiss
     setTimeout(() => {

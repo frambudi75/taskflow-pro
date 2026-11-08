@@ -6,6 +6,24 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.2] - 2026-11-08
+
+### ✨ Ditambahkan (Added)
+- **Suite Micro-Interactions & Fluid Animations**:
+  - Animasi transisi halus saat berpindah halaman (*page entrance fade & slide-up* dengan kurva cubic-bezier).
+  - Modal pop animation (`.animate-modal-pop`) untuk seluruh dialog modal (Upload Dokumen, Berbagi Dokumen, Pratinjau Dokumen, Command Palette, dan Modal Lupa Kata Sandi).
+  - Spring physics pada notifikasi toast (`.animate-toast-spring`) untuk umpan balik interaksi yang responsif dan luwes.
+  - Efek pantul taktil (*check bounce*) saat interaksi pemilihan kotak centang (*checkbox*).
+  - Respons tekan tombol (*tactile click feedback*) dengan skala interaktif `scale(0.97)` pada semua tombol aktif.
+  - Efek melayang halus (*hover elevation & soft shadow*) pada kartu interaktif.
+
+### 🛡️ Diperbaiki & Diperketat (Hardened)
+- **Hardening Endpoint Streaming Berkas (`serve_file.php`)**:
+  - Penanganan permintaan kosong atau akses langsung di peramban dengan pengalihan otomatis (*graceful redirect*) ke halaman Dokumen, mencegah tampilan error 403/400.
+  - Pengalihan otomatis pengguna yang belum terotentikasi ke halaman masuk (*login page*) saat mengakses berkas melalui dokumen peramban.
+
+---
+
 ## [3.2.1] - 2026-11-08
 
 ### 🎨 Disempurnakan (Refined)
