@@ -6,6 +6,18 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.7] - 2026-11-08
+
+### 💎 Desain & Antarmuka (Executive Glassmorphism Kalender Produktivitas)
+- **Implementasi Efek Glassmorphism Menyeluruh pada Modul Kalender (`pages/calendar.php`)**:
+  - Transformasi panel kanvas dan kartu metrik statistik ke sistem `cal-glass-panel` & `cal-glass-card` dengan *backdrop-blur* 16px, saturasi 180%, dan *specular edge highlight* halus.
+  - Header kalender bergradasi permukaan lembut (*frosted glass canvas*) dengan aksen garis atas indigo (`border-t-[3px] border-t-indigo-600`).
+  - Redesain navigasi kalender, selector bulan, tombol *Hari Ini*, dan *view switcher* menjadi kapsul kaca (*glass pills*) berbayang mikro.
+  - Penyempurnaan seleksi sel tanggal aktif (*is-selected*) dengan ring indigo lembut dan elevasi transparan, menggantikan garis kaku sebelumnya.
+  - Panel rincian agenda harian dipercantik dengan formulir input kaca (*frosted glass input*), tab filter interaktif dengan dukungan dark mode, dan kartu agenda beraksen status dinamis.
+
+---
+
 ## [3.2.6] - 2026-11-08
 
 ### 🎨 Desain & UI/UX (Overhaul Progress Widget & Balanced Dashboard)
