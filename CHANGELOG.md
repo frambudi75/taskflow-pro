@@ -6,6 +6,16 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.1] - 2026-11-08
+
+### 🎨 Disempurnakan (Refined)
+- **Penyelarasan Istilah Tab Pengaturan**:
+  - Menghapus penyebutan istilah *"Kop Surat"* pada menu Pengaturan Sistem dan mengubah label tab menjadi *"Identitas & Logo"*.
+  - Menyederhanakan deskripsi banner dan kartu menjadi *"Identitas & Logo Perusahaan"* agar selaras dengan fungsi platform.
+- **Optimasi Lingkungan Docker**:
+  - Menambahkan berkas `.dockerignore` untuk meningkatkan kecepatan build container.
+  - Memperbarui panduan pembaruan mandiri (*seamless update*) di dokumentasi instalasi.
+
 ## [3.2.0] - 2026-11-07
 
 ### ✨ Ditambahkan (Added)

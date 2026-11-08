@@ -1,6 +1,6 @@
 <?php
 if (!defined('IN_APP')) exit('Akses Ditolak');
-// pages/settings.php - System Configuration & Official Letterhead (Kop Surat) Settings 2.0 (Consistent Full-Width Layout)
+// pages/settings.php - System Configuration & Organization Identity Settings 2.0 (Consistent Full-Width Layout)
 if (!isAdmin()) {
     die("Akses Ditolak.");
 }
@@ -187,10 +187,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && !isset($_POST['action'])) {
                 $stmt->execute([$key, $value, $value]);
             }
 
-            logActivity("Memperbarui pengaturan sistem & kop surat", "settings");
+            logActivity("Memperbarui pengaturan sistem & identitas organisasi", "settings");
             clearCache();
             if (empty($error)) {
-                $success = "Pengaturan sistem dan identitas kop surat berhasil disimpan!";
+                $success = "Pengaturan sistem dan identitas organisasi berhasil disimpan!";
             }
         } catch (Exception $e) {
             $error = "Gagal menyimpan pengaturan: " . $e->getMessage();
@@ -235,7 +235,7 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
             </div>
             <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Pengaturan Sistem</h1>
             <p class="text-slate-500 text-xs md:text-sm font-medium max-w-xl leading-relaxed">
-                Konfigurasi identitas organisasi, kop surat, notifikasi telegram, dan parameter server email SMTP.
+                Konfigurasi identitas organisasi, logo perusahaan, notifikasi telegram, dan parameter server email SMTP.
             </p>
         </div>
     </div>
@@ -263,7 +263,7 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
     <div class="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar" role="tablist">
         <button type="button" onclick="switchTab('kop')" class="setting-tab px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 flex-shrink-0 <?php echo $active_tab === 'kop' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white border border-slate-200/90 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 shadow-2xs'; ?>" data-tab="kop" role="tab">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-3"/></svg>
-            <span>Kop Surat &amp; Logo</span>
+            <span>Identitas &amp; Logo</span>
         </button>
         <button type="button" onclick="switchTab('umum')" class="setting-tab px-5 py-2.5 rounded-2xl text-xs font-black uppercase tracking-wider transition-all flex items-center gap-2 flex-shrink-0 <?php echo $active_tab === 'umum' ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/30' : 'bg-white border border-slate-200/90 text-slate-600 hover:text-indigo-600 hover:bg-slate-50 shadow-2xs'; ?>" data-tab="umum" role="tab">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -289,7 +289,7 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
             <div class="space-y-6 flex-1 flex flex-col justify-between">
 
                 <!-- ============================================================== -->
-                <!-- TAB 1: KOP SURAT & LOGO PERUSAHAAN                             -->
+                <!-- TAB 1: IDENTITAS & LOGO PERUSAHAAN                             -->
                 <!-- ============================================================== -->
                 <div id="pane-kop" class="tab-pane <?php echo $active_tab === 'kop' ? '' : 'hidden'; ?> space-y-6">
                     <div class="p-4 bg-indigo-50/70 border border-indigo-100 rounded-2xl flex items-start gap-3.5">
@@ -297,8 +297,8 @@ $adminEmail = $_SESSION['email'] ?? 'admin@perusahaan.com';
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-3"/></svg>
                         </div>
                         <div>
-                            <h4 class="text-xs font-black text-indigo-950">Identitas Resmi &amp; Kop Surat</h4>
-                            <p class="text-[11px] text-indigo-700 leading-relaxed font-medium mt-0.5">Informasi dan logo di bawah ini digunakan sebagai kop resmi pada seluruh dokumen cetak, laporan, dan header aplikasi.</p>
+                            <h4 class="text-xs font-black text-indigo-950">Identitas &amp; Logo Perusahaan</h4>
+                            <p class="text-[11px] text-indigo-700 leading-relaxed font-medium mt-0.5">Informasi dan logo di bawah ini digunakan sebagai identitas resmi pada laporan, branding, dan header aplikasi.</p>
                         </div>
                     </div>
 

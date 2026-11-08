@@ -1,6 +1,6 @@
 # TaskFlow Pro: Enterprise Cloud Platform
 
-![Version](https://img.shields.io/badge/version-3.2.0-blue)
+![Version](https://img.shields.io/badge/version-3.2.1-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-indigo)
 ![Tailwind](https://img.shields.io/badge/Styling-Tailwind_CSS-sky)
 ![PWA](https://img.shields.io/badge/PWA-Ready-purple)
@@ -23,8 +23,8 @@
   - Dapat diinstal langsung ke layar utama ponsel (*Add to Home Screen*) seperti aplikasi native mobile di Android dan iOS.
 - **🔍 Navigasi Global Command Palette (`Ctrl + K` / `Cmd + K`)**:
   - Akses cepat pencarian halaman dan aksi penting dari mana saja dengan navigasi keyboard (`ArrowDown`, `ArrowUp`, `Enter`, `Esc`).
-- **📄 Ekspor & Cetak Rekap Laporan Resmi Ber-KOP Surat**:
-  - Rekap audit aktivitas otomatis dilengkapi KOP Surat resmi perusahaan (Logo, Nama Instansi, Alamat, Hotline, Email, Website) dan blok validasi tanda tangan administrator.
+- **📄 Ekspor & Cetak Rekap Laporan Resmi Ber-Header Perusahaan**:
+  - Rekap audit aktivitas otomatis dilengkapi identitas resmi perusahaan (Logo, Nama Instansi, Alamat, Hotline, Email, Website) dan blok validasi tanda tangan administrator.
 - **📌 Papan Kanban & Kalender Produktivitas**:
   - Alur kerja 3 kolom (*Todo*, *In Progress*, *Done*) dengan paginasi interaktif dan sinkronisasi instan.
 - **👤 Profil & Keamanan 2.0**:
@@ -72,7 +72,7 @@
      ```
 3. **Pengaturan Sistem**:
    - Masuk ke portal sistem menggunakan akun Administrator.
-   - Buka menu **Pengaturan Sistem** untuk mengunggah logo perusahaan, mengisi KOP surat, menyetel token bot Telegram, dan mengonfigurasi email SMTP.
+   - Buka menu **Pengaturan Sistem** untuk mengunggah logo perusahaan, mengisi identitas resmi organisasi, menyetel token bot Telegram, dan mengonfigurasi email SMTP.
 4. **Otomatisasi Cron Notifikasi**:
    - Jalankan cron job pada server untuk pengiriman ringkasan harian terjadwal:
      ```bash

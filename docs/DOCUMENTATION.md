@@ -1,6 +1,6 @@
-# 📘 Dokumentasi Resmi TaskFlow Pro v3.2.0
+# 📘 Dokumentasi Resmi TaskFlow Pro v3.2.1
 
-Selamat datang di dokumentasi resmi **TaskFlow Pro v3.2.0**. Dokumen ini merangkum arsitektur teknis, panduan modul fitur, integrasi sistem, serta praktik terbaik operasional platform.
+Selamat datang di dokumentasi resmi **TaskFlow Pro v3.2.1**. Dokumen ini merangkum arsitektur teknis, panduan modul fitur, integrasi sistem, serta praktik terbaik operasional platform.
 
 ---
 
@@ -25,9 +25,9 @@ taskflow/
 │   ├── notes.php              # Catatan kerja visual dengan label & tag interaktif
 │   ├── documents.php          # Pusat Dokumen 2.0 (Multi-select, ZIP, Drag-Drop, Cleaner)
 │   ├── projects.php           # Papan Kanban proyek (Todo, In Progress, Done) & paginasi
-│   ├── activities.php         # Audit log real-time & cetak laporan resmi ber-KOP surat
+│   ├── activities.php         # Audit log real-time & cetak laporan resmi ber-header instansi
 │   ├── admin.php              # Manajemen pengguna, kuota penyimpanan, drawer & popover aksi
-│   ├── settings.php           # Pengaturan sistem 2-kolom, Kop Surat, Bot Telegram & SMTP Test
+│   ├── settings.php           # Pengaturan sistem 2-kolom, Identitas & Logo, Bot Telegram & SMTP Test
 │   ├── backup.php             # Pencadangan basis data & berkas sekali klik
 │   ├── cache.php              # Optimasi cache, file temporer & analitik disk
 │   ├── profile.php            # Profil & Keamanan 2-kolom master-detail, Telegram Chat ID
@@ -65,13 +65,13 @@ taskflow/
 
 ---
 
-### 2. ⚡ Audit Log & Cetak Rekap Resmi Ber-KOP Surat
+### 2. ⚡ Audit Log & Cetak Rekap Resmi Ber-Header Instansi
 * **Timeline Aktivitas Real-Time**:
   * Mencatat semua kejadian penting: login, upload berkas, pembuatan tugas, perubahan pengaturan, dan pembagian dokumen.
   * Dilengkapi tombol tab segmented (*Semua*, *Tugas/Berkas*, *Sistem*) dan paginasi interaktif (10, 15, 25, 50 data per halaman).
 * **Cetak Rekap Laporan Resmi (`window.print()`)**:
   * Tombol *"Cetak Rekap Laporan"* memformat dokumen siap cetak atau simpan ke PDF.
-  * Dilengkapi KOP Surat Resmi Perusahaan (Logo, Nama PT, Alamat, Kontak, Website) yang diambil otomatis dari pengaturan.
+  * Dilengkapi identitas resmi perusahaan (Logo, Nama PT, Alamat, Kontak, Website) yang diambil otomatis dari pengaturan.
   * Dilengkapi blok tanda tangan validasi administrator untuk arsip audit enterprise.
 
 ---
@@ -106,7 +106,7 @@ taskflow/
 ### 6. ⚙️ Pengaturan Sistem & Verifikasi Server
 * **Layout 2-Kolom GitHub/Vercel-style**:
   * Mencegah ruang kosong horizontal yang berlebihan pada layar lebar.
-* **KOP Surat & Logo Instansi**:
+* **Identitas & Logo Perusahaan**:
   * Input Nama Perusahaan, Tagline, Alamat Resmi, Telepon/Hotline, Email Resmi, dan Website yang terintegrasi langsung ke dokumen cetak resmi.
 * **Verifikasi Koneksi Bot Telegram**:
   * Tombol sekunder di samping token untuk mengetes keabsahan token bot ke API Telegram secara real-time.
