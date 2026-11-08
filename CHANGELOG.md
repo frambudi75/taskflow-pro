@@ -6,6 +6,20 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.3] - 2026-11-08
+
+### 🎨 Desain & UI/UX (Design Overhaul)
+- **Executive SaaS Dashboard Hero Banner Redesign**:
+  - Penambahan tekstur *ambient canvas* dengan pencahayaan radial *multi-layer* (indigo, fuchsia, emerald) dan *geometric blueprint grid pattern*.
+  - Integrasi avatar pengguna berbingkai cincin gradasi dengan indikator status aktif (*online status pill*).
+  - Lokalisasi kalender resmi berbahasa Indonesia (`Minggu, 08 November 2026`) menggantikan format standar bahasa Inggris.
+  - Salam dinamis 4 waktu (*Selamat Pagi, Siang, Sore, Malam*) dengan nama pengguna bergradasi tipografi modern.
+  - Widget metrik penyeimbang di area tengah (*Rasio Capaian* & *Agenda Tersisa*) untuk menghilangkan ruang kosong pada layar monitor lebar.
+  - Cincin progres sirkular berbasis *frosted glass* dengan gradasi stroke SVG (`#34d399` ke `#38bdf8`) dan efek pendar halus (*drop-shadow glow*).
+  - Penambahan tombol aksi cepat sekunder ke papan Kanban di samping tombol *+ Buat Tugas Cepat*.
+
+---
+
 ## [3.2.2] - 2026-11-08
 
 ### ✨ Ditambahkan (Added)

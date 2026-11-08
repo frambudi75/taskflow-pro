@@ -94,7 +94,11 @@ $avatarSrc = $profilePhoto && file_exists(__DIR__ . '/../uploads/avatars/' . $pr
 
 $pct      = $total_todos > 0 ? round(($completed_todos / $total_todos) * 100) : 0;
 $hour     = (int)date('H');
-$greeting = $hour < 12 ? 'Selamat Pagi' : ($hour < 17 ? 'Selamat Siang' : 'Selamat Malam');
+$greeting = $hour < 11 ? 'Selamat Pagi' : ($hour < 15 ? 'Selamat Siang' : ($hour < 18 ? 'Selamat Sore' : 'Selamat Malam'));
+
+$days_id   = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
+$months_id = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
+$indo_date = ($days_id[date('l')] ?? date('l')) . ', ' . date('d') . ' ' . ($months_id[date('F')] ?? date('F')) . ' ' . date('Y');
 
 // Circular Progress Ring Math
 $ring_radius = 18;
@@ -289,53 +293,127 @@ if (!function_exists('formatActivityAction')) {
 
 <div class="p-4 md:p-8 w-full space-y-6">
 
-    <!-- WELCOME / DASHBOARD HERO BANNER (Functional SaaS Banner) -->
-    <div class="p-5 md:p-6 rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 border border-indigo-900/40 shadow-xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <!-- Ambient radial highlights inside banner -->
-        <div class="absolute -top-16 -right-16 w-72 h-72 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-16 left-1/4 w-60 h-60 bg-purple-500/15 rounded-full blur-2xl pointer-events-none"></div>
-        
-        <div class="relative z-10">
-            <!-- Date Pill with Subtle Calendar Icon (No green server dot) -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-200 text-xs font-bold uppercase tracking-wider mb-2">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="text-indigo-200/90"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span><?php echo date('l, d F Y'); ?></span>
+    <!-- WELCOME / DASHBOARD HERO BANNER (Executive SaaS Ambient Canvas) -->
+    <div class="p-6 md:p-7 rounded-[28px] bg-gradient-to-r from-slate-950 via-[#100d38] to-[#1c1752] border border-white/10 shadow-2xl relative overflow-hidden flex flex-col xl:flex-row xl:items-center justify-between gap-6 transition-all duration-300">
+        <!-- Ambient Multi-Layer Specular Glow Orbs -->
+        <div class="absolute -top-20 -right-20 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 left-1/4 w-72 h-72 bg-fuchsia-600/15 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-1/2 left-[-60px] w-60 h-60 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+        <!-- Subtle Geometric Blueprint Grid Overlay -->
+        <svg class="absolute inset-0 w-full h-full opacity-[0.05] pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <pattern id="dashHeroGrid" width="32" height="32" patternUnits="userSpaceOnUse">
+                    <circle cx="2" cy="2" r="1" fill="#ffffff" />
+                </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#dashHeroGrid)" />
+        </svg>
+
+        <!-- Left Area: User Avatar, Indonesian Date & Personalized Greeting -->
+        <div class="relative z-10 flex items-center gap-4 md:gap-5 min-w-0">
+            <!-- User Avatar with Ambient Glowing Ring -->
+            <div class="relative flex-shrink-0">
+                <div class="w-14 h-14 md:w-16 md:h-16 rounded-2xl p-0.5 bg-gradient-to-tr from-indigo-500 via-purple-500 to-emerald-400 shadow-lg shadow-indigo-950/60 flex items-center justify-center">
+                    <img src="<?php echo htmlspecialchars($avatarSrc); ?>" alt="Avatar" class="w-full h-full object-cover rounded-[14px]">
+                </div>
+                <span class="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-emerald-500 border-2 border-slate-950 rounded-full shadow-xs" title="Status: Aktif"></span>
             </div>
-            <h1 class="text-xl md:text-2xl font-black text-white leading-tight tracking-tight mb-1.5">
-                <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?> 👋
-            </h1>
-            <p class="text-slate-300 text-xs md:text-sm font-medium max-w-xl leading-relaxed">
-                <?php echo ($total_todos - $completed_todos) > 0
-                    ? ($total_todos - $completed_todos) . ' tugas menunggu diselesaikan hari ini. Tetap fokus dan pertahankan ritme produktif Anda!'
-                    : 'Luar biasa! Seluruh target agenda kerja Anda telah tercapai dengan sukses.'; ?>
-            </p>
+
+            <!-- Greeting & Dynamic Micro-Copy -->
+            <div class="min-w-0">
+                <!-- Date & Status Badge -->
+                <div class="flex flex-wrap items-center gap-2 mb-1.5">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/15 text-indigo-200 text-[11px] font-extrabold uppercase tracking-wider shadow-xs">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-indigo-300"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                        <span><?php echo $indo_date; ?></span>
+                    </div>
+                    <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/25 text-emerald-300 text-[10px] font-black uppercase tracking-wider">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span>Fokus Harian</span>
+                    </span>
+                </div>
+
+                <h1 class="text-xl md:text-2xl font-black text-white leading-tight tracking-tight flex items-center gap-2 flex-wrap">
+                    <span><?php echo $greeting; ?>,</span>
+                    <span class="bg-gradient-to-r from-white via-indigo-100 to-indigo-300 bg-clip-text text-transparent"><?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?></span>
+                    <span class="inline-block hover:rotate-12 transition-transform cursor-default">👋</span>
+                </h1>
+
+                <p class="text-slate-300/90 text-xs md:text-sm font-medium max-w-xl leading-relaxed mt-1">
+                    <?php echo ($total_todos - $completed_todos) > 0
+                        ? '<span class="text-amber-300 font-bold">' . ($total_todos - $completed_todos) . ' tugas</span> masih menunggu diselesaikan hari ini. Pertahankan momentum produktif Anda!'
+                        : 'Luar biasa! Seluruh target agenda kerja Anda hari ini telah tercapai dengan sempurna.'; ?>
+                </p>
+            </div>
         </div>
 
-        <!-- High-Value Functional Right Area: Daily Progress Ring + Quick Task CTA -->
-        <div class="relative z-10 flex flex-wrap items-center gap-3 self-start md:self-center flex-shrink-0">
-            <!-- Daily Progress Ring Widget -->
-            <div class="flex items-center gap-3 bg-white/10 backdrop-blur-md px-3.5 py-2 rounded-2xl border border-white/15 shadow-sm">
-                <div class="relative w-11 h-11 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-11 h-11 transform -rotate-90" viewBox="0 0 44 44">
-                        <circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,0.2)" stroke-width="3.5" fill="none" />
-                        <circle cx="22" cy="22" r="18" stroke="#34d399" stroke-width="3.5" fill="none" stroke-linecap="round"
+        <!-- Middle Bridge Metrics (Fills Desktop Space with High-Value Context) -->
+        <div class="relative z-10 hidden lg:flex items-center gap-3">
+            <!-- Pill 1: Rasio Produktivitas -->
+            <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.10] border border-white/10 backdrop-blur-md transition-all shadow-inner">
+                <div class="w-9 h-9 rounded-xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-400/20 shadow-xs">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold text-indigo-200/80 uppercase tracking-wider">Rasio Capaian</div>
+                    <div class="text-sm font-black text-white leading-none mt-0.5"><?php echo $pct; ?>%</div>
+                </div>
+            </div>
+
+            <!-- Pill 2: Agenda Menunggu -->
+            <div class="flex items-center gap-3 px-3.5 py-2.5 rounded-2xl bg-white/[0.06] hover:bg-white/[0.10] border border-white/10 backdrop-blur-md transition-all shadow-inner">
+                <div class="w-9 h-9 rounded-xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center border border-emerald-400/20 shadow-xs">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div>
+                    <div class="text-[10px] font-bold text-emerald-200/80 uppercase tracking-wider">Tersisa</div>
+                    <div class="text-sm font-black text-white leading-none mt-0.5"><?php echo max(0, $total_todos - $completed_todos); ?> <span class="text-[10px] font-semibold text-slate-400">Tugas</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Area: Frosted Progress Ring + Dynamic CTAs -->
+        <div class="relative z-10 flex flex-wrap items-center gap-3 self-start xl:self-center flex-shrink-0">
+            <!-- Modern Frosted Glass Progress Card -->
+            <div class="flex items-center gap-3.5 bg-white/[0.08] hover:bg-white/[0.12] backdrop-blur-xl px-4 py-2.5 rounded-2xl border border-white/15 shadow-xl transition-all">
+                <div class="relative w-12 h-12 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-12 h-12 transform -rotate-90 drop-shadow-[0_0_8px_rgba(52,211,153,0.35)]" viewBox="0 0 44 44">
+                        <circle cx="22" cy="22" r="18" stroke="rgba(255,255,255,0.15)" stroke-width="3.5" fill="none" />
+                        <circle cx="22" cy="22" r="18" stroke="url(#heroRingGrad)" stroke-width="3.8" fill="none" stroke-linecap="round"
                                 stroke-dasharray="<?php echo $ring_circ; ?>"
                                 stroke-dashoffset="<?php echo $ring_offset; ?>"
                                 class="transition-all duration-1000 ease-out" />
+                        <defs>
+                            <linearGradient id="heroRingGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#34d399" />
+                                <stop offset="100%" stop-color="#38bdf8" />
+                            </linearGradient>
+                        </defs>
                     </svg>
-                    <span class="absolute text-[10px] font-black text-white"><?php echo $pct; ?>%</span>
+                    <span class="absolute text-[11px] font-black text-white tracking-tight"><?php echo $pct; ?>%</span>
                 </div>
                 <div class="text-left pr-1">
                     <div class="text-white text-xs font-black tracking-tight leading-tight">Progres Hari Ini</div>
-                    <div class="text-[11px] text-indigo-200/90 font-semibold mt-0.5"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tuntas</div>
+                    <div class="text-[11px] text-indigo-200/90 font-semibold mt-0.5">
+                        <span class="font-bold text-emerald-300"><?php echo $completed_todos; ?></span> dari <?php echo $total_todos; ?> tuntas
+                    </div>
                 </div>
             </div>
 
-            <!-- Quick Task Primary CTA Button -->
-            <a href="?page=calendar" class="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 flex items-center gap-2 transition-all">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>+ Buat Tugas Cepat</span>
-            </a>
+            <!-- Quick Action Group -->
+            <div class="flex items-center gap-2">
+                <!-- Primary Action CTA Button -->
+                <a href="?page=calendar" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-indigo-500 via-indigo-600 to-violet-600 hover:from-indigo-400 hover:to-violet-500 active:scale-95 text-white font-extrabold text-xs shadow-lg shadow-indigo-600/35 border border-indigo-400/30 flex items-center gap-2 transition-all">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    <span>+ Buat Tugas Cepat</span>
+                </a>
+
+                <!-- Secondary Quick Action: Jump to Kanban Board -->
+                <a href="?page=projects" title="Buka Papan Kanban" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 active:scale-95 border border-white/15 flex items-center justify-center text-white/90 hover:text-white transition-all shadow-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18"/><path d="M15 3v18"/></svg>
+                </a>
+            </div>
         </div>
     </div>
 
