@@ -6,6 +6,19 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.4] - 2026-11-08
+
+### 🛡️ Pembersihan Anti-Slop (Purified Human Craft)
+- **Eliminasi Total Pola AI-Slop pada Dashboard**:
+  - Menghapus seluruh gradien gelap ungu-hitam, *radial blur orbs*, dan *geometric blueprint grid overlay* (mematuhi R-01 & R-07).
+  - Mengganti banner gelap menjadi kartu eksekutif bersih (*clean crisp executive panel*) yang 100% selaras dengan sistem desain TaskFlow Pro (mematuhi C-3 & R-21).
+  - Menghilangkan emoji dekoratif `👋` pada judul utama (mematuhi R-04 & R-36).
+  - Menghilangkan teks nama bergradasi (*gradient text*) dan efek pendar cahaya (*drop-shadow glow* pada SVG).
+  - Menghapus badge kapsul dengan *pulsing green dot* dan kartu metrik pengisi (*filler pills*).
+  - Menyederhanakan tombol aksi utama menjadi tombol fungsional solid yang tenang dan percaya diri (mematuhi C-1 & C-2).
+
+---
+
 ## [3.2.3] - 2026-11-08
 
 ### 🎨 Desain & UI/UX (Design Overhaul)
