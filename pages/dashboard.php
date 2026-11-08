@@ -294,47 +294,69 @@ if (!function_exists('formatActivityAction')) {
 <div class="p-4 md:p-8 w-full space-y-6">
 
     <!-- Dashboard Header Section (Clean Executive Standard) -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-            <!-- Date Badge -->
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700/80 text-slate-600 dark:text-slate-300 text-xs font-bold uppercase tracking-wider mb-2.5">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-slate-500 dark:text-slate-400"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                <span><?php echo $indo_date; ?></span>
+    <div class="rounded-3xl p-6 md:p-7 bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 border-t-[3px] border-t-indigo-600 shadow-xs flex flex-col xl:flex-row xl:items-center justify-between gap-6">
+        <!-- Left: User Identity & Greeting -->
+        <div class="flex items-center gap-4 md:gap-5 min-w-0">
+            <div class="w-12 h-12 md:w-14 md:h-14 rounded-2xl p-0.5 border border-slate-200/90 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 flex-shrink-0 shadow-xs">
+                <img src="<?php echo htmlspecialchars($avatarSrc); ?>" alt="Avatar" class="w-full h-full object-cover rounded-[14px]">
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1">
-                <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?>
-            </h1>
-            <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
-                <?php echo ($total_todos - $completed_todos) > 0
-                    ? ($total_todos - $completed_todos) . ' agenda tugas menunggu diselesaikan hari ini. Pertahankan fokus dan produktivitas Anda.'
-                    : 'Seluruh target agenda kerja Anda hari ini telah tercapai dengan sukses.'; ?>
-            </p>
+            <div class="min-w-0">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold uppercase tracking-wider mb-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-indigo-600 dark:text-indigo-400"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <span><?php echo $indo_date; ?></span>
+                </div>
+                <h1 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-0.5">
+                    <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?>
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium leading-relaxed max-w-xl">
+                    <?php echo ($total_todos - $completed_todos) > 0
+                        ? ($total_todos - $completed_todos) . ' agenda tugas menunggu diselesaikan hari ini. Pertahankan fokus dan produktivitas Anda.'
+                        : 'Seluruh target agenda kerja Anda hari ini telah tercapai dengan sukses.'; ?>
+                </p>
+            </div>
+        </div>
+
+        <!-- Middle: Contextual Status Divider (Fills the desktop void with clean real metrics) -->
+        <div class="hidden xl:flex items-center gap-6 border-x border-slate-100 dark:border-slate-800 px-6 flex-shrink-0">
+            <div>
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Status Agenda</div>
+                <div class="text-sm font-black text-slate-900 dark:text-white mt-0.5 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full <?php echo ($total_todos - $completed_todos) > 0 ? 'bg-amber-500' : 'bg-emerald-500'; ?>"></span>
+                    <span><?php echo ($total_todos - $completed_todos) > 0 ? ($total_todos - $completed_todos) . ' Menunggu' : 'Semua Tuntas'; ?></span>
+                </div>
+            </div>
+            <div>
+                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Tingkat Capaian</div>
+                <div class="text-sm font-black text-slate-900 dark:text-white mt-0.5">
+                    <?php echo $pct; ?>% <span class="text-[11px] font-medium text-slate-400 font-normal">(<?php echo $completed_todos; ?>/<?php echo $total_todos; ?>)</span>
+                </div>
+            </div>
         </div>
 
         <!-- Right Side: Clean Progress Widget + Quick Task Action -->
         <div class="flex flex-wrap items-center gap-3.5 flex-shrink-0">
             <!-- Progress Pill Card -->
-            <div class="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700">
-                <div class="relative w-10 h-10 flex items-center justify-center flex-shrink-0">
-                    <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 44 44">
+            <div class="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700 shadow-xs">
+                <div class="relative w-11 h-11 flex items-center justify-center flex-shrink-0">
+                    <svg class="w-11 h-11 transform -rotate-90" viewBox="0 0 44 44">
                         <circle cx="22" cy="22" r="18" stroke="currentColor" stroke-width="3.5" fill="none" class="text-slate-200 dark:text-slate-700" />
                         <circle cx="22" cy="22" r="18" stroke="#10b981" stroke-width="3.5" fill="none" stroke-linecap="round"
                                 stroke-dasharray="<?php echo $ring_circ; ?>"
                                 stroke-dashoffset="<?php echo $ring_offset; ?>"
                                 class="transition-all duration-700 ease-out" />
                     </svg>
-                    <span class="absolute text-[11px] font-black text-slate-900 dark:text-white"><?php echo $pct; ?>%</span>
+                    <span class="absolute text-xs font-black text-slate-900 dark:text-white"><?php echo $pct; ?>%</span>
                 </div>
                 <div>
                     <div class="text-[10px] font-black uppercase tracking-wider text-slate-400">Progres Hari Ini</div>
-                    <div class="text-xs font-black text-slate-800 dark:text-slate-200"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tuntas</div>
+                    <div class="text-xs font-black text-slate-800 dark:text-slate-200 mt-0.5"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tuntas</div>
                 </div>
             </div>
 
             <!-- Single Purpose Primary Button -->
-            <a href="?page=calendar" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs transition-colors flex items-center gap-2 shadow-xs">
+            <a href="?page=calendar" class="px-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs transition-colors flex items-center gap-2 shadow-sm shadow-indigo-600/20">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Buat Tugas Cepat</span>
+                <span>+ Buat Tugas Cepat</span>
             </a>
         </div>
     </div>

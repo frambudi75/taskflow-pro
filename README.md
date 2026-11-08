@@ -1,6 +1,6 @@
 # TaskFlow Pro: Enterprise Cloud Platform
 
-![Version](https://img.shields.io/badge/version-3.2.4-blue)
+![Version](https://img.shields.io/badge/version-3.2.5-blue)
 ![PHP](https://img.shields.io/badge/PHP-8.0%2B-indigo)
 ![Tailwind](https://img.shields.io/badge/Styling-Tailwind_CSS-sky)
 ![PWA](https://img.shields.io/badge/PWA-Ready-purple)

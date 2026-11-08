@@ -6,6 +6,18 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.5] - 2026-11-08
+
+### 🎨 Desain & Kerajinan UI (Polished Executive Header)
+- **Penyempurnaan Proporsi & Visual Anchor Header Dashboard**:
+  - Penambahan avatar pengguna sebagai jangkar visual identitas (*visual identity anchor*).
+  - Aksen garis atas indigo (`border-t-[3px] border-t-indigo-600`) yang selaras sempurna dengan ritme kartu metrik dashboard.
+  - Lencana tanggal beraksen indigo lembut (*soft indigo badge*) dengan tipografi yang lebih tegas dan rapi.
+  - Pembagi metrik fungsional di area tengah (*Status Agenda* & *Tingkat Capaian*) untuk menyeimbangkan bidang pandang desktop layar lebar.
+  - Peningkatan kontras tipografi dan penyempurnaan tombol aksi cepat `+ Buat Tugas Cepat`.
+
+---
+
 ## [3.2.4] - 2026-11-08
 
 ### 🛡️ Pembersihan Anti-Slop (Purified Human Craft)
