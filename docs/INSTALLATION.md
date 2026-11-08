@@ -60,6 +60,33 @@ Agar notifikasi harian terkirim otomatis, Anda **WAJIB** mendaftarkan script pen
 
 ---
 
+## 🐳 Panduan Menjalankan & Memperbarui via Docker
+
+TaskFlow Pro sudah dilengkapi dengan konfigurasi `Dockerfile`, `docker-compose.yml`, dan `docker-entrypoint.sh` siap pakai untuk lingkungan container / cloud.
+
+### 1. Menjalankan Pertama Kali:
+```bash
+docker compose up -d --build
+```
+Aplikasi langsung dapat diakses di peramban pada port 2026:
+`http://localhost:2026` atau `http://IP-SERVER:2026`
+
+### 2. Cara Update Aplikasi di Docker:
+Setiap kali ada pembaruan kode di repositori, cukup jalankan:
+```bash
+# 1. Ambil pembaruan kode terbaru
+git pull origin main
+
+# 2. Rebuild dan restart container secara seamless
+docker compose up -d --build
+```
+
+### 3. Keamanan Data (Persistence):
+* **Basis Data**: Disimpan secara persisten pada volume `db_data`, sehingga data akun, tugas, dan histori **tidak akan terhapus** saat container di-restart atau di-build ulang.
+* **Berkas Fisik (Uploads)**: Dimounting langsung dari folder host `./uploads`, menjamin seluruh dokumen aman tersimpan.
+
+---
+
 ## 🔒 Keamanan (Security)
 -   **Folder Uploads**: Pastikan folder `/uploads/` dan subfoldernya memiliki izin tulis (`chmod 755`).
 -   **File Config**: Jangan membagikan file `config.php` ke siapa pun.

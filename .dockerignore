@@ -1,0 +1,6 @@
+.git
+.gitignore
+.dockerignore
+docs/
+anti-slop/
+*.md
