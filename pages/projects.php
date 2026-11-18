@@ -1,25 +1,98 @@
 <?php
 if (!defined('IN_APP')) exit('Akses Ditolak');
-// pages/projects.php - Kanban Board 2.0 (Executive Clean & Interactive Task Tracking with Lane Pagination)
+// pages/projects.php - Kanban Board 2.0 (Executive Clean & Interactive Task Tracking with Lane Pagination, Linear-Style Detail Modal, and Checklists)
 $user_id = (int)$_SESSION['user_id'];
 
 // Handle Quick Add Task
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_task'])) {
     if (validateCSRF($_POST['csrf_token'])) {
         $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $priority = in_array($_POST['priority'] ?? 'medium', ['low', 'medium', 'high']) ? $_POST['priority'] : 'medium';
         $status = in_array($_POST['status'] ?? 'todo', ['todo', 'in_progress', 'done']) ? $_POST['status'] : 'todo';
         $todo_date = !empty($_POST['todo_date']) ? $_POST['todo_date'] : date('Y-m-d');
         $completed = ($status === 'done') ? 1 : 0;
         
         if ($title) {
-            $stmt = $pdo->prepare("INSERT INTO todos (user_id, title, todo_date, completed, status) VALUES (?, ?, ?, ?, ?)");
-            $stmt->execute([$user_id, $title, $todo_date, $completed, $status]);
+            $stmt = $pdo->prepare("INSERT INTO todos (user_id, title, description, priority, todo_date, completed, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+            $stmt->execute([$user_id, $title, $description, $priority, $todo_date, $completed, $status]);
             $todo_id = $pdo->lastInsertId();
             logActivity("Menambahkan tugas ke papan Kanban: " . $title, "todo", $todo_id);
         }
         header("Location: index.php?page=projects");
         exit;
     }
+}
+
+// Handle Update Full Task Details (from Linear Detail Modal)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_task_details'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $todo_id = (int)$_POST['todo_id'];
+        $title = trim($_POST['title'] ?? '');
+        $description = trim($_POST['description'] ?? '');
+        $priority = in_array($_POST['priority'] ?? 'medium', ['low', 'medium', 'high']) ? $_POST['priority'] : 'medium';
+        $status = in_array($_POST['status'] ?? 'todo', ['todo', 'in_progress', 'done']) ? $_POST['status'] : 'todo';
+        $todo_date = !empty($_POST['todo_date']) ? $_POST['todo_date'] : date('Y-m-d');
+        $completed = ($status === 'done') ? 1 : 0;
+
+        if ($title) {
+            $stmt = $pdo->prepare("UPDATE todos SET title = ?, description = ?, priority = ?, status = ?, completed = ?, todo_date = ? WHERE id = ? AND user_id = ?");
+            $stmt->execute([$title, $description, $priority, $status, $completed, $todo_date, $todo_id, $user_id]);
+            logActivity("Memperbarui detail tugas #" . $todo_id . " (" . $title . ")", "todo", $todo_id);
+        }
+
+        if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) || isset($_POST['ajax'])) {
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+            exit;
+        }
+        header("Location: index.php?page=projects");
+        exit;
+    }
+}
+
+// Handle Checklist AJAX Operations (Add, Toggle, Delete)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['checklist_action'])) {
+    if (validateCSRF($_POST['csrf_token'])) {
+        $action = $_POST['checklist_action'];
+        
+        if ($action === 'add') {
+            $todo_id = (int)$_POST['todo_id'];
+            $chk_title = trim($_POST['title'] ?? '');
+            $chkOwner = $pdo->prepare("SELECT id FROM todos WHERE id = ? AND user_id = ?");
+            $chkOwner->execute([$todo_id, $user_id]);
+            if ($chkOwner->fetch() && $chk_title) {
+                $stmt = $pdo->prepare("INSERT INTO todo_checklists (todo_id, title, is_completed) VALUES (?, ?, 0)");
+                $stmt->execute([$todo_id, $chk_title]);
+                $chk_id = $pdo->lastInsertId();
+                header('Content-Type: application/json');
+                echo json_encode(['success' => true, 'id' => $chk_id, 'title' => $chk_title, 'is_completed' => 0]);
+                exit;
+            }
+        }
+        
+        if ($action === 'toggle') {
+            $chk_id = (int)$_POST['checklist_id'];
+            $is_completed = !empty($_POST['is_completed']) ? 1 : 0;
+            $stmt = $pdo->prepare("UPDATE todo_checklists tc JOIN todos t ON tc.todo_id = t.id SET tc.is_completed = ? WHERE tc.id = ? AND t.user_id = ?");
+            $stmt->execute([$is_completed, $chk_id, $user_id]);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'is_completed' => $is_completed]);
+            exit;
+        }
+
+        if ($action === 'delete') {
+            $chk_id = (int)$_POST['checklist_id'];
+            $stmt = $pdo->prepare("DELETE tc FROM todo_checklists tc JOIN todos t ON tc.todo_id = t.id WHERE tc.id = ? AND t.user_id = ?");
+            $stmt->execute([$chk_id, $user_id]);
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true]);
+            exit;
+        }
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false]);
+    exit;
 }
 
 // Handle Status Update (Drag & Drop or Button Click)
@@ -38,6 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_status'])) {
             header("Location: index.php?page=projects");
             exit;
         }
+        header('Content-Type: application/json');
         echo json_encode(['success' => true]);
         exit;
     }
@@ -58,7 +132,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_task'])) {
 // Fetch all todos for user
 $stmt = $pdo->prepare("SELECT * FROM todos WHERE user_id = ? ORDER BY todo_date ASC, id DESC");
 $stmt->execute([$user_id]);
-$all_todos = $stmt->fetchAll();
+$all_todos = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Fetch all checklists for user's todos
+$checklists_by_todo = [];
+try {
+    $stmtChk = $pdo->prepare("SELECT tc.id, tc.todo_id, tc.title, tc.is_completed FROM todo_checklists tc JOIN todos t ON tc.todo_id = t.id WHERE t.user_id = ? ORDER BY tc.id ASC");
+    $stmtChk->execute([$user_id]);
+    $raw_checklists = $stmtChk->fetchAll(PDO::FETCH_ASSOC);
+    foreach ($raw_checklists as $chk) {
+        $checklists_by_todo[$chk['todo_id']][] = $chk;
+    }
+} catch(Exception $e) {}
+
+// Fetch user's documents for quick attachment reference
+$user_documents = [];
+try {
+    $stmtDoc = $pdo->prepare("SELECT id, name, file_type FROM documents WHERE user_id = ? ORDER BY id DESC LIMIT 15");
+    $stmtDoc->execute([$user_id]);
+    $user_documents = $stmtDoc->fetchAll(PDO::FETCH_ASSOC);
+} catch(Exception $e) {}
+
+// Priority helper
+function getPriorityPill($priority) {
+    switch(strtolower($priority ?? 'medium')) {
+        case 'high':
+        case 'tinggi':
+            return [
+                'label' => 'Tinggi',
+                'class' => 'bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border-rose-200 dark:border-rose-800/80',
+                'dot'   => 'bg-rose-500 animate-pulse'
+            ];
+        case 'low':
+        case 'rendah':
+            return [
+                'label' => 'Normal',
+                'class' => 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700',
+                'dot'   => 'bg-slate-400'
+            ];
+        case 'medium':
+        case 'sedang':
+        default:
+            return [
+                'label' => 'Sedang',
+                'class' => 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800/80',
+                'dot'   => 'bg-amber-500'
+            ];
+    }
+}
 
 $columns = [
     'todo' => [
@@ -272,28 +393,75 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
             <!-- Cards Container -->
             <div class="flex flex-col gap-3 flex-1 kanban-cards-wrapper" id="lane-cards-<?php echo $cid; ?>">
                 <?php foreach ($tasks as $todo): 
-                    $dateObj   = strtotime($todo['todo_date']);
-                    $dateFmt   = date('d M Y', $dateObj);
-                    $isOverdue = $dateObj < strtotime('today') && $cid !== 'done';
-                    $isToday   = date('Y-m-d', $dateObj) === date('Y-m-d');
+                    $dateObj      = strtotime($todo['todo_date']);
+                    $dateFmt      = date('d M Y', $dateObj);
+                    $isOverdue    = $dateObj < strtotime('today') && $cid !== 'done';
+                    $isToday      = date('Y-m-d', $dateObj) === date('Y-m-d');
+                    $todo_chks    = $checklists_by_todo[$todo['id']] ?? [];
+                    $total_chk    = count($todo_chks);
+                    $done_chk     = count(array_filter($todo_chks, fn($c) => !empty($c['is_completed'])));
+                    $chk_pct      = $total_chk > 0 ? round(($done_chk / $total_chk) * 100) : 0;
+                    $priorityPill = getPriorityPill($todo['priority'] ?? 'medium');
+                    $has_desc     = !empty(trim($todo['description'] ?? ''));
+                    $task_payload = htmlspecialchars(json_encode([
+                        'id'          => $todo['id'],
+                        'title'       => $todo['title'],
+                        'description' => $todo['description'] ?? '',
+                        'priority'    => $todo['priority'] ?? 'medium',
+                        'status'      => $cid,
+                        'status_label'=> $cdata['title'],
+                        'todo_date'   => $todo['todo_date'],
+                        'checklists'  => $todo_chks
+                    ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP), ENT_QUOTES, 'UTF-8');
                 ?>
-                <div class="kanban-task-card p-4 cursor-grab active:cursor-grabbing group relative select-none"
+                <div class="kanban-task-card p-4 cursor-pointer group relative select-none"
                      draggable="true" 
+                     onclick="openTaskDetailModal(this)"
+                     data-task="<?php echo $task_payload; ?>"
                      ondragstart="kanbanDragStart(event, <?php echo $todo['id']; ?>)" 
                      ondragend="kanbanDragEnd(event)"
                      id="todo-<?php echo $todo['id']; ?>"
                      data-lane="<?php echo $cid; ?>"
                      data-title="<?php echo strtolower(htmlspecialchars($todo['title'])); ?>">
                     
-                    <!-- Card Header: Title -->
+                    <!-- Top Meta Row: Priority Badge + Checklist Indicator -->
+                    <div class="flex items-center justify-between gap-2 mb-2">
+                        <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-black border <?php echo $priorityPill['class']; ?>">
+                            <span class="w-1.5 h-1.5 rounded-full <?php echo $priorityPill['dot']; ?>"></span>
+                            <?php echo $priorityPill['label']; ?>
+                        </span>
+
+                        <?php if ($total_chk > 0): ?>
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                            <span>☑</span>
+                            <span><?php echo $done_chk; ?>/<?php echo $total_chk; ?></span>
+                        </span>
+                        <?php endif; ?>
+                    </div>
+
+                    <!-- Title & Optional Description Preview -->
                     <div class="mb-2.5">
                         <h3 class="font-black text-slate-900 dark:text-white text-xs sm:text-[13px] leading-snug group-hover:text-[#1E5CE6] dark:group-hover:text-blue-400 transition-colors">
                             <?php echo htmlspecialchars($todo['title']); ?>
                         </h3>
+                        <?php if ($has_desc): ?>
+                        <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium line-clamp-2 mt-1 leading-relaxed">
+                            <?php echo htmlspecialchars($todo['description']); ?>
+                        </p>
+                        <?php endif; ?>
                     </div>
 
+                    <!-- Checklist Mini Progress Bar (if checklists exist) -->
+                    <?php if ($total_chk > 0): ?>
+                    <div class="mb-3">
+                        <div class="w-full h-1 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                            <div class="h-full bg-[#1E5CE6] rounded-full transition-all duration-300" style="width: <?php echo $chk_pct; ?>%;"></div>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+
                     <!-- Card Footer: Due Date Badge & Status Advance Button -->
-                    <div class="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-800 mt-auto text-xs">
+                    <div class="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-800 mt-auto text-xs" onclick="event.stopPropagation()">
                         <!-- Date Chip -->
                         <div class="flex items-center gap-1.5">
                             <?php if ($isOverdue): ?>
@@ -320,7 +488,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                             <button type="button" 
                                     onclick="changeKanbanStatus(<?php echo $todo['id']; ?>, '<?php echo $cdata['next_status']; ?>')"
                                     title="<?php echo $cdata['next_label']; ?>" aria-label="<?php echo $cdata['next_label']; ?>"
-                                    class="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-400 hover:text-[#1E5CE6] dark:hover:text-blue-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
+                                    class="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-400 hover:text-[#1E5CE6] dark:hover:text-blue-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors cursor-pointer">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                             </button>
 
@@ -328,7 +496,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                             <button type="button" 
                                     onclick="confirmDeleteTask(<?php echo $todo['id']; ?>, '<?php echo addslashes($todo['title']); ?>')"
                                     title="Hapus tugas" aria-label="Hapus tugas"
-                                    class="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
+                                    class="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors cursor-pointer">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             </button>
                         </div>
@@ -374,7 +542,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
 <!-- QUICK ADD TASK MODAL -->
 <!-- ============================================================== -->
 <div id="addTaskModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="addTaskModalTitle">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-modal-pop" onclick="event.stopPropagation()">
         
         <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/60 dark:bg-slate-800/50">
             <div class="flex items-center gap-3">
@@ -401,27 +569,43 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                        class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400">
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div>
+                <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Catatan / Deskripsi Singkat</label>
+                <textarea name="description" rows="2" placeholder="Detail atau instruksi spesifik untuk tugas ini..."
+                          class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400"></textarea>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Kolom Status</label>
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Kolom</label>
                     <select name="status" id="addTaskStatusSelect"
-                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                         <option value="todo">Belum Mulai</option>
-                        <option value="in_progress">Sedang Dikerjakan</option>
+                        <option value="in_progress">Dikerjakan</option>
                         <option value="done">Selesai</option>
                     </select>
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Tenggat Waktu</label>
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Prioritas</label>
+                    <select name="priority"
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
+                        <option value="medium" selected>Sedang</option>
+                        <option value="high">Tinggi</option>
+                        <option value="low">Normal</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Tenggat</label>
                     <input type="date" name="todo_date" value="<?php echo date('Y-m-d'); ?>" required
-                           class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
+                           class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                 </div>
             </div>
 
             <div class="pt-2">
                 <button type="submit" 
-                        class="w-full py-3 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
+                        class="w-full py-3 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2 cursor-pointer">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     Simpan Kartu Tugas
                 </button>
@@ -430,8 +614,372 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
     </div>
 </div>
 
+<!-- ============================================================== -->
+<!-- LINEAR / NOTION-STYLE COMPREHENSIVE TASK DETAIL MODAL -->
+<!-- ============================================================== -->
+<div id="taskDetailModal" class="fixed inset-0 hidden z-50 items-center justify-center p-3 sm:p-4 bg-slate-950/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="taskDetailModalTitle">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-3xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800 animate-modal-pop" onclick="event.stopPropagation()">
+        
+        <!-- Modal Top Bar -->
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/70 dark:bg-slate-800/50">
+            <div class="flex items-center gap-2.5">
+                <span id="detailStatusBadge" class="px-2.5 py-1 rounded-full text-[10px] font-black border uppercase tracking-wider">
+                    Status
+                </span>
+                <span class="text-xs font-mono font-bold text-slate-400" id="detailTaskId">#0</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button type="button" onclick="closeTaskDetailModal()" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center cursor-pointer">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- 2-Column Split Modal Body -->
+        <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+            <form id="taskDetailForm" onsubmit="saveTaskDetails(event)" class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                <input type="hidden" name="update_task_details" value="1">
+                <input type="hidden" name="todo_id" id="detailFormTodoId">
+
+                <!-- Left Column (8 of 12 Cols) -->
+                <div class="md:col-span-7 lg:col-span-8 space-y-5">
+                    <!-- Title Input -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Judul Tugas</label>
+                        <input type="text" name="title" id="detailTitleInput" required
+                               class="w-full text-base sm:text-lg font-black text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all">
+                    </div>
+
+                    <!-- Description Input -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Catatan &amp; Deskripsi Tugas</label>
+                        <textarea name="description" id="detailDescInput" rows="3" placeholder="Tulis catatan atau instruksi spesifik untuk tugas ini..."
+                                  class="w-full text-xs font-medium text-slate-800 dark:text-slate-200 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400 leading-relaxed"></textarea>
+                    </div>
+
+                    <!-- Checklists / Sub-tasks Section -->
+                    <div class="pt-2">
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center gap-2">
+                                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Sub-tugas (Checklist)</span>
+                                <span id="detailChecklistRatio" class="text-[10px] font-bold font-mono px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">0/0</span>
+                            </div>
+                            <span id="detailChecklistPct" class="text-[11px] font-black text-[#1E5CE6] dark:text-blue-400">0% Selesai</span>
+                        </div>
+
+                        <!-- Animated Progress Bar -->
+                        <div class="w-full h-1.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden mb-3">
+                            <div id="detailChecklistProgressBar" class="h-full bg-[#1E5CE6] rounded-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
+
+                        <!-- Checklists Items Container -->
+                        <div id="detailChecklistContainer" class="space-y-2 mb-3">
+                            <!-- Items injected dynamically -->
+                        </div>
+
+                        <!-- Add Checklist Item Input -->
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="newChecklistInput" placeholder="+ Tambahkan sub-tugas baru (tekan Enter)..."
+                                   onkeydown="if(event.key==='Enter'){event.preventDefault(); addNewChecklistItem();}"
+                                   class="flex-1 bg-slate-50 dark:bg-slate-800 border border-dashed border-slate-300 dark:border-slate-700 rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:border-[#1E5CE6] transition-all">
+                            <button type="button" onclick="addNewChecklistItem()"
+                                    class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-[#1E5CE6] dark:hover:bg-[#1E5CE6] text-slate-700 dark:text-slate-300 hover:text-white dark:hover:text-white text-xs font-bold transition-all shrink-0 cursor-pointer">
+                                + Tambah
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column / Properties Panel (4 of 12 Cols) -->
+                <div class="md:col-span-5 lg:col-span-4 p-4 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/80 space-y-4 h-fit">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200/60 dark:border-slate-700/60 pb-2">Properti Tugas</p>
+
+                    <!-- Status Selector -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Status Papan</label>
+                        <select name="status" id="detailStatusSelect"
+                                class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30">
+                            <option value="todo">Belum Mulai</option>
+                            <option value="in_progress">Sedang Dikerjakan</option>
+                            <option value="done">Selesai</option>
+                        </select>
+                    </div>
+
+                    <!-- Priority Selector -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tingkat Prioritas</label>
+                        <select name="priority" id="detailPrioritySelect"
+                                class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30">
+                            <option value="high">🔴 Prioritas Tinggi</option>
+                            <option value="medium">🟡 Prioritas Sedang</option>
+                            <option value="low">🟢 Prioritas Normal</option>
+                        </select>
+                    </div>
+
+                    <!-- Due Date Picker -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Tenggat Waktu</label>
+                        <input type="date" name="todo_date" id="detailDateInput" required
+                               class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30">
+                    </div>
+
+                    <!-- Related Document Quick Reference -->
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-1">Lampiran / Berkas Terkait</label>
+                        <a href="index.php?page=documents" target="_blank"
+                           class="w-full p-2.5 rounded-xl bg-white dark:bg-slate-800 hover:bg-blue-50/50 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] transition-all flex items-center justify-between">
+                            <span class="flex items-center gap-1.5 truncate">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+                                <span>Buka Manajemen Dokumen</span>
+                            </span>
+                            <span class="text-slate-400">&rarr;</span>
+                        </a>
+                    </div>
+
+                    <!-- Save Button -->
+                    <div class="pt-3 border-t border-slate-200/60 dark:border-slate-700/60">
+                        <button type="submit" id="btnSaveDetail"
+                                class="w-full py-2.5 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/25 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2 cursor-pointer">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                            <span>Simpan Perubahan</span>
+                        </button>
+                    </div>
+
+                    <!-- Delete Button -->
+                    <div>
+                        <button type="button" onclick="deleteTaskFromDetail()"
+                                class="w-full py-2 rounded-xl text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs font-bold transition-colors flex items-center justify-center gap-1.5 cursor-pointer">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Hapus Tugas</span>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 (function() {
+    // -------------------------------------------------------------
+    // Linear-Style Task Detail Modal & Checklists State
+    // -------------------------------------------------------------
+    let currentTaskDetail = null;
+
+    window.openTaskDetailModal = function(cardEl) {
+        if (!cardEl) return;
+        try {
+            const payload = JSON.parse(cardEl.getAttribute('data-task'));
+            currentTaskDetail = payload;
+            
+            document.getElementById('detailFormTodoId').value = payload.id;
+            document.getElementById('detailTaskId').textContent = '#' + payload.id;
+            document.getElementById('detailTitleInput').value = payload.title || '';
+            document.getElementById('detailDescInput').value = payload.description || '';
+            document.getElementById('detailStatusSelect').value = payload.status || 'todo';
+            document.getElementById('detailPrioritySelect').value = payload.priority || 'medium';
+            document.getElementById('detailDateInput').value = payload.todo_date || '';
+
+            // Status badge in header
+            const badge = document.getElementById('detailStatusBadge');
+            if (badge) {
+                badge.textContent = payload.status_label || payload.status;
+                if (payload.status === 'done') {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-black border bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800 uppercase tracking-wider';
+                } else if (payload.status === 'in_progress') {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-black border bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800 uppercase tracking-wider';
+                } else {
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-black border bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800 uppercase tracking-wider';
+                }
+            }
+
+            renderDetailChecklists(payload.checklists || []);
+
+            const modal = document.getElementById('taskDetailModal');
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.style.display = 'flex';
+            }
+        } catch(e) {
+            console.error(e);
+        }
+    };
+
+    window.closeTaskDetailModal = function() {
+        const modal = document.getElementById('taskDetailModal');
+        if (modal) {
+            modal.classList.add('hidden');
+            modal.style.display = 'none';
+        }
+        currentTaskDetail = null;
+    };
+
+    function renderDetailChecklists(checklists) {
+        const container = document.getElementById('detailChecklistContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const total = checklists.length;
+        const done = checklists.filter(c => c.is_completed == 1 || c.is_completed === true).length;
+        const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+        const ratioEl = document.getElementById('detailChecklistRatio');
+        const pctEl = document.getElementById('detailChecklistPct');
+        const barEl = document.getElementById('detailChecklistProgressBar');
+
+        if (ratioEl) ratioEl.textContent = `${done}/${total}`;
+        if (pctEl) pctEl.textContent = `${pct}% Selesai`;
+        if (barEl) barEl.style.width = `${pct}%`;
+
+        if (total === 0) {
+            container.innerHTML = '<p class="text-xs text-slate-400 italic py-2">Belum ada sub-tugas. Tambahkan langkah pengerjaan di bawah.</p>';
+            return;
+        }
+
+        checklists.forEach(chk => {
+            const item = document.createElement('div');
+            item.className = 'flex items-center justify-between gap-2.5 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/80 hover:border-[#1E5CE6]/50 transition-all group';
+            const isChecked = (chk.is_completed == 1);
+            item.innerHTML = `
+                <label class="flex items-center gap-2.5 min-w-0 flex-1 cursor-pointer select-none">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleChecklistItem(${chk.id}, this.checked)"
+                           class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#1E5CE6] focus:ring-[#1E5CE6]/20 cursor-pointer">
+                    <span class="text-xs font-semibold ${isChecked ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-800 dark:text-slate-200'} truncate transition-colors">
+                        ${chk.title}
+                    </span>
+                </label>
+                <button type="button" onclick="deleteChecklistItem(${chk.id})" title="Hapus sub-tugas"
+                        class="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-rose-600 transition-opacity p-1 text-xs cursor-pointer">
+                    ✕
+                </button>
+            `;
+            container.appendChild(item);
+        });
+    }
+
+    window.addNewChecklistItem = function() {
+        if (!currentTaskDetail) return;
+        const input = document.getElementById('newChecklistInput');
+        const title = input.value.trim();
+        if (!title) return;
+
+        const formData = new FormData();
+        formData.append('checklist_action', 'add');
+        formData.append('todo_id', currentTaskDetail.id);
+        formData.append('title', title);
+        formData.append('csrf_token', '<?php echo $_SESSION['csrf_token']; ?>');
+
+        fetch('index.php?page=projects', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                input.value = '';
+                if (!currentTaskDetail.checklists) currentTaskDetail.checklists = [];
+                currentTaskDetail.checklists.push({ id: res.id, title: res.title, is_completed: 0 });
+                renderDetailChecklists(currentTaskDetail.checklists);
+                if (typeof showToast === 'function') showToast('Sub-tugas berhasil ditambahkan', 'success');
+            }
+        });
+    };
+
+    window.toggleChecklistItem = function(chkId, isCompleted) {
+        if (!currentTaskDetail) return;
+        const formData = new FormData();
+        formData.append('checklist_action', 'toggle');
+        formData.append('checklist_id', chkId);
+        formData.append('is_completed', isCompleted ? 1 : 0);
+        formData.append('csrf_token', '<?php echo $_SESSION['csrf_token']; ?>');
+
+        fetch('index.php?page=projects', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                const item = currentTaskDetail.checklists.find(c => c.id == chkId);
+                if (item) item.is_completed = isCompleted ? 1 : 0;
+                renderDetailChecklists(currentTaskDetail.checklists);
+            }
+        });
+    };
+
+    window.deleteChecklistItem = function(chkId) {
+        if (!currentTaskDetail) return;
+        const formData = new FormData();
+        formData.append('checklist_action', 'delete');
+        formData.append('checklist_id', chkId);
+        formData.append('csrf_token', '<?php echo $_SESSION['csrf_token']; ?>');
+
+        fetch('index.php?page=projects', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                currentTaskDetail.checklists = currentTaskDetail.checklists.filter(c => c.id != chkId);
+                renderDetailChecklists(currentTaskDetail.checklists);
+            }
+        });
+    };
+
+    window.saveTaskDetails = function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('btnSaveDetail');
+        const orig = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="inline-block animate-spin">⏳</span> Menyimpan...';
+
+        const form = document.getElementById('taskDetailForm');
+        const formData = new FormData(form);
+        formData.append('ajax', '1');
+
+        fetch('index.php?page=projects', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData
+        })
+        .then(r => r.json())
+        .then(res => {
+            if (res && res.success) {
+                if (typeof showToast === 'function') showToast('Perubahan tugas berhasil disimpan! ✨', 'success');
+                setTimeout(() => {
+                    closeTaskDetailModal();
+                    if (typeof loadPage === 'function') {
+                        loadPage('index.php?page=projects', false);
+                    } else {
+                        window.location.reload();
+                    }
+                }, 400);
+            } else {
+                btn.disabled = false;
+                btn.innerHTML = orig;
+                if (typeof showToast === 'function') showToast('Gagal menyimpan perubahan', 'error');
+            }
+        })
+        .catch(() => {
+            btn.disabled = false;
+            btn.innerHTML = orig;
+            if (typeof showToast === 'function') showToast('Terjadi kesalahan jaringan', 'error');
+        });
+    };
+
+    window.deleteTaskFromDetail = function() {
+        if (!currentTaskDetail) return;
+        if (confirm('Hapus tugas ini dari papan Kanban? Semua sub-tugas terkait akan terhapus.')) {
+            document.getElementById('deleteTodoId').value = currentTaskDetail.id;
+            document.getElementById('deleteTaskForm').submit();
+        }
+    };
+
     // -------------------------------------------------------------
     // Kanban Pagination State
     // -------------------------------------------------------------

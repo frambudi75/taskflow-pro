@@ -6,6 +6,31 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.5.0] - 2026-11-18
+
+### 🚀 Pusat Notifikasi Tenggat Waktu Otomatis & Modal Detail Tugas Linear-Style (Sub-Tugas Checklists)
+- **Pusat Notifikasi Tenggat Waktu Otomatis (*Interactive Due Date Notification Center*) di Top Header (`index.php`)**:
+  - Deteksi otomatis tugas yang jatuh tempo **Hari Ini** atau **Terlambat (*Overdue*)** secara real-time.
+  - Lonceng notifikasi dengan lencana berdenyut dinamis (*pulsing alert badge*) yang menampilkan jumlah tugas mendesak.
+  - Dropdown interaktif 2 tab (*Tenggat Waktu* dan *Aktivitas Tim*).
+  - Aksi instan 1-klik `✓ Selesai` langsung dari dropdown notifikasi melalui AJAX tanpa perlu memuat ulang halaman, lengkap dengan pembaruan hitungan lencana secara mulus.
+- **Modal Detail Tugas Bergaya Linear / Notion (*Task Detail Modal & Checklists*) di Kanban (`pages/projects.php`)**:
+  - Kartu tugas di Papan Kanban kini dapat diklik untuk membuka modal inspeksi dan editor komprehensif bergaya Linear.
+  - **Dukungan Sub-Tugas / Checklists Interaktif**: Pengguna dapat menambahkan butir sub-tugas, mencentang/membatalkan status selesai secara instan via AJAX, dan menghapus butir tugas.
+  - **Bilah Kemajuan Sub-Tugas Real-Time (*Dynamic Progress Bar*)**: Menghitung persentase penyelesaian sub-tugas secara otomatis (misal: "3/5 selesai (60%)").
+  - Editor deskripsi tugas lengkap, pemilih prioritas (*Tinggi*, *Sedang*, *Normal*), pemilih status kolom, dan tanggal tenggat waktu.
+- **Peningkatan Visual Kartu Kanban & Indikator Urgensi**:
+  - Lencana prioritas berpendar (*glowing priority pills*): 🔴 Tinggi (*Rose*), 🟡 Sedang (*Amber*), 🟢 Normal (*Emerald*).
+  - Indikator sub-tugas mini dengan bilah progres mikro langsung di kartu Kanban.
+  - Desain Midnight Navy 100% kohesif di Dark Mode dengan garis batas tipis (*hairline borders*).
+- **Ekspansi Skema Basis Data Otomatis (`config.php`)**:
+  - Migrasi otomatis kolom `priority` (VARCHAR 20) dan `description` (TEXT) pada tabel `todos`.
+  - Pembuatan otomatis tabel relasional `todo_checklists` dengan integritas foreign key cascade.
+- **Peningkatan Cache PWA**:
+  - Peningkatan cache Service Worker ke `taskflow-pwa-v3.5.0`.
+
+---
+
 ## [3.4.0] - 2026-11-18
 
 ### 🌓 Sistem Dark Mode Paripurna, Tombol Alih Tema Header, & Navigasi Melayang Mobile

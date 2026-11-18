@@ -1,5 +1,5 @@
 // TaskFlow Pro - Progressive Web App Service Worker
-const CACHE_NAME = 'taskflow-pwa-v3.4.0';
+const CACHE_NAME = 'taskflow-pwa-v3.5.0';
 const STATIC_ASSETS = [
     './favicon.svg',
     './manifest.json'

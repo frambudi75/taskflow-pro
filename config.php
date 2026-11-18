@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
 
-define('APP_VERSION', '3.4.0');
+define('APP_VERSION', '3.5.0');
 
 // PHP 8.0 Polyfills for backward compatibility (PHP 7.4)
 if (!function_exists('str_starts_with')) {
@@ -189,6 +189,27 @@ try {
     if (empty($checkStatus)) {
         $pdo->exec("ALTER TABLE users ADD COLUMN status ENUM('active', 'inactive') NOT NULL DEFAULT 'active' AFTER role");
     }
+
+    // Ensure priority and description columns exist in todos
+    $checkPriority = $pdo->query("SHOW COLUMNS FROM todos LIKE 'priority'")->fetchAll();
+    if (empty($checkPriority)) {
+        $pdo->exec("ALTER TABLE todos ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER status");
+    }
+    $checkDesc = $pdo->query("SHOW COLUMNS FROM todos LIKE 'description'")->fetchAll();
+    if (empty($checkDesc)) {
+        $pdo->exec("ALTER TABLE todos ADD COLUMN description TEXT NULL AFTER priority");
+    }
+
+    // Ensure todo_checklists table exists for sub-tasks
+    $pdo->exec("CREATE TABLE IF NOT EXISTS todo_checklists (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        todo_id INT NOT NULL,
+        title VARCHAR(255) NOT NULL,
+        is_completed TINYINT(1) DEFAULT 0,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (todo_id) REFERENCES todos(id) ON DELETE CASCADE,
+        INDEX idx_todo_chk (todo_id)
+    )");
 } catch (\Throwable $e) {}
 
 /**

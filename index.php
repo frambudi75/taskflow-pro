@@ -67,6 +67,23 @@ $sidebar_storage_pct = ($sidebar_user_quota <= 0) ? 0 : min(100, max(2, round(($
 $sidebar_storage_formatted = formatSize($sidebar_storage_used);
 $sidebar_quota_formatted = ($sidebar_user_quota <= 0) ? 'Tanpa Batas' : formatSize($sidebar_user_quota);
 
+// Quick Complete Task Handler (Called via AJAX from notification center or quick actions)
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['quick_complete_task'])) {
+    if (isset($_SESSION['user_id']) && validateCSRF($_POST['csrf_token'] ?? '')) {
+        $todo_id = (int)$_POST['todo_id'];
+        $curr_user_id = (int)$_SESSION['user_id'];
+        $stmtQC = $pdo->prepare("UPDATE todos SET status = 'done', completed = 1 WHERE id = ? AND user_id = ?");
+        $stmtQC->execute([$todo_id, $curr_user_id]);
+        logActivity("Menyelesaikan tugas via notifikasi tenggat waktu (#" . $todo_id . ")", "todo", $todo_id);
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'todo_id' => $todo_id]);
+        exit;
+    }
+    header('Content-Type: application/json');
+    echo json_encode(['success' => false, 'error' => 'Validasi gagal']);
+    exit;
+}
+
 // Pending tasks count
 $badge_pending_tasks = 0;
 try {
@@ -75,10 +92,26 @@ try {
     $badge_pending_tasks = (int)$stmtBadge->fetchColumn();
 } catch(Exception $e) {}
 
+// Urgent Tasks for Interactive Notification Center: Overdue & Due Today
+$notif_overdue_tasks = [];
+$notif_today_tasks = [];
+try {
+    $uid = (int)($_SESSION['user_id'] ?? 0);
+    $stmtOverdue = $pdo->prepare("SELECT id, title, todo_date, priority FROM todos WHERE user_id = ? AND completed = 0 AND status != 'done' AND todo_date < CURDATE() ORDER BY todo_date ASC LIMIT 5");
+    $stmtOverdue->execute([$uid]);
+    $notif_overdue_tasks = $stmtOverdue->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmtToday = $pdo->prepare("SELECT id, title, todo_date, priority FROM todos WHERE user_id = ? AND completed = 0 AND status != 'done' AND todo_date = CURDATE() ORDER BY id DESC LIMIT 5");
+    $stmtToday->execute([$uid]);
+    $notif_today_tasks = $stmtToday->fetchAll(PDO::FETCH_ASSOC);
+} catch(Exception $e) {}
+
+$notif_urgent_count = count($notif_overdue_tasks) + count($notif_today_tasks);
+
 // Recent activities for notifications
 $recent_activities = [];
 try {
-    $stmtAct = $pdo->prepare("SELECT action, details, created_at FROM audit_logs ORDER BY id DESC LIMIT 4");
+    $stmtAct = $pdo->prepare("SELECT action, details, created_at FROM audit_logs ORDER BY id DESC LIMIT 5");
     $stmtAct->execute();
     $recent_activities = $stmtAct->fetchAll(PDO::FETCH_ASSOC);
 } catch(Exception $e) {}
@@ -485,29 +518,106 @@ try {
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path stroke-linecap="round" d="M20 20l-3.5-3.5"></path></svg>
                 </button>
 
-                <!-- Notification Bell -->
+                <!-- Notification Bell & Center -->
                 <div class="relative">
-                    <button onclick="toggleDropdown('notifDropdown')" class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Notifikasi" aria-label="Notifikasi">
+                    <button onclick="toggleDropdown('notifDropdown')" class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] dark:hover:text-blue-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" title="Pusat Notifikasi &amp; Tenggat Waktu" aria-label="Notifikasi">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
-                        <?php if (!empty($recent_activities)): ?>
-                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
+                        <?php if ($notif_urgent_count > 0): ?>
+                        <span id="notifBadge" class="absolute -top-0.5 -right-0.5 min-w-[19px] h-[19px] px-1 bg-rose-600 text-white rounded-full text-[10px] font-black flex items-center justify-center ring-2 ring-white dark:ring-slate-900 animate-pulse shadow-sm">
+                            <?php echo $notif_urgent_count; ?>
+                        </span>
+                        <?php elseif (!empty($recent_activities)): ?>
+                        <span id="notifBadge" class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-blue-500 rounded-full ring-2 ring-white dark:ring-slate-900"></span>
                         <?php endif; ?>
                     </button>
-                    <!-- Notification Dropdown -->
-                    <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-4 z-50">
-                        <div class="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
-                            <span class="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-100">Aktivitas Terkini</span>
-                            <a href="<?php echo route('activities'); ?>" class="text-[11px] text-[#1E5CE6] font-semibold hover:underline">Semua Log &rarr;</a>
+
+                    <!-- Interactive Notification Dropdown Panel -->
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-84 sm:w-96 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/90 dark:border-slate-800 p-0 z-50 overflow-hidden text-left animate-modal-pop">
+                        <!-- Top Header with Segmented Tabs -->
+                        <div class="p-3.5 bg-slate-50/80 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div class="flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full <?php echo $notif_urgent_count > 0 ? 'bg-rose-500 animate-ping' : 'bg-emerald-500'; ?>"></span>
+                                <span class="font-black text-xs text-slate-900 dark:text-white">Pusat Notifikasi</span>
+                            </div>
+                            <div class="flex items-center gap-1 bg-white dark:bg-slate-700/80 p-0.5 rounded-xl border border-slate-200/80 dark:border-slate-600/80 text-[11px] font-bold">
+                                <button type="button" id="tabNotifUrgentBtn" onclick="switchNotifTab('urgent')" class="px-2.5 py-1 rounded-lg bg-[#1E5CE6] text-white transition-all">
+                                    Tenggat Waktu <?php if ($notif_urgent_count > 0): ?><span class="ml-1 px-1.5 py-0.2 bg-white/25 rounded-full text-[9px]"><?php echo $notif_urgent_count; ?></span><?php endif; ?>
+                                </button>
+                                <button type="button" id="tabNotifActivityBtn" onclick="switchNotifTab('activity')" class="px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-all">
+                                    Aktivitas
+                                </button>
+                            </div>
                         </div>
-                        <div class="divide-y divide-slate-100 dark:divide-slate-800 max-h-60 overflow-y-auto mt-1">
+
+                        <!-- TAB 1: URGENT / DUE DATE TASKS -->
+                        <div id="tabNotifUrgentContent" class="max-h-80 overflow-y-auto custom-scrollbar p-3 space-y-2.5">
+                            <?php if ($notif_urgent_count === 0): ?>
+                            <div class="py-8 px-4 text-center">
+                                <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2.5 text-xl font-bold shadow-xs">
+                                    ✓
+                                </div>
+                                <p class="text-xs font-bold text-slate-800 dark:text-white mb-0.5">Semua Tenggat Waktu Aman!</p>
+                                <p class="text-[11px] text-slate-400">Tidak ada agenda tugas yang jatuh tempo atau terlambat hari ini.</p>
+                            </div>
+                            <?php else: ?>
+                                <!-- Overdue Tasks -->
+                                <?php foreach ($notif_overdue_tasks as $ot): ?>
+                                <div id="notif-item-<?php echo $ot['id']; ?>" class="p-3 rounded-xl bg-rose-50/60 dark:bg-rose-950/30 border border-rose-200/80 dark:border-rose-900/50 flex items-start justify-between gap-2.5 transition-all">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase text-rose-700 dark:text-rose-300 bg-rose-100 dark:bg-rose-900/60 px-2 py-0.5 rounded-md">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                                Terlambat
+                                            </span>
+                                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400"><?php echo date('d M', strtotime($ot['todo_date'])); ?></span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white leading-snug truncate" title="<?php echo htmlspecialchars($ot['title']); ?>">
+                                            <?php echo htmlspecialchars($ot['title']); ?>
+                                        </p>
+                                    </div>
+                                    <button type="button" onclick="completeTaskFromNotif(<?php echo $ot['id']; ?>, this)" title="Tandai Selesai"
+                                            class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-slate-700 dark:text-slate-200 hover:text-white dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:border-transparent text-[11px] font-bold transition-all shadow-2xs flex items-center gap-1 shrink-0">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span>Selesai</span>
+                                    </button>
+                                </div>
+                                <?php endforeach; ?>
+
+                                <!-- Today Tasks -->
+                                <?php foreach ($notif_today_tasks as $tt): ?>
+                                <div id="notif-item-<?php echo $tt['id']; ?>" class="p-3 rounded-xl bg-amber-50/60 dark:bg-amber-950/30 border border-amber-200/80 dark:border-amber-900/50 flex items-start justify-between gap-2.5 transition-all">
+                                    <div class="min-w-0 flex-1">
+                                        <div class="flex items-center gap-1.5 mb-1">
+                                            <span class="inline-flex items-center gap-1 text-[9px] font-black uppercase text-amber-800 dark:text-amber-300 bg-amber-100 dark:bg-amber-900/60 px-2 py-0.5 rounded-md">
+                                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                                Hari Ini
+                                            </span>
+                                            <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400">Jatuh Tempo</span>
+                                        </div>
+                                        <p class="text-xs font-bold text-slate-900 dark:text-white leading-snug truncate" title="<?php echo htmlspecialchars($tt['title']); ?>">
+                                            <?php echo htmlspecialchars($tt['title']); ?>
+                                        </p>
+                                    </div>
+                                    <button type="button" onclick="completeTaskFromNotif(<?php echo $tt['id']; ?>, this)" title="Tandai Selesai"
+                                            class="px-2.5 py-1.5 rounded-lg bg-white dark:bg-slate-800 hover:bg-emerald-600 dark:hover:bg-emerald-600 text-slate-700 dark:text-slate-200 hover:text-white dark:hover:text-white border border-slate-200 dark:border-slate-700 hover:border-transparent text-[11px] font-bold transition-all shadow-2xs flex items-center gap-1 shrink-0">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                                        <span>Selesai</span>
+                                    </button>
+                                </div>
+                                <?php endforeach; ?>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- TAB 2: RECENT ACTIVITIES -->
+                        <div id="tabNotifActivityContent" class="hidden max-h-80 overflow-y-auto custom-scrollbar p-3 divide-y divide-slate-100 dark:divide-slate-800">
                             <?php if (empty($recent_activities)): ?>
-                                <p class="text-xs text-slate-400 py-3 text-center">Belum ada riwayat aktivitas terbaru.</p>
+                                <p class="text-xs text-slate-400 py-6 text-center">Belum ada riwayat aktivitas terbaru.</p>
                             <?php else: ?>
                                 <?php foreach ($recent_activities as $ra): ?>
-                                <div class="py-2.5 flex items-start gap-3">
-                                    <div class="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center shrink-0 font-bold text-xs">⚡</div>
+                                <div class="py-2.5 flex items-start gap-2.5">
+                                    <div class="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] dark:text-blue-400 flex items-center justify-center shrink-0 font-bold text-xs">⚡</div>
                                     <div class="flex-1 min-w-0">
                                         <p class="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate"><?php echo htmlspecialchars($ra['action']); ?></p>
                                         <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate"><?php echo htmlspecialchars($ra['details']); ?></p>
@@ -516,6 +626,16 @@ try {
                                 </div>
                                 <?php endforeach; ?>
                             <?php endif; ?>
+                        </div>
+
+                        <!-- Dropdown Footer -->
+                        <div class="p-2.5 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs font-bold">
+                            <a href="<?php echo route('projects'); ?>" class="text-[#1E5CE6] dark:text-blue-400 hover:underline flex items-center gap-1 text-[11px]">
+                                <span>Buka Papan Kanban</span> &rarr;
+                            </a>
+                            <a href="<?php echo route('activities'); ?>" class="text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors text-[11px]">
+                                Riwayat Log
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -1066,6 +1186,88 @@ document.addEventListener('click', function(e) {
         document.getElementById('userDropdown')?.classList.add('hidden');
     }
 });
+
+// Notification Panel Tabs
+function switchNotifTab(tab) {
+    const btnUrgent = document.getElementById('tabNotifUrgentBtn');
+    const btnActivity = document.getElementById('tabNotifActivityBtn');
+    const contentUrgent = document.getElementById('tabNotifUrgentContent');
+    const contentActivity = document.getElementById('tabNotifActivityContent');
+    if (!btnUrgent || !btnActivity) return;
+    if (tab === 'urgent') {
+        btnUrgent.className = 'px-2.5 py-1 rounded-lg bg-[#1E5CE6] text-white transition-all';
+        btnActivity.className = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-all';
+        contentUrgent?.classList.remove('hidden');
+        contentActivity?.classList.add('hidden');
+    } else {
+        btnActivity.className = 'px-2.5 py-1 rounded-lg bg-[#1E5CE6] text-white transition-all';
+        btnUrgent.className = 'px-2.5 py-1 rounded-lg text-slate-500 dark:text-slate-300 hover:text-slate-800 dark:hover:text-white transition-all';
+        contentActivity?.classList.remove('hidden');
+        contentUrgent?.classList.add('hidden');
+    }
+}
+window.switchNotifTab = switchNotifTab;
+
+// Complete Task directly from Notification Center
+function completeTaskFromNotif(todoId, btn) {
+    if (!todoId || !btn) return;
+    const originalText = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="inline-block animate-spin text-[10px]">⏳</span>';
+
+    const formData = new FormData();
+    formData.append('quick_complete_task', '1');
+    formData.append('todo_id', todoId);
+    formData.append('csrf_token', '<?php echo $_SESSION['csrf_token'] ?? ''; ?>');
+
+    fetch('index.php', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: formData
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data && data.success) {
+            const item = document.getElementById('notif-item-' + todoId);
+            if (item) {
+                item.style.transition = 'all 0.35s ease';
+                item.style.opacity = '0';
+                item.style.transform = 'translateX(20px)';
+                setTimeout(() => {
+                    item.remove();
+                    // Update badge count
+                    const badge = document.getElementById('notifBadge');
+                    if (badge) {
+                        let count = parseInt(badge.innerText.trim()) || 0;
+                        count = Math.max(0, count - 1);
+                        if (count <= 0) {
+                            badge.remove();
+                            const listContainer = document.getElementById('tabNotifUrgentContent');
+                            if (listContainer && listContainer.children.length === 0) {
+                                listContainer.innerHTML = '<div class="py-8 px-4 text-center"><div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mx-auto mb-2.5 text-xl font-bold shadow-xs">✓</div><p class="text-xs font-bold text-slate-800 dark:text-white mb-0.5">Semua Tenggat Waktu Aman!</p><p class="text-[11px] text-slate-400">Tidak ada agenda tugas yang jatuh tempo atau terlambat hari ini.</p></div>';
+                            }
+                        } else {
+                            badge.innerText = count;
+                        }
+                    }
+                }, 350);
+            }
+            if (typeof showToast === 'function') {
+                showToast('Tugas berhasil diselesaikan! 🎉', 'success');
+            }
+        } else {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            if (typeof showToast === 'function') showToast('Gagal memperbarui tugas', 'error');
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        if (typeof showToast === 'function') showToast('Terjadi kesalahan jaringan', 'error');
+    });
+}
+window.completeTaskFromNotif = completeTaskFromNotif;
 
 // Modals Helper
 function openGlobalCreateModal() {
