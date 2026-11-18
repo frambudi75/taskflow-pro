@@ -706,7 +706,7 @@ window.closeUploadModal = window.closeUploadModal || function() {
             </div>
         </div>
         <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membersihkan seluruh data dokumen tanpa berkas fisik?');" class="flex-shrink-0">
-            <input type="hidden" name="csrf_token" value="<?php echo generateCSRF(); ?>">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
             <button type="submit" name="clean_broken_docs" class="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs shadow-xs transition-transform active:scale-95">
                 Bersihkan Sekarang
             </button>
@@ -1467,7 +1467,7 @@ window.closeUploadModal = window.closeUploadModal || function() {
     <div class="h-4 w-px bg-white/20"></div>
     <!-- Bulk ZIP Download Form -->
     <form id="bulkZipForm" method="POST" action="index.php?page=documents&tab=<?php echo $tab; ?>" class="inline">
-        <input type="hidden" name="csrf_token" value="<?php echo generateCSRF(); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <input type="hidden" name="bulk_download_zip" value="1">
         <div id="bulkZipInputs"></div>
         <button type="button" onclick="submitBulkZip()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 transition-transform active:scale-95 shadow-sm">
@@ -1477,7 +1477,7 @@ window.closeUploadModal = window.closeUploadModal || function() {
     </form>
     <!-- Bulk Delete Form -->
     <form id="bulkDeleteForm" method="POST" action="index.php?page=documents&tab=<?php echo $tab; ?>" class="inline">
-        <input type="hidden" name="csrf_token" value="<?php echo generateCSRF(); ?>">
+        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
         <input type="hidden" name="bulk_delete_docs" value="1">
         <div id="bulkDeleteInputs"></div>
         <button type="button" onclick="confirmBulkDelete()" class="px-3.5 py-1.5 rounded-xl bg-rose-600/90 hover:bg-rose-600 text-white font-bold text-xs flex items-center gap-1.5 transition-transform active:scale-95 shadow-sm">

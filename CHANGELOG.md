@@ -6,6 +6,17 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.9] - 2026-11-18
+
+### 🛡️ Perbaikan Kritis & Stabilitas Sistem (Fix Fatal Error & CSRF Generator)
+- **Mengatasi HTTP 503 & Fatal Error di Halaman Dokumen**:
+  - Memperbaiki `Fatal error: Call to undefined function generateCSRF()` pada form pembersih berkas lama (*broken records cleaner*) dan form *bulk actions* di `pages/documents.php`.
+  - Mendaftarkan fungsi helper `generateCSRF()` di `config.php` yang menjamin ketersediaan token CSRF sesi secara aman ke seluruh modul sistem.
+  - Mengganti seluruh pemanggilan `generateCSRF()` di `pages/documents.php` dengan `$_SESSION['csrf_token']`.
+  - Mengeliminasi penyebab `503 Service Unavailable` saat membuka halaman dokumen atau mengklik tombol unggah.
+
+---
+
 ## [3.2.8] - 2026-11-18
 
 ### 🐛 Perbaikan Bug & Ketahanan Sistem (Service Worker & Modal Stability)

@@ -1,7 +1,7 @@
 <?php
 date_default_timezone_set('Asia/Jakarta');
 
-define('APP_VERSION', '3.2.8');
+define('APP_VERSION', '3.2.9');
 
 // PHP 8.0 Polyfills for backward compatibility (PHP 7.4)
 if (!function_exists('str_starts_with')) {
@@ -316,6 +316,13 @@ function isLoggedIn() {
 
 function isAdmin() {
     return isset($_SESSION['role']) && $_SESSION['role'] === 'administrator';
+}
+
+function generateCSRF() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
 }
 
 function validateCSRF($token) {
