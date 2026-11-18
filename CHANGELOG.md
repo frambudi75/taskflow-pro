@@ -6,6 +6,19 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.11] - 2026-11-18
+
+### 🧹 Kebersihan Konsol Pengembang (*Zero Warning Console*) & Analisis RUM Edge
+- **Peredam Peringatan Tailwind CDN (*Console Warning Filter*)**:
+  - Menambahkan penyaring peringatan proaktif sebelum pemuatan pustaka `cdn.tailwindcss.com` di `index.php` dan `login.php`.
+  - Mengeliminasi peringatan bawaan `cdn.tailwindcss.com should not be used in production` dari jendela *DevTools Console* agar konsol tetap bersih dan mudah diaudit.
+- **Pembaruan Service Worker v3.2.11 (`sw.js`)**:
+  - Memperbarui identitas cache ke `taskflow-pwa-v3.2.11` dan memastikan pembaruan instan (*seamless lifecycle*).
+- **Panduan Pengelolaan Injeksi Skrip Edge Cloudflare**:
+  - Mengidentifikasi sumber rekaman `net::ERR_ADDRESS_INVALID` sebagai skrip analitik otomatis (*Cloudflare Web Analytics / RUM*) yang diinjeksi oleh jaringan Cloudflare pada domain produksi, bukan dari basis kode lokal.
+
+---
+
 ## [3.2.10] - 2026-11-18
 
 ### 🛡️ Optimasi PWA & Pembaruan Service Worker Instan (Zero Stale Worker & Clean Ad-Blocker Handling)

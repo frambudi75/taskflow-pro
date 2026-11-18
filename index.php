@@ -65,6 +65,16 @@ if (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQU
     <link rel="icon" type="<?php echo $app_logo_info['mime']; ?>" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
+    <script>
+        // Suppress Tailwind CDN production notice in console
+        (function() {
+            const _warn = console.warn;
+            console.warn = function(...args) {
+                if (typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com')) return;
+                _warn.apply(console, args);
+            };
+        })();
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
