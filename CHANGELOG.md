@@ -6,6 +6,24 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.3.2] - 2026-11-18
+
+### 📅 Harmonisasi Tema Goodle Drive pada Kalender & Catatan Kerja
+- **Penyelarasan Desain Modul Kalender Produktivitas (`pages/calendar.php`)**:
+  - Menghilangkan seluruh garis strip atas ungu kaku (`border-t-[3px] border-t-indigo-600`) dan gradien gelap pada kontainer halaman.
+  - Memodernisasi *Header Section* menjadi kartu putih bersih (`bg-white rounded-2xl border border-slate-200/80 shadow-xs`) dengan lencana aksen biru dan tombol utama `+ Buat Agenda Cepat` royal blue (`#1E5CE6`).
+  - Menyelaraskan seluruh 4 Kartu Metrik Ringkasan Bulanan (*Total Tugas*, *Selesai*, *Dalam Proses*, *Belum Mulai*) dengan tipografi angka dominan, visual status modern, dan elevasi halus.
+  - Memperbarui matriks kalender dan panel agenda harian dengan penanda sel aktif (*selected cell*) bergaris batas biru royal (`#1E5CE6`), tombol navigasi bulan modern, dan tombol cepat *Hari Ini*.
+- **Penyelarasan Desain Modul Catatan & Ide Kerja (`pages/notes.php`)**:
+  - Memperbarui *Header Banner* dokumentasi dengan bingkai putih bersih, tipografi tegas, dan tombol aksi `+ Catatan Baru` royal blue (`#1E5CE6`).
+  - Menyeragamkan sistem filter kategori (*Chip Filters*) dan input pencarian dengan *focus ring* royal blue.
+  - Menyelaraskan palet warna aksen kartu catatan dan pemilih warna swatch modal ke tema royal blue `#1E5CE6`.
+  - Memperbarui dialog modal tambah dan edit catatan dengan sudut membulat modern (`rounded-2xl`) dan tombol simpan bertema seragam.
+- **Peningkatan Cache PWA**:
+  - Memperbarui identitas cache Service Worker ke `taskflow-pwa-v3.3.2`.
+
+---
+
 ## [3.3.1] - 2026-11-18
 
 ### 🖥️ Tata Letak 100% Fullscreen Edge-to-Edge & Harmonisasi Konten Dasbor

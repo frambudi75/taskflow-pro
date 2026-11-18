@@ -110,30 +110,26 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 ?>
 
 <style>
-/* Executive Glassmorphic Productivity Calendar System */
+/* Modern Clean Calendar Craft & Goodle Drive System */
 .cal-glass-panel {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    border-radius: 24px;
-    box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+    background: #FFFFFF;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 20px;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
     position: relative;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .dark .cal-glass-panel {
     background: rgba(15, 23, 42, 0.82);
     border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.45), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 30px -4px rgba(0, 0, 0, 0.45);
 }
 
 .cal-glass-card {
-    background: rgba(255, 255, 255, 0.82);
-    backdrop-filter: blur(14px) saturate(180%);
-    -webkit-backdrop-filter: blur(14px) saturate(180%);
-    border: 1px solid rgba(255, 255, 255, 0.85);
-    border-radius: 20px;
-    box-shadow: 0 4px 16px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
+    background: #FFFFFF;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    border-radius: 18px;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
     position: relative;
     overflow: hidden;
@@ -141,16 +137,11 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 .dark .cal-glass-card {
     background: rgba(15, 23, 42, 0.8);
     border-color: rgba(255, 255, 255, 0.08);
-    box-shadow: 0 6px 20px -2px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
 }
 .cal-glass-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 0 rgba(255, 255, 255, 1);
-    border-color: rgba(99, 102, 241, 0.35);
-}
-.dark .cal-glass-card:hover {
-    box-shadow: 0 12px 28px -4px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.12);
-    border-color: rgba(99, 102, 241, 0.45);
+    box-shadow: 0 8px 24px -3px rgba(30, 92, 230, 0.1);
+    border-color: rgba(30, 92, 230, 0.35);
 }
 
 .cal-cell {
@@ -160,14 +151,14 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
     z-index: 5;
 }
 .cal-cell.is-selected {
-    box-shadow: inset 0 0 0 2px #6366f1, 0 4px 14px -2px rgba(99, 102, 241, 0.25) !important;
-    background: rgba(238, 242, 255, 0.92) !important;
+    box-shadow: inset 0 0 0 2px #1E5CE6, 0 4px 14px -2px rgba(30, 92, 230, 0.25) !important;
+    background: rgba(239, 246, 255, 0.95) !important;
     position: relative;
     z-index: 20 !important;
 }
 .dark .cal-cell.is-selected {
-    box-shadow: inset 0 0 0 2px #818cf8, 0 4px 14px -2px rgba(99, 102, 241, 0.35) !important;
-    background: rgba(30, 27, 75, 0.7) !important;
+    box-shadow: inset 0 0 0 2px #3B82F6, 0 4px 14px -2px rgba(30, 92, 230, 0.35) !important;
+    background: rgba(30, 58, 138, 0.45) !important;
 }
 
 .cal-task-pill {
@@ -189,87 +180,87 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
 }
 </style>
 
-<div class="p-4 md:p-8 pb-20 md:pb-24 w-full space-y-6">
+<div class="p-4 md:p-6 pb-20 md:pb-24 w-full space-y-6">
 
-    <!-- Header Section (Executive Clean SaaS Frosted Glass Header) -->
-    <div class="rounded-3xl p-6 md:p-7 cal-glass-panel bg-gradient-to-br from-white/95 via-slate-50/70 to-indigo-50/30 dark:from-slate-900/90 dark:via-slate-900/80 dark:to-indigo-950/20 border-t-[3px] border-t-indigo-600 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">
+    <!-- Header Section (Clean Goodle Drive Standard Header) -->
+    <div class="rounded-2xl p-6 bg-white border border-slate-200/80 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold uppercase tracking-widest mb-2.5">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#1E5CE6] text-xs font-extrabold uppercase tracking-widest mb-2.5">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 Jadwal &amp; Agenda Kerja
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1">Kalender Produktivitas</h1>
-            <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight mb-1">Kalender Produktivitas</h1>
+            <p class="text-slate-500 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
                 Pantau seluruh agenda, tenggat waktu harian, dan rencanakan aktivitas kerja Anda dalam satu kanvas terintegrasi.
             </p>
         </div>
 
         <div class="flex items-center gap-3 self-start md:self-center flex-shrink-0">
             <button type="button" onclick="focusAgendaInput()" 
-                    class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 active:scale-95 text-white font-bold text-xs shadow-md shadow-indigo-600/25 flex items-center gap-2 transition-all">
+                    class="px-4 py-2.5 rounded-xl bg-[#1E5CE6] hover:bg-[#1749B8] active:scale-95 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all cursor-pointer">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>+ Buat Agenda Cepat</span>
             </button>
         </div>
     </div>
 
-    <!-- Monthly Summary KPI Stats (Standard Cards with Clean Scope Sub-labels & Accent Icons) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Monthly Summary KPI Stats (Clean Goodle Drive System with Dominant Numbers) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
         <!-- Card 1: Total Agenda -->
-        <div class="cal-glass-card p-5 border-t-[3px] border-t-indigo-500">
+        <div class="cal-glass-card p-5">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tugas</span>
-                <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Total Tugas</span>
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#1E5CE6] flex items-center justify-center border border-blue-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none"><?php echo $total_month; ?></span>
+                <span class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none"><?php echo $total_month; ?></span>
             </div>
-            <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1">di bulan <?php echo date('F Y', strtotime($current_month)); ?></div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-1">di bulan <?php echo date('F Y', strtotime($current_month)); ?></div>
         </div>
 
         <!-- Card 2: Selesai -->
-        <div class="cal-glass-card p-5 border-t-[3px] border-t-emerald-500">
+        <div class="cal-glass-card p-5">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Selesai</span>
-                <div class="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Selesai</span>
+                <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-emerald-600 dark:text-emerald-400 tracking-tight leading-none"><?php echo $done_month; ?></span>
-                <span class="text-[11px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2.5 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/60"><?php echo $completion_pct; ?>%</span>
+                <span class="text-2xl md:text-3xl font-black text-emerald-600 tracking-tight leading-none"><?php echo $done_month; ?></span>
+                <span class="text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200"><?php echo $completion_pct; ?>%</span>
             </div>
-            <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1">selesai bulan ini</div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-1">selesai bulan ini</div>
         </div>
 
         <!-- Card 3: Dalam Progress -->
-        <div class="cal-glass-card p-5 border-t-[3px] border-t-sky-500">
+        <div class="cal-glass-card p-5">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dalam Proses</span>
-                <div class="w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Dalam Proses</span>
+                <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></svg>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-sky-600 dark:text-sky-400 tracking-tight leading-none"><?php echo $inprogress_month; ?></span>
+                <span class="text-2xl md:text-3xl font-black text-sky-600 tracking-tight leading-none"><?php echo $inprogress_month; ?></span>
             </div>
-            <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1">sedang aktif berjalan</div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-1">sedang aktif berjalan</div>
         </div>
 
         <!-- Card 4: Belum Mulai -->
-        <div class="cal-glass-card p-5 border-t-[3px] border-t-amber-500">
+        <div class="cal-glass-card p-5">
             <div class="flex items-center justify-between mb-2">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Belum Mulai</span>
-                <div class="w-8 h-8 rounded-xl bg-amber-50 dark:bg-amber-950/60 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-100 dark:border-amber-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Belum Mulai</span>
+                <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                 </div>
             </div>
             <div class="flex items-baseline gap-2">
-                <span class="text-2xl md:text-3xl font-black text-amber-600 dark:text-amber-400 tracking-tight leading-none"><?php echo $todo_month; ?></span>
+                <span class="text-2xl md:text-3xl font-black text-amber-600 tracking-tight leading-none"><?php echo $todo_month; ?></span>
             </div>
-            <div class="text-[11px] text-slate-400 dark:text-slate-500 font-semibold mt-1">dalam antrean bulan ini</div>
+            <div class="text-[11px] text-slate-400 font-semibold mt-1">dalam antrean bulan ini</div>
         </div>
     </div>
 
@@ -277,35 +268,35 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
 
         <!-- Calendar Matrix (8 Columns on desktop) -->
-        <div class="xl:col-span-8 cal-glass-panel border-t-[3px] border-t-indigo-600 rounded-3xl overflow-hidden flex flex-col">
+        <div class="xl:col-span-8 cal-glass-panel rounded-2xl overflow-hidden flex flex-col">
             
             <!-- Proximity Calendar Header: Month Navigator + Today Jump + View Switcher + Indicators -->
-            <div class="px-5 py-4 border-b border-slate-200/70 dark:border-slate-800/80 bg-white/50 dark:bg-slate-900/40 backdrop-blur-md flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="px-5 py-4 border-b border-slate-100 bg-white flex flex-col md:flex-row md:items-center justify-between gap-4">
                 
                 <!-- Left: Navigation Controls directly on top of grid -->
                 <div class="flex items-center gap-3">
                     <!-- Month Navigation Group -->
-                    <div class="flex items-center rounded-xl bg-white/90 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/90 dark:border-slate-700/80 shadow-2xs p-1">
+                    <div class="flex items-center rounded-xl bg-[#F8FAFC] border border-slate-200/90 shadow-2xs p-1">
                         <a href="?page=calendar&month=<?php echo date('Y-m', strtotime($current_month . ' -1 month')); ?>&date=<?php echo $selected_date; ?>&view=<?php echo $view_mode; ?>"
                            aria-label="Bulan sebelumnya"
                            title="Bulan sebelumnya"
-                           class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all">
+                           class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:text-[#1E5CE6] hover:bg-white active:scale-95 transition-all">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                         </a>
-                        <span class="px-3 md:px-5 font-black text-slate-900 dark:text-white text-sm tracking-tight text-center min-w-[130px]">
+                        <span class="px-3 md:px-5 font-black text-slate-800 text-sm tracking-tight text-center min-w-[130px]">
                             <?php echo date('F Y', strtotime($current_month)); ?>
                         </span>
                         <a href="?page=calendar&month=<?php echo date('Y-m', strtotime($current_month . ' +1 month')); ?>&date=<?php echo $selected_date; ?>&view=<?php echo $view_mode; ?>"
                            aria-label="Bulan berikutnya"
                            title="Bulan berikutnya"
-                           class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-700 active:scale-95 transition-all">
+                           class="w-8 h-8 flex items-center justify-center rounded-lg text-slate-600 hover:text-[#1E5CE6] hover:bg-white active:scale-95 transition-all">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </a>
                     </div>
 
                     <!-- Jump to Today -->
                     <a href="?page=calendar&month=<?php echo date('Y-m'); ?>&date=<?php echo $today_date; ?>&view=<?php echo $view_mode; ?>" 
-                       class="px-3.5 py-2 rounded-xl bg-indigo-50/90 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900/80 active:scale-95 border border-indigo-200/80 dark:border-indigo-800/70 text-indigo-700 dark:text-indigo-300 text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs">
+                       class="px-3.5 py-2 rounded-xl bg-blue-50 hover:bg-blue-100 active:scale-95 border border-blue-200 text-[#1E5CE6] text-xs font-bold transition-all flex items-center gap-1.5 shadow-2xs">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         Hari Ini
                     </a>
@@ -314,26 +305,26 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                 <!-- Right: View Switcher (Bulan | Minggu | Hari) & Dot Legend -->
                 <div class="flex items-center gap-3 self-end md:self-auto flex-wrap">
                     <!-- View Switcher -->
-                    <div class="flex items-center p-1 rounded-xl bg-white/90 dark:bg-slate-800/80 backdrop-blur-sm border border-slate-200/90 dark:border-slate-700/80 shadow-2xs text-xs font-bold">
+                    <div class="flex items-center p-1 rounded-xl bg-[#F8FAFC] border border-slate-200/90 shadow-2xs text-xs font-bold">
                         <a href="?page=calendar&month=<?php echo $current_month; ?>&date=<?php echo $selected_date; ?>&view=month" 
-                           class="px-3 py-1.5 rounded-lg transition-all <?php echo $view_mode === 'month' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'; ?>">
+                           class="px-3 py-1.5 rounded-lg transition-all <?php echo $view_mode === 'month' ? 'bg-[#1E5CE6] text-white shadow-xs' : 'text-slate-600 hover:text-[#1E5CE6]'; ?>">
                             Bulan
                         </a>
                         <a href="?page=calendar&month=<?php echo $current_month; ?>&date=<?php echo $selected_date; ?>&view=week" 
-                           class="px-3 py-1.5 rounded-lg transition-all <?php echo $view_mode === 'week' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'; ?>">
+                           class="px-3 py-1.5 rounded-lg transition-all <?php echo $view_mode === 'week' ? 'bg-[#1E5CE6] text-white shadow-xs' : 'text-slate-600 hover:text-[#1E5CE6]'; ?>">
                             Minggu
                         </a>
                         <a href="?page=calendar&month=<?php echo $current_month; ?>&date=<?php echo $selected_date; ?>&view=day" 
-                           class="px-3 py-1.5 rounded-lg transition-all <?php echo $view_mode === 'day' ? 'bg-indigo-600 text-white shadow-xs' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'; ?>">
+                           class="px-3 py-1.5 rounded-lg transition-all <?php echo $view_mode === 'day' ? 'bg-[#1E5CE6] text-white shadow-xs' : 'text-slate-600 hover:text-[#1E5CE6]'; ?>">
                             Hari
                         </a>
                     </div>
 
                     <!-- Indicators -->
-                    <div class="hidden md:flex items-center gap-2.5 text-[11px] font-semibold text-slate-500 dark:text-slate-400 pl-3 border-l border-slate-200/80 dark:border-slate-800">
+                    <div class="hidden md:flex items-center gap-2.5 text-[11px] font-semibold text-slate-500 pl-3 border-l border-slate-200">
                         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Selesai</span>
                         <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-500"></span>Proses</span>
-                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-indigo-500"></span>Pending</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#1E5CE6]"></span>Pending</span>
                     </div>
                 </div>
             </div>
@@ -341,13 +332,13 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
             <?php if ($view_mode === 'month'): ?>
                 <!-- Day of Week Header -->
                 <div class="grid grid-cols-7 bg-slate-200/60 dark:bg-slate-800/60 gap-[1px] border-b border-slate-200/80 dark:border-slate-800 text-center text-xs font-black uppercase tracking-wider">
-                    <div class="py-2.5 bg-rose-50/70 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400">Min</div>
-                    <div class="py-2.5 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400">Sen</div>
-                    <div class="py-2.5 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400">Sel</div>
-                    <div class="py-2.5 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400">Rab</div>
-                    <div class="py-2.5 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400">Kam</div>
-                    <div class="py-2.5 bg-slate-50/80 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400">Jum</div>
-                    <div class="py-2.5 bg-indigo-50/70 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400">Sab</div>
+                    <div class="py-2.5 bg-rose-50/70 text-rose-600">Min</div>
+                    <div class="py-2.5 bg-slate-50/80 text-slate-600">Sen</div>
+                    <div class="py-2.5 bg-slate-50/80 text-slate-600">Sel</div>
+                    <div class="py-2.5 bg-slate-50/80 text-slate-600">Rab</div>
+                    <div class="py-2.5 bg-slate-50/80 text-slate-600">Kam</div>
+                    <div class="py-2.5 bg-slate-50/80 text-slate-600">Jum</div>
+                    <div class="py-2.5 bg-blue-50/70 text-[#1E5CE6]">Sab</div>
                 </div>
 
                 <!-- Calendar Cells Grid -->
@@ -580,30 +571,30 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
         </div>
 
         <!-- Right Side Panel: Day Agenda & Tasks (Always active, defaults to Today) -->
-        <div class="xl:col-span-4 cal-glass-panel border-t-[3px] border-t-indigo-600 rounded-3xl p-6 flex flex-col min-h-[500px]">
+        <div class="xl:col-span-4 cal-glass-panel rounded-2xl p-6 flex flex-col min-h-[500px]">
             
             <!-- Panel Header -->
-            <div class="border-b border-slate-200/80 dark:border-slate-800/80 pb-4 mb-4">
+            <div class="border-b border-slate-100 pb-4 mb-4">
                 <div class="flex items-start justify-between gap-2 mb-2">
                     <div>
                         <div class="flex items-center gap-2 mb-1">
-                            <span class="inline-block text-[10px] font-black uppercase tracking-wider text-indigo-700 dark:text-indigo-300 bg-indigo-50/90 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-900/60 px-2.5 py-0.5 rounded-full">
+                            <span class="inline-block text-[10px] font-black uppercase tracking-wider text-[#1E5CE6] bg-blue-50 border border-blue-100 px-2.5 py-0.5 rounded-full">
                                 <?php echo date('l', strtotime($selected_date)); ?>
                             </span>
                             <?php if ($selected_date === $today_date): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800/60">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                 Hari Ini
                             </span>
                             <?php endif; ?>
                         </div>
-                        <h2 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white"><?php echo date('d F Y', strtotime($selected_date)); ?></h2>
+                        <h2 class="text-xl md:text-2xl font-black text-slate-800"><?php echo date('d F Y', strtotime($selected_date)); ?></h2>
                     </div>
 
                     <?php if ($selected_date !== $today_date): ?>
                     <a href="?page=calendar&month=<?php echo date('Y-m'); ?>&date=<?php echo $today_date; ?>&view=<?php echo $view_mode; ?>" 
                        title="Kembali ke Hari Ini"
-                       class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors py-1 px-2.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 flex items-center gap-1 shadow-2xs">
+                       class="text-xs font-bold text-[#1E5CE6] hover:text-[#1749B8] transition-colors py-1 px-2.5 rounded-lg bg-blue-50 border border-blue-200 flex items-center gap-1 shadow-2xs">
                         Hari Ini &rarr;
                     </a>
                     <?php endif; ?>
@@ -612,30 +603,30 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                 <!-- Progress Bar for the day (Only shown when total > 0) -->
                 <div class="mt-3">
                     <?php if ($day_total === 0): ?>
-                        <div class="text-xs font-medium text-slate-400 dark:text-slate-500 py-1">Tidak ada agenda untuk hari ini</div>
+                        <div class="text-xs font-medium text-slate-400 py-1">Tidak ada agenda untuk hari ini</div>
                     <?php else: ?>
-                        <div class="flex justify-between text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">
+                        <div class="flex justify-between text-xs font-bold text-slate-500 mb-1.5">
                             <span>Penyelesaian Agenda</span>
-                            <span class="text-indigo-600 dark:text-indigo-400 font-extrabold"><?php echo $day_done; ?> / <?php echo $day_total; ?> (<?php echo $day_pct; ?>%)</span>
+                            <span class="text-[#1E5CE6] font-extrabold"><?php echo $day_done; ?> / <?php echo $day_total; ?> (<?php echo $day_pct; ?>%)</span>
                         </div>
-                        <div class="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                            <div class="h-full bg-gradient-to-r from-indigo-500 to-indigo-600 rounded-full transition-all duration-500" style="width: <?php echo $day_pct; ?>%"></div>
+                        <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-[#1E5CE6] rounded-full transition-all duration-500" style="width: <?php echo $day_pct; ?>%"></div>
                         </div>
                     <?php endif; ?>
                 </div>
 
                 <!-- Filter Tabs: Semua / Pending / Selesai -->
-                <div class="flex items-center gap-1.5 mt-4 p-1 rounded-xl bg-slate-100/80 dark:bg-slate-800/60 backdrop-blur-sm border border-slate-200/70 dark:border-slate-700/60">
+                <div class="flex items-center gap-1.5 mt-4 p-1 rounded-xl bg-slate-100/80 border border-slate-200/70">
                     <button type="button" onclick="filterAgendaTasks('all')" id="btn-filter-all"
-                            class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-extrabold text-slate-900 dark:text-white bg-white dark:bg-slate-900 shadow-2xs transition-all text-center">
+                            class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-extrabold text-slate-900 bg-white shadow-2xs transition-all text-center">
                         Semua (<?php echo $day_total; ?>)
                     </button>
                     <button type="button" onclick="filterAgendaTasks('pending')" id="btn-filter-pending"
-                            class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all text-center">
+                            class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-900 transition-all text-center">
                         Pending (<?php echo $day_pending; ?>)
                     </button>
                     <button type="button" onclick="filterAgendaTasks('done')" id="btn-filter-done"
-                            class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all text-center">
+                            class="flex-1 py-1.5 px-2 rounded-lg text-[11px] font-bold text-slate-500 hover:text-slate-900 transition-all text-center">
                         Selesai (<?php echo $day_done; ?>)
                     </button>
                 </div>
@@ -651,7 +642,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                            placeholder="+ Tulis agenda untuk tanggal ini..." 
                            aria-label="Tambah agenda"
                            oninput="handleAgendaInputChange(this)"
-                           class="flex-1 bg-white/80 dark:bg-slate-800/70 backdrop-blur-sm border border-slate-200/90 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:bg-white dark:focus:bg-slate-800 focus:border-indigo-500 shadow-2xs transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500">
+                           class="flex-1 bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] shadow-2xs transition-all placeholder:text-slate-400">
                     <button type="submit" id="agendaSubmitBtn" disabled aria-label="Simpan Tugas" 
                             class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-slate-200 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed transition-all">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -680,8 +671,8 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
                         $is_done = $status === 'done' || $todo['completed'];
                         
                         $card_bg = $is_done 
-                            ? 'bg-emerald-50/40 dark:bg-emerald-950/20 border-emerald-200/70 dark:border-emerald-800/50' 
-                            : ($status === 'in_progress' ? 'bg-sky-50/40 dark:bg-sky-950/20 border-sky-200/70 dark:border-sky-800/50' : 'bg-white/80 dark:bg-slate-800/60 border-slate-200/80 dark:border-slate-700/70 hover:border-indigo-300 dark:hover:border-indigo-600/50 shadow-2xs');
+                            ? 'bg-emerald-50/40 border-emerald-200/70' 
+                            : ($status === 'in_progress' ? 'bg-sky-50/40 border-sky-200/70' : 'bg-white border-slate-200/80 hover:border-blue-300 shadow-2xs');
                         
                         $badge_class = $is_done 
                             ? 'text-emerald-800 dark:text-emerald-300 bg-emerald-100/90 dark:bg-emerald-900/60 border border-emerald-200/80 dark:border-emerald-800/50' 
@@ -777,7 +768,7 @@ function handleAgendaInputChange(input) {
     const hasText = input.value.trim().length > 0;
     btn.disabled = !hasText;
     if (hasText) {
-        btn.className = 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white shadow-md shadow-indigo-600/30 transition-all cursor-pointer active:scale-95';
+        btn.className = 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-[#1E5CE6] hover:bg-[#1749B8] text-white shadow-md shadow-blue-600/25 transition-all cursor-pointer active:scale-95';
     } else {
         btn.className = 'w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-slate-200 text-slate-400 cursor-not-allowed transition-all';
     }

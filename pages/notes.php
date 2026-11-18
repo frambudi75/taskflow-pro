@@ -118,7 +118,7 @@ if (!function_exists('getNoteCategoryBadge')) {
             case 'notula':
                 return ['#Notula', 'bg-sky-50 text-sky-700 border-sky-200/80 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800/60'];
             case 'proyek':
-                return ['#Proyek', 'bg-indigo-50 text-indigo-700 border-indigo-200/80 dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800/60'];
+                return ['#Proyek', 'bg-blue-50 text-[#1E5CE6] border-blue-200/80'];
             case 'draf':
                 return ['#Draf', 'bg-amber-50 text-amber-700 border-amber-200/80 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800/60'];
             case 'personal':
@@ -178,17 +178,17 @@ if (!function_exists('getNoteBorderColor')) {
 }
 
 .note-accent-indigo {
-    border-top: 4px solid #6366F1 !important;
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.09) 0%, #FFFFFF 36%) !important;
+    border-top: 4px solid #1E5CE6 !important;
+    background: linear-gradient(180deg, rgba(30, 92, 230, 0.08) 0%, #FFFFFF 36%) !important;
 }
 .note-accent-indigo:hover {
-    border-color: rgba(99, 102, 241, 0.45);
-    border-top-color: #6366F1 !important;
-    box-shadow: 0 14px 30px -4px rgba(99, 102, 241, 0.22);
+    border-color: rgba(30, 92, 230, 0.45);
+    border-top-color: #1E5CE6 !important;
+    box-shadow: 0 14px 30px -4px rgba(30, 92, 230, 0.18);
 }
-.note-accent-indigo .note-accent-dot { background-color: #6366F1 !important; }
+.note-accent-indigo .note-accent-dot { background-color: #1E5CE6 !important; }
 .dark .note-accent-indigo {
-    background: linear-gradient(180deg, rgba(99, 102, 241, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
+    background: linear-gradient(180deg, rgba(30, 92, 230, 0.14) 0%, rgba(15, 23, 42, 0.92) 40%) !important;
 }
 
 .note-accent-sky {
@@ -289,17 +289,17 @@ if (!function_exists('getNoteBorderColor')) {
 }
 </style>
 
-<div class="p-4 md:p-8 w-full space-y-6">
+<div class="p-4 md:p-6 w-full space-y-6">
 
-    <!-- Executive Header Banner (Frosted Glass with Comprehensive Layout) -->
-    <div class="rounded-3xl p-6 md:p-7 notes-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <!-- Executive Header Banner (Clean Goodle Drive Standard Header) -->
+    <div class="rounded-2xl p-6 bg-white border border-slate-200/80 shadow-xs relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div class="max-w-2xl">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-50 dark:bg-violet-950/60 border border-violet-100 dark:border-violet-900/50 text-violet-700 dark:text-violet-300 text-xs font-extrabold uppercase tracking-widest mb-2.5">
-                <span class="w-2 h-2 rounded-full bg-violet-500 animate-pulse"></span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#1E5CE6] text-xs font-extrabold uppercase tracking-widest mb-2.5">
+                <span class="w-2 h-2 rounded-full bg-[#1E5CE6] animate-pulse"></span>
                 Dokumentasi &amp; Ruang Ide
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1.5">Catatan &amp; Ide Kerja</h1>
-            <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium leading-relaxed">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-800 tracking-tight mb-1.5">Catatan &amp; Ide Kerja</h1>
+            <p class="text-slate-500 text-xs md:text-sm font-medium leading-relaxed">
                 Kelola seluruh draf ide, notula rapat koordinasi, dan dokumentasi kerja harian Anda dalam satu kanvas produktivitas yang terorganisir dan mudah ditelusuri.
             </p>
         </div>
@@ -307,29 +307,29 @@ if (!function_exists('getNoteBorderColor')) {
         <!-- Metric Badges & Action -->
         <div class="flex flex-wrap items-center gap-3.5 flex-shrink-0">
             <!-- 3 High-Value Standard Metrics -->
-            <div class="bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 px-4 py-2.5 rounded-2xl flex items-center gap-3.5">
+            <div class="bg-white border border-slate-200/80 px-4 py-2.5 rounded-2xl flex items-center gap-3.5 shadow-2xs">
                 <div>
                     <div class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Total Catatan</div>
-                    <div class="text-xl font-black text-slate-900 dark:text-white leading-none mt-1"><?php echo $total_notes; ?></div>
+                    <div class="text-xl font-black text-slate-900 leading-none mt-1"><?php echo $total_notes; ?></div>
                 </div>
-                <div class="w-px h-7 bg-slate-200 dark:bg-slate-700"></div>
+                <div class="w-px h-7 bg-slate-200"></div>
                 <div>
-                    <div class="text-[10px] uppercase font-bold text-amber-600 dark:text-amber-400 tracking-wider flex items-center gap-1">
+                    <div class="text-[10px] uppercase font-bold text-amber-600 tracking-wider flex items-center gap-1">
                         <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6l1 1 1-1v-6h5v-2l-2-2z"/></svg>
                         Disematkan
                     </div>
-                    <div class="text-xl font-black text-amber-600 dark:text-amber-400 leading-none mt-1"><?php echo $pinned_notes; ?></div>
+                    <div class="text-xl font-black text-amber-600 leading-none mt-1"><?php echo $pinned_notes; ?></div>
                 </div>
-                <div class="w-px h-7 bg-slate-200 dark:bg-slate-700"></div>
+                <div class="w-px h-7 bg-slate-200"></div>
                 <div>
-                    <div class="text-[10px] uppercase font-bold text-indigo-600 dark:text-indigo-400 tracking-wider">Topik/Kategori</div>
-                    <div class="text-xl font-black text-indigo-600 dark:text-indigo-400 leading-none mt-1"><?php echo $total_cats; ?></div>
+                    <div class="text-[10px] uppercase font-bold text-[#1E5CE6] tracking-wider">Topik/Kategori</div>
+                    <div class="text-xl font-black text-[#1E5CE6] leading-none mt-1"><?php echo $total_cats; ?></div>
                 </div>
             </div>
 
             <!-- Primary CTA -->
             <button onclick="openAddModal()"
-                    class="min-h-[46px] flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/30 transition-all active:scale-95 flex-shrink-0">
+                    class="min-h-[44px] flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs text-white bg-[#1E5CE6] hover:bg-[#1749B8] shadow-md shadow-blue-600/20 transition-all active:scale-95 flex-shrink-0 cursor-pointer">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>+ Catatan Baru</span>
             </button>
@@ -343,28 +343,28 @@ if (!function_exists('getNoteBorderColor')) {
         <div class="relative w-full max-w-sm flex-shrink-0">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" id="searchNotes" placeholder="Cari catatan berdasarkan judul atau isi..." oninput="handleFilterChange()"
-                   class="w-full pl-9 pr-9 py-2 rounded-xl text-xs font-semibold bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                   class="w-full pl-9 pr-9 py-2.5 rounded-xl text-xs font-semibold bg-white border border-slate-200 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all">
             <button type="button" id="clearSearchBtn" onclick="clearSearch()" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold">✕</button>
         </div>
 
         <!-- Center: Category / Tag Filter Chips -->
         <div class="flex items-center gap-1.5 overflow-x-auto py-1 no-scrollbar text-xs">
-            <button type="button" onclick="setCategoryFilter('all')" data-cat="all" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-xs">
+            <button type="button" onclick="setCategoryFilter('all')" data-cat="all" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-[#1E5CE6] text-white shadow-xs cursor-pointer">
                 Semua
             </button>
-            <button type="button" onclick="setCategoryFilter('Ide')" data-cat="Ide" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">
+            <button type="button" onclick="setCategoryFilter('Ide')" data-cat="Ide" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">
                 #Ide
             </button>
-            <button type="button" onclick="setCategoryFilter('Rapat')" data-cat="Rapat" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">
+            <button type="button" onclick="setCategoryFilter('Rapat')" data-cat="Rapat" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">
                 #Notula
             </button>
-            <button type="button" onclick="setCategoryFilter('Proyek')" data-cat="Proyek" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">
+            <button type="button" onclick="setCategoryFilter('Proyek')" data-cat="Proyek" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">
                 #Proyek
             </button>
-            <button type="button" onclick="setCategoryFilter('Draf')" data-cat="Draf" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">
+            <button type="button" onclick="setCategoryFilter('Draf')" data-cat="Draf" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">
                 #Draf
             </button>
-            <button type="button" onclick="setCategoryFilter('Personal')" data-cat="Personal" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200">
+            <button type="button" onclick="setCategoryFilter('Personal')" data-cat="Personal" class="cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer">
                 #Personal
             </button>
         </div>
@@ -398,16 +398,16 @@ if (!function_exists('getNoteBorderColor')) {
 
     <!-- Notes Content Area -->
     <?php if (empty($notes)): ?>
-        <div class="flex flex-col items-center justify-center py-20 text-center rounded-3xl bg-white dark:bg-slate-900/40 border border-slate-200/80 dark:border-slate-800 shadow-sm">
-            <div class="w-16 h-16 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center mb-4 text-indigo-500">
+        <div class="flex flex-col items-center justify-center py-20 text-center rounded-2xl bg-white border border-slate-200/80 shadow-xs">
+            <div class="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4 text-[#1E5CE6]">
                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
             </div>
-            <h3 class="text-base font-extrabold text-slate-900 dark:text-white mb-1.5">Belum Ada Catatan Tersimpan</h3>
-            <p class="text-slate-500 dark:text-slate-400 text-xs mb-5 max-w-sm font-medium leading-relaxed">
+            <h3 class="text-base font-extrabold text-slate-900 mb-1.5">Belum Ada Catatan Tersimpan</h3>
+            <p class="text-slate-500 text-xs mb-5 max-w-sm font-medium leading-relaxed">
                 Ruang dokumentasi Anda masih kosong. Buat draf ide baru atau notula kerja untuk memulai.
             </p>
             <button onclick="openAddModal()"
-                    class="px-5 py-2.5 rounded-xl font-bold text-white text-xs bg-indigo-600 hover:bg-indigo-700 transition-all shadow-md shadow-indigo-600/30 active:scale-95">
+                    class="px-5 py-2.5 rounded-xl font-bold text-white text-xs bg-[#1E5CE6] hover:bg-[#1749B8] transition-all shadow-md shadow-blue-600/20 active:scale-95 cursor-pointer">
                 + Buat Catatan Pertama
             </button>
         </div>
@@ -479,24 +479,24 @@ if (!function_exists('getNoteBorderColor')) {
                         </div>
 
                         <!-- Note Title -->
-                        <h3 class="text-[15px] font-black text-slate-900 dark:text-white mb-2 leading-snug group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        <h3 class="text-[15px] font-black text-slate-900 mb-2 leading-snug group-hover:text-[#1E5CE6] transition-colors">
                             <?php echo htmlspecialchars($note['title']); ?>
                         </h3>
 
                         <!-- Note Body Excerpt (Bounded to 2-3 lines with neat gray font) -->
-                        <p class="note-body-preview text-xs md:text-[13px] text-slate-600 dark:text-slate-400 leading-relaxed font-normal mb-3">
+                        <p class="note-body-preview text-xs md:text-[13px] text-slate-600 leading-relaxed font-normal mb-3">
                             <?php echo !empty($preview) ? nl2br(htmlspecialchars($preview)) : '<span class="italic text-slate-400">(Catatan ini tidak memiliki isi teks tambahan)</span>'; ?>
                         </p>
                     </div>
 
                     <!-- Card Bottom Anatomy: [Diedit X waktu lalu] ---------------- [Buka Catatan ->] -->
-                    <div class="mt-2 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-semibold text-slate-400">
-                        <span class="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
+                    <div class="mt-2 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] font-semibold text-slate-400">
+                        <span class="flex items-center gap-1.5 text-slate-500">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             Diedit <?php echo notesTimeAgo($note['updated_at']); ?>
                         </span>
 
-                        <span class="group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors flex items-center gap-1 font-bold">
+                        <span class="group-hover:text-[#1E5CE6] transition-colors flex items-center gap-1 font-bold">
                             <span>Buka Catatan</span>
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="group-hover:translate-x-1 transition-transform"><polyline points="9 18 15 12 9 6"/></svg>
                         </span>
@@ -509,10 +509,10 @@ if (!function_exists('getNoteBorderColor')) {
 
 <!-- Modal Tambah Catatan -->
 <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop-blur bg-slate-900/60">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-7" onclick="event.stopPropagation()">
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-xl p-6 sm:p-7" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#1E5CE6] border border-blue-100 flex items-center justify-center">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </div>
                 <div>
@@ -532,14 +532,14 @@ if (!function_exists('getNoteBorderColor')) {
             <div>
                 <label for="newNoteTitle" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Judul Catatan</label>
                 <input type="text" name="title" id="newNoteTitle" required placeholder="Tulis judul yang jelas..."
-                       class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label for="newNoteCategory" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Kategori / Topik</label>
+                    <label for="newNoteCategory" class="block text-[11px] font-black text-slate-600 uppercase tracking-wider mb-1.5">Kategori / Topik</label>
                     <select name="category" id="newNoteCategory"
-                            class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30">
                         <option value="Ide">💡 #Ide</option>
                         <option value="Rapat">📋 #Notula</option>
                         <option value="Proyek">🚀 #Proyek</option>
@@ -548,13 +548,13 @@ if (!function_exists('getNoteBorderColor')) {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Warna Aksen</label>
+                    <label class="block text-[11px] font-black text-slate-600 uppercase tracking-wider mb-1.5">Warna Aksen</label>
                     <input type="hidden" name="color" id="newNoteColor" value="violet">
                     <div class="flex items-center gap-2 pt-1" id="newColorPicker">
                         <button type="button" onclick="selectNewColor('violet')" data-color="violet" title="Ungu (Violet)" class="new-swatch-btn w-7 h-7 rounded-full bg-[#8B5CF6] transition-transform flex items-center justify-center text-white ring-2 ring-offset-2 ring-[#8B5CF6] scale-110">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                         </button>
-                        <button type="button" onclick="selectNewColor('indigo')" data-color="indigo" title="Biru Indigo" class="new-swatch-btn w-7 h-7 rounded-full bg-[#6366F1] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectNewColor('indigo')" data-color="indigo" title="Biru Royal" class="new-swatch-btn w-7 h-7 rounded-full bg-[#1E5CE6] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
                         <button type="button" onclick="selectNewColor('sky')" data-color="sky" title="Biru Langit" class="new-swatch-btn w-7 h-7 rounded-full bg-[#0EA5E9] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
                         <button type="button" onclick="selectNewColor('emerald')" data-color="emerald" title="Hijau Emerald" class="new-swatch-btn w-7 h-7 rounded-full bg-[#10B981] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
                         <button type="button" onclick="selectNewColor('amber')" data-color="amber" title="Kuning Amber" class="new-swatch-btn w-7 h-7 rounded-full bg-[#F59E0B] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
@@ -565,30 +565,30 @@ if (!function_exists('getNoteBorderColor')) {
 
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <label for="newNoteContent" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Isi Dokumentasi</label>
+                    <label for="newNoteContent" class="block text-[11px] font-black text-slate-600 uppercase tracking-wider">Isi Dokumentasi</label>
                     <span id="addWordCount" class="text-[10px] text-slate-400 font-semibold">0 kata</span>
                 </div>
                 <textarea name="content" id="newNoteContent" placeholder="Ketik isi catatan atau ringkasan ide di sini... (Tekan Ctrl + Enter untuk menyimpan)" rows="7"
                           oninput="updateCount(this.value, 'addWordCount')"
-                          class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-medium leading-relaxed text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all resize-none"></textarea>
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium leading-relaxed text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all resize-none"></textarea>
             </div>
 
             <div class="flex items-center gap-2">
-                <label class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                    <input type="checkbox" name="is_pinned" value="1" class="rounded text-indigo-600 focus:ring-indigo-500">
+                <label class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                    <input type="checkbox" name="is_pinned" value="1" class="rounded text-[#1E5CE6] focus:ring-[#1E5CE6]">
                     <span>Sematkan catatan ini di posisi atas</span>
                 </label>
             </div>
 
             <div class="flex items-center justify-between pt-2">
-                <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">Tip: <kbd class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 border text-[10px] font-mono">Ctrl + Enter</kbd> untuk simpan</span>
+                <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">Tip: <kbd class="px-1.5 py-0.5 rounded bg-slate-100 border text-[10px] font-mono">Ctrl + Enter</kbd> untuk simpan</span>
                 <div class="flex gap-2.5 ml-auto">
                     <button type="button" onclick="closeAddModal()"
-                            class="py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-xs">
+                            class="py-2 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all text-xs cursor-pointer">
                         Batal
                     </button>
                     <button type="submit"
-                            class="py-2 px-5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all text-xs shadow-md shadow-indigo-600/30 active:scale-95">
+                            class="py-2 px-5 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-[#1749B8] transition-all text-xs shadow-md shadow-blue-600/20 active:scale-95 cursor-pointer">
                         Simpan Catatan
                     </button>
                 </div>
@@ -599,18 +599,18 @@ if (!function_exists('getNoteBorderColor')) {
 
 <!-- Modal Edit Catatan -->
 <div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-backdrop-blur bg-slate-900/60">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl shadow-2xl w-full max-w-xl p-6 sm:p-7" onclick="event.stopPropagation()">
+    <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl w-full max-w-xl p-6 sm:p-7" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between mb-5">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-900/50 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#1E5CE6] border border-blue-100 flex items-center justify-center">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                 </div>
                 <div>
-                    <h3 class="text-base font-black text-slate-900 dark:text-white">Edit Catatan</h3>
+                    <h3 class="text-base font-black text-slate-900">Edit Catatan</h3>
                     <p class="text-slate-400 text-xs font-medium">Perbarui isi draf dokumentasi</p>
                 </div>
             </div>
-            <button onclick="closeEditModal()" aria-label="Tutup modal" class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all">
+            <button onclick="closeEditModal()" aria-label="Tutup modal" class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition-all cursor-pointer">
                 ✕
             </button>
         </div>
@@ -621,16 +621,16 @@ if (!function_exists('getNoteBorderColor')) {
             <input type="hidden" name="note_id" id="editNoteId">
             
             <div>
-                <label for="editNoteTitle" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Judul Catatan</label>
+                <label for="editNoteTitle" class="block text-[11px] font-black text-slate-600 uppercase tracking-wider mb-1.5">Judul Catatan</label>
                 <input type="text" name="title" id="editNoteTitle" required
-                       class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all">
+                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-xs font-bold text-slate-900 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label for="editNoteCategory" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Kategori / Topik</label>
+                    <label for="editNoteCategory" class="block text-[11px] font-black text-slate-600 uppercase tracking-wider mb-1.5">Kategori / Topik</label>
                     <select name="category" id="editNoteCategory"
-                            class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30">
+                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30">
                         <option value="Ide">💡 #Ide</option>
                         <option value="Rapat">📋 #Notula</option>
                         <option value="Proyek">🚀 #Proyek</option>
@@ -639,13 +639,13 @@ if (!function_exists('getNoteBorderColor')) {
                     </select>
                 </div>
                 <div>
-                    <label class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider mb-1.5">Warna Aksen</label>
+                    <label class="block text-[11px] font-black text-slate-600 uppercase tracking-wider mb-1.5">Warna Aksen</label>
                     <input type="hidden" name="color" id="editNoteColor" value="violet">
                     <div class="flex items-center gap-2 pt-1" id="editColorPicker">
                         <button type="button" onclick="selectEditColor('violet')" data-color="violet" title="Ungu (Violet)" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#8B5CF6] transition-transform flex items-center justify-center text-white ring-2 ring-offset-2 ring-[#8B5CF6] scale-110">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
                         </button>
-                        <button type="button" onclick="selectEditColor('indigo')" data-color="indigo" title="Biru Indigo" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#6366F1] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
+                        <button type="button" onclick="selectEditColor('indigo')" data-color="indigo" title="Biru Royal" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#1E5CE6] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
                         <button type="button" onclick="selectEditColor('sky')" data-color="sky" title="Biru Langit" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#0EA5E9] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
                         <button type="button" onclick="selectEditColor('emerald')" data-color="emerald" title="Hijau Emerald" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#10B981] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
                         <button type="button" onclick="selectEditColor('amber')" data-color="amber" title="Kuning Amber" class="edit-swatch-btn w-7 h-7 rounded-full bg-[#F59E0B] transition-transform flex items-center justify-center text-white opacity-75 hover:opacity-100"></button>
@@ -656,38 +656,39 @@ if (!function_exists('getNoteBorderColor')) {
 
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <label for="editNoteContent" class="block text-[11px] font-black text-slate-600 dark:text-slate-300 uppercase tracking-wider">Isi Dokumentasi</label>
+                    <label for="editNoteContent" class="block text-[11px] font-black text-slate-600 uppercase tracking-wider">Isi Dokumentasi</label>
                     <span id="editWordCount" class="text-[10px] text-slate-400 font-semibold">0 kata</span>
                 </div>
                 <textarea name="content" id="editNoteContent" rows="7"
                           oninput="updateCount(this.value, 'editWordCount')"
-                          class="w-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-xs font-medium leading-relaxed text-slate-800 dark:text-slate-200 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all resize-none"></textarea>
+                          class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-xs font-medium leading-relaxed text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 focus:border-[#1E5CE6] transition-all resize-none"></textarea>
             </div>
 
             <div class="flex items-center gap-2">
-                <label class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300 cursor-pointer">
-                    <input type="checkbox" name="is_pinned" id="editNotePinned" value="1" class="rounded text-indigo-600 focus:ring-indigo-500">
+                <label class="inline-flex items-center gap-2 text-xs font-bold text-slate-700 cursor-pointer">
+                    <input type="checkbox" name="is_pinned" id="editNotePinned" value="1" class="rounded text-[#1E5CE6] focus:ring-[#1E5CE6]">
                     <span>Sematkan catatan ini di posisi teratas</span>
                 </label>
             </div>
 
             <div class="flex items-center justify-between pt-2">
                 <button type="submit" form="deleteNoteForm" aria-label="Hapus Catatan"
-                        class="px-3.5 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 text-rose-600 dark:text-rose-400 font-bold hover:bg-rose-50 dark:hover:bg-rose-950/40 text-xs flex items-center gap-1.5 transition-all">
+                        class="px-3.5 py-2 rounded-xl border border-rose-200 text-rose-600 font-bold hover:bg-rose-50 text-xs flex items-center gap-1.5 transition-all cursor-pointer">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
                     Hapus
                 </button>
 
                 <div class="flex gap-2.5">
                     <button type="button" onclick="closeEditModal()"
-                            class="py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-xs">
+                            class="py-2 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all text-xs cursor-pointer">
                         Batal
                     </button>
                     <button type="submit"
-                            class="py-2 px-5 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-all text-xs shadow-md shadow-indigo-600/30 active:scale-95">
+                            class="py-2 px-5 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-[#1749B8] transition-all text-xs shadow-md shadow-blue-600/20 active:scale-95 cursor-pointer">
                         Simpan Perubahan
                     </button>
                 </div>
+            </div>
             </div>
         </form>
     </div>
@@ -712,7 +713,7 @@ let currentCategoryFilter = 'all';
 
 const NOTE_COLOR_MAP = {
     'violet': '#8B5CF6',
-    'indigo': '#6366F1',
+    'indigo': '#1E5CE6',
     'sky': '#0EA5E9',
     'emerald': '#10B981',
     'amber': '#F59E0B',
@@ -831,9 +832,9 @@ function setCategoryFilter(category) {
     document.querySelectorAll('.cat-filter-btn').forEach(btn => {
         const cat = btn.getAttribute('data-cat');
         if (cat === category) {
-            btn.className = 'cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-indigo-600 text-white shadow-xs';
+            btn.className = 'cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-[#1E5CE6] text-white shadow-xs cursor-pointer';
         } else {
-            btn.className = 'cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200';
+            btn.className = 'cat-filter-btn px-3 py-1.5 rounded-xl font-bold transition-all bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer';
         }
     });
     handleFilterChange();
