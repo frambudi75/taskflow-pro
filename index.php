@@ -1277,10 +1277,12 @@ document.getElementById('cmdPaletteModal')?.addEventListener('click', function(e
     if (e.target === this) closeCmdPalette();
 });
 
-// Register Service Worker for PWA
+// Register Service Worker for PWA with cache-busting and instant activation
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').catch(() => {});
+        navigator.serviceWorker.register('sw.js?v=<?php echo APP_VERSION; ?>').then((reg) => {
+            reg.update();
+        }).catch(() => {});
     });
 }
 

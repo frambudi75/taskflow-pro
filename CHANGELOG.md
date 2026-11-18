@@ -6,6 +6,20 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.10] - 2026-11-18
+
+### 🛡️ Optimasi PWA & Pembaruan Service Worker Instan (Zero Stale Worker & Clean Ad-Blocker Handling)
+- **Registrasi Service Worker Berversi (*Cache-Busting Registration*)**:
+  - Memperbarui pendaftaran Service Worker di `index.php` menjadi `sw.js?v=<?php echo APP_VERSION; ?>` dengan pemanggilan eksplisit `reg.update()`.
+  - Memaksa peramban (browser) segera memeriksa, mengunduh, dan mengaktifkan Service Worker terbaru tanpa tertahan di cache lokal peramban.
+- **Arsitektur Service Worker Presisi (`sw.js`)**:
+  - Service Worker sekarang berfokus penuh dan eksklusif pada caching aset statis lokal (`.svg`, `.png`, `.jpg`, `.css`, web fonts).
+  - Melewati (*bypass*) seluruh permintaan pihak ketiga (seperti `static.cloudflareinsights.com/beacon.min.js`), mencegah kegagalan promise fetch ketika beacon Cloudflare diblokir oleh ekstensi Ad-Blocker (uBlock, Brave Shields, dll).
+  - Melepaskan kendali penanganan rute PHP/HTML dinamis langsung ke peramban tanpa `event.respondWith()`, menjamin navigasi halaman dan autentikasi sesi selalu 100% mulus tanpa interupsi offline palsu.
+  - Memperbarui identitas cache ke `taskflow-pwa-v3.2.10` disertai `self.skipWaiting()` dan `self.clients.claim()` untuk pengambilalihan instan.
+
+---
+
 ## [3.2.9] - 2026-11-18
 
 ### 🛡️ Perbaikan Kritis & Stabilitas Sistem (Fix Fatal Error & CSRF Generator)
