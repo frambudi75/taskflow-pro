@@ -1076,6 +1076,31 @@ document.addEventListener('click', function(e) {
     } catch(e) {}
 })();
 
+// Global Safe Modals Handler (Prevents ReferenceError on any page)
+window.openUploadModal = function() {
+    const m = document.getElementById('uploadModal');
+    if (m) {
+        m.classList.remove('hidden');
+        m.style.display = 'flex';
+        const fileIn = document.getElementById('fileInput');
+        if (fileIn) fileIn.focus();
+    } else {
+        if (typeof loadPage === 'function') {
+            loadPage('index.php?page=documents&openUpload=1');
+        } else {
+            window.location.href = 'index.php?page=documents&openUpload=1';
+        }
+    }
+};
+
+window.closeUploadModal = function() {
+    const m = document.getElementById('uploadModal');
+    if (m) {
+        m.classList.add('hidden');
+        m.style.display = 'none';
+    }
+};
+
 // ==============================================================
 // 1. FLOATING TOAST NOTIFICATION SYSTEM
 // ==============================================================

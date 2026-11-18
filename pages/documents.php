@@ -588,6 +588,26 @@ function docIconSvg($type, $color) {
 }
 </style>
 
+<script>
+// Early modal bindings to guarantee immediate availability on click
+window.openUploadModal = window.openUploadModal || function() {
+    const m = document.getElementById('uploadModal');
+    if (m) {
+        m.classList.remove('hidden');
+        m.style.display = 'flex';
+        const fileIn = document.getElementById('fileInput');
+        if (fileIn) fileIn.focus();
+    }
+};
+window.closeUploadModal = window.closeUploadModal || function() {
+    const m = document.getElementById('uploadModal');
+    if (m) {
+        m.classList.add('hidden');
+        m.style.display = 'none';
+    }
+};
+</script>
+
 <div class="p-4 md:p-8 w-full space-y-6">
 
     <!-- Executive Header Section (Glassmorphic) -->
@@ -1921,6 +1941,13 @@ function docIconSvg($type, $color) {
             }
         }
     });
+
+    // Auto-open upload modal if requested via URL parameter or hash
+    if (new URLSearchParams(window.location.search).get('openUpload') === '1' || window.location.hash.includes('upload')) {
+        setTimeout(function() {
+            if (typeof openUploadModal === 'function') openUploadModal();
+        }, 120);
+    }
 
     // Close modals on Escape key
     document.addEventListener('keydown', function(e) {

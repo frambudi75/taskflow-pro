@@ -6,6 +6,20 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.2.8] - 2026-11-18
+
+### 🐛 Perbaikan Bug & Ketahanan Sistem (Service Worker & Modal Stability)
+- **Perbaikan Service Worker PWA (`sw.js`)**:
+  - Mengatasi error `Uncaught (in promise) TypeError: Failed to convert value to 'Response'` dan fetch rejection.
+  - Membatasi penanganan fetch hanya untuk *same-origin* dan Google Fonts, sehingga tidak mencegat script analitik/beacon pihak ketiga (seperti Cloudflare Insights `static.cloudflareinsights.com/beacon.min.js`) yang diblokir oleh ad-blocker.
+  - Menjamin pengembalian objek `Response` valid (HTTP 503 fallback) pada seluruh kegagalan jaringan atau kondisi offline, mencegah penolakan promise di peramban.
+  - Memperbarui versi cache ke `taskflow-pwa-v3.2.8`.
+- **Perbaikan Global Safe Modal Binding (`index.php` & `pages/documents.php`)**:
+  - Mengatasi `ReferenceError: openUploadModal is not defined` dengan mendaftarkan fungsi modal secara global pada `window` di `index.php` dan di blok awal `pages/documents.php`.
+  - Menambahkan dukungan navigasi otomatis dengan parameter `openUpload=1` atau hash `#uploadSection` saat tombol aksi cepat modal diklik dari halaman lain.
+
+---
+
 ## [3.2.7] - 2026-11-08
 
 ### 💎 Desain & Antarmuka (Executive Glassmorphism Kalender Produktivitas)
