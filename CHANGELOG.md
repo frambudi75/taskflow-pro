@@ -6,6 +6,26 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.3.1] - 2026-11-18
+
+### 🖥️ Tata Letak 100% Fullscreen Edge-to-Edge & Harmonisasi Konten Dasbor
+- **Tata Letak Penuh Tanpa Batas (*100% Edge-to-Edge Fullscreen*) (`index.php`)**:
+  - Mengubah kerangka aplikasi dari model kotak tengah mengambang (*floating windowed*) menjadi tampilan penuh *100% screen width & height* tanpa margin luar.
+  - Header utama membentang penuh di bagian atas (*full edge-to-edge width*) dengan pembatas halus (*subtle border-b*).
+  - *Curved Royal Blue Sidebar* menempel langsung di tepi kiri layar dengan sudut kurva atas-kanan khas (*border-top-right-radius: 46px*) ala Goodle Drive.
+  - Area kerja (*main workspace*) mengisi seluruh sisa layar secara optimal, memberikan ruang kerja yang luas dan leluasa bagi seluruh modul.
+- **Harmonisasi Konten & Kartu Dasbor (`pages/dashboard.php`)**:
+  - Memperbarui kartu ucapan (*Greeting Banner*) dengan latar putih bersih, tipografi royal blue, dan **Widget Cincin Progres Melingkar SVG (*Circular Progress Ring*)** yang presisi menampilkan persentase target hari ini serta rasio tugas tuntas.
+  - Menyelaraskan seluruh 4 Kartu KPI Utama (*Stat Cards*) dengan tipografi angka dominan berukuran besar (*dominant numbers*), ikon halus, dan baris progres modern tanpa garis strip atas kaku.
+  - Menyeragamkan seluruh tautan, tombol aksi cepat, dan pintasan sistem ke palet warna royal blue `#1E5CE6` dan `#1749B8`.
+- **Perbaikan Stabilitas Service Worker & Pendaftaran Modal Global (`sw.js`, `index.php`)**:
+  - Menambahkan pengecualian navigasi (`event.request.mode === 'navigate'`) pada `sw.js` agar Service Worker tidak mengintersepsi permintaan navigasi HTML/PHP, mencegah potensi respon galat 503.
+  - Memastikan seluruh *fallback* pada `event.respondWith` selalu mengembalikan objek `Response` valid untuk meniadakan `TypeError: Failed to convert value to 'Response'`.
+  - Mendaftarkan fungsi `openUploadModal` sejak awal di tag `<head>` pada `index.php` untuk mencegah galat `ReferenceError: openUploadModal is not defined` saat tombol diakses instan.
+  - Memperbarui identitas cache Service Worker ke `taskflow-pwa-v3.3.1`.
+
+---
+
 ## [3.3.0] - 2026-11-18
 
 ### 💎 Desain Antarmuka Cloud Storage Generasi Baru (Goodle Drive UI Integration)

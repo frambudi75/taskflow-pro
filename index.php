@@ -145,35 +145,29 @@ try {
         }
 
         body {
-            background-color: #235EE7;
-            background-image: radial-gradient(circle at 15% 15%, #326FF5 0%, #235EE7 55%, #1A4EC9 100%);
+            background-color: #FFFFFF;
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            min-height: 100vh;
+            height: 100vh;
+            width: 100vw;
             margin: 0;
             overflow: hidden;
         }
 
-        /* Main Application Frame */
+        /* 100% Full-Width Application Frame */
         .app-frame {
             background: #FFFFFF;
-            border-radius: 34px;
-            box-shadow: 0 32px 70px -15px rgba(10, 29, 77, 0.45), 0 0 1px 1px rgba(255, 255, 255, 0.15);
+            width: 100%;
+            height: 100vh;
             overflow: hidden;
-        }
-        @media (max-width: 1023px) {
-            .app-frame {
-                border-radius: 0 !important;
-                box-shadow: none !important;
-            }
-            body {
-                background: #FFFFFF !important;
-            }
+            display: flex;
+            flex-direction: column;
+            position: relative;
         }
 
         /* Distinctive Curved Royal Blue Sidebar */
         .curved-sidebar {
             background: linear-gradient(180deg, #1E5CE6 0%, #1B55D8 100%);
-            border-top-right-radius: 54px;
+            border-top-right-radius: 46px;
             transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
         }
         @media (max-width: 1023px) {
@@ -383,15 +377,31 @@ try {
             animation: modalPop 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
+    <script>
+        // Early global modal helpers
+        window.openUploadModal = window.openUploadModal || function() {
+            if (typeof window.documentsOpenUploadModal === 'function') {
+                window.documentsOpenUploadModal();
+            } else if (document.getElementById('uploadModal')) {
+                const m = document.getElementById('uploadModal');
+                m.classList.remove('hidden');
+                m.style.display = 'flex';
+                const fi = document.getElementById('fileInput');
+                if (fi) fi.focus();
+            } else {
+                window.location.href = 'index.php?page=documents&openUpload=1';
+            }
+        };
+    </script>
 </head>
-<body class="p-0 lg:p-4 xl:p-6 flex items-center justify-center select-none">
+<body class="bg-white overflow-hidden h-screen w-screen flex flex-col m-0 p-0 select-none">
     <div id="pageLoader"></div>
 
-    <!-- MAIN FLOATING APPLICATION FRAME -->
-    <div class="app-frame w-full max-w-[1580px] h-screen lg:h-[calc(100vh-2rem)] xl:h-[calc(100vh-3rem)] flex flex-col relative">
+    <!-- 100% FULL-SCREEN APPLICATION FRAME -->
+    <div class="app-frame w-full h-screen flex flex-col relative bg-white overflow-hidden">
 
         <!-- ==================== TOP HEADER BAR ==================== -->
-        <header class="w-full bg-white px-4 sm:px-8 pt-5 pb-4 flex items-center justify-between gap-4 z-20 border-b border-slate-100 flex-shrink-0">
+        <header class="w-full bg-white px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 z-20 border-b border-slate-100 flex-shrink-0">
             <!-- Left: Logo + Brand Title + Mobile Menu Toggle -->
             <div class="flex items-center gap-3">
                 <button id="mobileMenuBtn" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors" aria-label="Toggle navigation">

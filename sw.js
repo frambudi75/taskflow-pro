@@ -1,5 +1,5 @@
 // TaskFlow Pro - Progressive Web App Service Worker
-const CACHE_NAME = 'taskflow-pwa-v3.3.0';
+const CACHE_NAME = 'taskflow-pwa-v3.3.1';
 const STATIC_ASSETS = [
     './favicon.svg',
     './manifest.json'
@@ -30,10 +30,13 @@ self.addEventListener('activate', (event) => {
     );
 });
 
-// Precision Fetch: ONLY handle static local assets, NEVER touch dynamic PHP or third-party beacons
+// Precision Fetch: ONLY handle static local assets, NEVER touch dynamic PHP, navigation, or third-party beacons
 self.addEventListener('fetch', (event) => {
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
+
+    // Never intercept navigation requests - let browser handle HTML/PHP pages natively
+    if (event.request.mode === 'navigate') return;
 
     let url;
     try {
@@ -42,22 +45,20 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Never intercept third-party domains (e.g. Cloudflare Insights, Google Analytics, ad-block targets)
+    // Never intercept third-party domains (e.g. Cloudflare Insights, Google Analytics, beacons)
     if (url.origin !== self.location.origin) {
         if (!url.hostname.includes('fonts.googleapis.com') && !url.hostname.includes('fonts.gstatic.com')) {
-            return; // Let browser handle natively
+            return;
         }
     }
 
     // Only cache static file extensions
     const isStaticAsset = url.pathname.match(/\.(svg|png|jpg|jpeg|webp|ico|css|woff2?)$/i) || url.hostname.includes('fonts.');
     if (!isStaticAsset) {
-        // Do NOT call event.respondWith for HTML/PHP pages or dynamic endpoints.
-        // Let browser handle all navigation natively with full session cookies and direct server response!
         return;
     }
 
-    // Static assets: Cache-first with network fallback
+    // Static assets: Cache-first with network fallback and guaranteed valid Response
     event.respondWith(
         caches.match(event.request).then((cached) => {
             if (cached) return cached;
@@ -68,9 +69,10 @@ self.addEventListener('fetch', (event) => {
                 }
                 return response;
             }).catch(() => {
-                // Return cached or empty valid response (NEVER return undefined)
                 return cached || new Response('', { status: 404, statusText: 'Not Found' });
             });
+        }).catch(() => {
+            return new Response('', { status: 404, statusText: 'Not Found' });
         })
     );
 });

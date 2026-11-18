@@ -186,8 +186,8 @@ if (!function_exists('formatActivityAction')) {
 .glass-surface {
     background: #FFFFFF;
     border: 1px solid rgba(226, 232, 240, 0.9);
-    border-radius: 22px;
-    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+    border-radius: 20px;
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
     position: relative;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -200,16 +200,16 @@ if (!function_exists('formatActivityAction')) {
 .dash-stat-card {
     background: #FFFFFF;
     border: 1px solid rgba(226, 232, 240, 0.9);
-    border-radius: 22px;
-    padding: 18px 20px;
+    border-radius: 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 8px;
+    gap: 10px;
     position: relative;
     overflow: hidden;
     transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
-    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04), 0 1px 2px -1px rgba(15, 23, 42, 0.02);
+    box-shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.04);
 }
 .dark .dash-stat-card {
     background: rgba(15, 23, 42, 0.85);
@@ -218,8 +218,8 @@ if (!function_exists('formatActivityAction')) {
 }
 .dash-stat-card:hover { 
     transform: translateY(-2px); 
-    border-color: rgba(99, 102, 241, 0.35);
-    box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.10); 
+    border-color: rgba(30, 92, 230, 0.35);
+    box-shadow: 0 10px 24px -4px rgba(30, 92, 230, 0.12); 
 }
 .dark .dash-stat-card:hover {
     border-color: #334155;
@@ -241,12 +241,12 @@ if (!function_exists('formatActivityAction')) {
 .d-section-head h3 { font-size: 13.5px; font-weight: 800; color: #0f172a; margin: 0; }
 .dark .d-section-head h3 { color: #f8fafc; }
 .d-section-head a { 
-    font-size: 12px; font-weight: 700; color: #4f46e5; text-decoration: none; 
+    font-size: 12px; font-weight: 700; color: #1E5CE6; text-decoration: none; 
     transition: all 0.2s;
 }
-.dark .d-section-head a { color: #818cf8; }
+.dark .d-section-head a { color: #60a5fa; }
 .d-section-head a:hover { 
-    color: #4338ca; transform: translateX(2px);
+    color: #1749b8; transform: translateX(2px);
 }
 
 .d-row {
@@ -286,25 +286,25 @@ if (!function_exists('formatActivityAction')) {
 .chart-container { position: relative; height: 230px; width: 100%; padding: 10px 16px 16px; }
 </style>
 
-<div class="p-4 md:p-8 w-full space-y-6">
+<div class="p-4 md:p-6 w-full space-y-6">
 
-    <!-- Dashboard Header Section (Clean Executive Standard) -->
-    <div class="rounded-3xl p-6 md:p-7 bg-gradient-to-br from-white via-slate-50/50 to-indigo-50/30 dark:from-slate-900 dark:via-slate-900 dark:to-indigo-950/20 border border-slate-200/90 dark:border-slate-800 border-t-[3px] border-t-indigo-600 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+    <!-- Dashboard Header Section (Clean Goodle Drive Standard) -->
+    <div class="rounded-2xl p-6 bg-white border border-slate-200/80 shadow-xs flex flex-col lg:flex-row lg:items-center justify-between gap-6">
         <!-- Left: User Identity & Greeting -->
         <div class="flex items-center gap-4 md:gap-5 min-w-0">
-            <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-2xl p-0.5 border border-slate-200/90 dark:border-slate-700 bg-white dark:bg-slate-800 flex-shrink-0 shadow-xs">
+            <div class="relative w-12 h-12 md:w-14 md:h-14 rounded-2xl p-0.5 border border-slate-200 bg-white flex-shrink-0 shadow-2xs">
                 <img src="<?php echo htmlspecialchars($avatarSrc); ?>" alt="Avatar" class="w-full h-full object-cover rounded-[14px]">
-                <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white dark:border-slate-900"></span>
+                <span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-white"></span>
             </div>
             <div class="min-w-0">
-                <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900/60 text-indigo-700 dark:text-indigo-300 text-[11px] font-extrabold uppercase tracking-wider mb-1.5">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-indigo-600 dark:text-indigo-400"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                <div class="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-blue-50 border border-blue-100 text-[#1E5CE6] text-[11px] font-extrabold uppercase tracking-wider mb-1.5">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" class="text-[#1E5CE6]"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     <span><?php echo $indo_date; ?></span>
                 </div>
-                <h1 class="text-xl md:text-2xl font-black text-slate-900 dark:text-white tracking-tight mb-0.5">
+                <h1 class="text-xl md:text-2xl font-black text-slate-800 tracking-tight mb-0.5">
                     <?php echo $greeting; ?>, <?php echo htmlspecialchars($_SESSION['display_name'] ?? 'User'); ?>
                 </h1>
-                <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm font-medium leading-relaxed max-w-xl">
+                <p class="text-slate-500 text-xs md:text-sm font-medium leading-relaxed max-w-xl">
                     <?php echo ($total_todos - $completed_todos) > 0
                         ? ($total_todos - $completed_todos) . ' agenda tugas menunggu diselesaikan hari ini. Pertahankan fokus dan produktivitas Anda.'
                         : 'Seluruh target agenda kerja Anda hari ini telah tercapai dengan sukses.'; ?>
@@ -312,126 +312,129 @@ if (!function_exists('formatActivityAction')) {
             </div>
         </div>
 
-        <!-- Right Side: Clean Progress Widget + Quick Task Action -->
+        <!-- Right Side: Circular Progress Ring Widget (Matches exact design) + Quick Task Action -->
         <div class="flex flex-wrap items-center gap-3.5 flex-shrink-0">
-            <!-- Polished Horizontal Target & Progress Card -->
-            <div class="flex items-center gap-3.5 px-4 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-800/90 border border-slate-200/90 dark:border-slate-700 shadow-xs">
-                <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-black text-xs border border-emerald-200/70 dark:border-emerald-800/50 shrink-0">
-                    <?php echo $pct; ?>%
+            <!-- Exact Circular Progress Ring Badge -->
+            <div class="flex items-center gap-3 px-4 py-2 rounded-2xl bg-white border border-slate-200/90 shadow-2xs">
+                <!-- SVG Circular Progress Ring -->
+                <div class="relative w-10 h-10 flex items-center justify-center shrink-0">
+                    <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
+                        <circle cx="18" cy="18" r="15.5" stroke="#E2E8F0" stroke-width="3" fill="none" />
+                        <circle cx="18" cy="18" r="15.5" stroke="#10B981" stroke-width="3" stroke-linecap="round" fill="none"
+                                stroke-dasharray="97.4"
+                                stroke-dashoffset="<?php echo 97.4 - (97.4 * min(100, max(0, $pct)) / 100); ?>"
+                                style="transition: stroke-dashoffset 1s ease-in-out;" />
+                    </svg>
+                    <span class="absolute font-black text-[10px] text-slate-800 tracking-tight"><?php echo $pct; ?>%</span>
                 </div>
-                <div class="min-w-[130px]">
-                    <div class="flex items-center justify-between text-[11px] mb-1">
-                        <span class="font-extrabold text-slate-700 dark:text-slate-300">Target Hari Ini</span>
-                        <span class="font-black text-emerald-600 dark:text-emerald-400"><?php echo $completed_todos; ?>/<?php echo $total_todos; ?></span>
-                    </div>
-                    <div class="w-full bg-slate-100 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-                        <div class="bg-emerald-500 h-full rounded-full transition-all duration-700" style="width: <?php echo $pct; ?>%"></div>
-                    </div>
+                <div class="min-w-[90px]">
+                    <div class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-400">Progres Hari Ini</div>
+                    <div class="text-xs font-black text-slate-800 tracking-tight leading-tight"><?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tuntas</div>
                 </div>
             </div>
 
             <!-- Single Purpose Primary Button -->
-            <a href="?page=calendar" class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-xs transition-colors flex items-center gap-2 shadow-sm shadow-indigo-600/20">
+            <a href="?page=calendar" class="px-4 py-2.5 rounded-xl bg-[#1E5CE6] hover:bg-[#1749B8] active:scale-95 text-white font-bold text-xs transition-colors flex items-center gap-2 shadow-md shadow-blue-600/20">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>+ Buat Tugas Cepat</span>
             </a>
         </div>
     </div>
 
-    <!-- STAT CARDS (Executive Standard 3-Row Grid with Dominant Big Numbers & Clean Micro-Copy) -->
+    <!-- STAT CARDS (Clean Goodle Drive System with Dominant Numbers) -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-5">
         
         <!-- CARD 1: TOTAL TUGAS -->
-        <div class="dash-stat-card border-t-[3px] border-t-indigo-500">
+        <div class="dash-stat-card">
             <!-- Top Row: Label left, Icon right -->
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Tugas</span>
-                <div class="stat-icon w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center border border-indigo-100 dark:border-indigo-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Total Tugas</span>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-blue-50 text-[#1E5CE6] flex items-center justify-center border border-blue-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
                 </div>
             </div>
             <!-- Middle Row: Dominant Big Number Anchor -->
             <div class="my-1.5">
-                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none counter-value" data-target="<?php echo $total_todos; ?>">0</div>
+                <div class="text-3xl font-black text-slate-900 tracking-tight leading-none counter-value" data-target="<?php echo $total_todos; ?>">0</div>
             </div>
-            <!-- Bottom Row: Status pill & micro-copy neatly aligned at bottom left -->
+            <!-- Bottom Row: Status pill & micro-copy -->
             <div class="flex items-center gap-2 mt-auto">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-50 dark:bg-indigo-950/50 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-900/50">
-                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#1E5CE6] border border-blue-100">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#1E5CE6]"></span>
                     <?php echo $completed_todos; ?> Selesai
                 </span>
                 <span class="text-[11px] font-semibold text-slate-400">· <?php echo $pct; ?>% rasio</span>
             </div>
             <!-- Progress Bar -->
-            <div class="pb-bg"><div class="pb-fill bg-indigo-500" style="width:<?php echo $pct; ?>%"></div></div>
+            <div class="pb-bg"><div class="pb-fill bg-[#1E5CE6]" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- CARD 2: PENYELESAIAN -->
-        <div class="dash-stat-card border-t-[3px] border-t-emerald-500">
+        <div class="dash-stat-card">
             <!-- Top Row: Label left, Icon right -->
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Penyelesaian</span>
-                <div class="stat-icon w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-100 dark:border-emerald-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Penyelesaian</span>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
                 </div>
             </div>
             <!-- Middle Row: Dominant Big Number Anchor -->
             <div class="my-1.5">
-                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none">
+                <div class="text-3xl font-black text-slate-900 tracking-tight leading-none">
                     <span class="counter-value" data-target="<?php echo $pct; ?>">0</span><span class="text-xl font-bold text-slate-500 ml-0.5">%</span>
                 </div>
             </div>
-            <!-- Bottom Row: Status pill & micro-copy neatly aligned at bottom left -->
+            <!-- Bottom Row: Status pill & micro-copy -->
             <div class="flex items-center gap-2 mt-auto">
-                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-300 border border-emerald-200/60">
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200/60">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                     <?php echo $completed_todos; ?> dari <?php echo $total_todos; ?> tercapai
                 </span>
             </div>
-            <!-- Horizontal Progress Bar (Visual Anchor) -->
+            <!-- Horizontal Progress Bar -->
             <div class="pb-bg"><div class="pb-fill bg-emerald-500" style="width:<?php echo $pct; ?>%"></div></div>
         </div>
 
         <!-- CARD 3: CATATAN & IDE -->
-        <div class="dash-stat-card border-t-[3px] border-t-violet-500">
+        <div class="dash-stat-card">
             <!-- Top Row: Label left, Icon right -->
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Catatan &amp; Ide</span>
-                <div class="stat-icon w-8 h-8 rounded-xl bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center border border-violet-100 dark:border-violet-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Catatan &amp; Ide</span>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
                 </div>
             </div>
             <!-- Middle Row: Dominant Big Number Anchor -->
             <div class="my-1.5">
-                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none counter-value" data-target="<?php echo $total_notes; ?>">0</div>
+                <div class="text-3xl font-black text-slate-900 tracking-tight leading-none counter-value" data-target="<?php echo $total_notes; ?>">0</div>
             </div>
-            <!-- Bottom Row: Status pill & micro-copy neatly aligned at bottom left -->
+            <!-- Bottom Row: Status pill & micro-copy -->
             <div class="flex items-center gap-2 mt-auto">
-                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-violet-50 dark:bg-violet-950/50 text-violet-700 dark:text-violet-300 border border-violet-200/60">
-                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
                     <?php echo $total_notes; ?> catatan aktif
                 </span>
             </div>
             <!-- Progress Bar -->
-            <div class="pb-bg"><div class="pb-fill bg-violet-500" style="width:<?php echo min(100, $total_notes * 20); ?>%"></div></div>
+            <div class="pb-bg"><div class="pb-fill bg-purple-500" style="width:<?php echo min(100, $total_notes * 20); ?>%"></div></div>
         </div>
 
         <!-- CARD 4: DOKUMEN ARSIP -->
-        <div class="dash-stat-card border-t-[3px] border-t-sky-500">
+        <div class="dash-stat-card">
             <!-- Top Row: Label left, Icon right -->
             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500 dark:text-slate-400">Dokumen Arsip</span>
-                <div class="stat-icon w-8 h-8 rounded-xl bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center border border-sky-100 dark:border-sky-900/50">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">Dokumen Arsip</span>
+                <div class="stat-icon w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
                 </div>
             </div>
             <!-- Middle Row: Dominant Big Number Anchor -->
             <div class="my-1.5">
-                <div class="text-3xl font-black text-slate-900 dark:text-white tracking-tight leading-none counter-value" data-target="<?php echo $total_docs; ?>">0</div>
+                <div class="text-3xl font-black text-slate-900 tracking-tight leading-none counter-value" data-target="<?php echo $total_docs; ?>">0</div>
             </div>
-            <!-- Bottom Row: Status pill & micro-copy neatly aligned at bottom left -->
+            <!-- Bottom Row: Status pill & micro-copy -->
             <div class="flex items-center gap-2 mt-auto">
-                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 border border-sky-200/60">
+                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-50 text-sky-700 border border-sky-200/60">
                     <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                     <?php echo $total_docs; ?> berkas tersimpan
                 </span>
@@ -475,7 +478,7 @@ if (!function_exists('formatActivityAction')) {
                     <p class="text-[11px] text-slate-500 dark:text-slate-400 max-w-sm mb-3.5 leading-relaxed font-medium">
                         Grafik tren akan otomatis aktif setelah Anda menuntaskan agenda tugas harian di Kalender atau Proyek.
                     </p>
-                    <a href="?page=calendar" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/25 flex items-center gap-1.5 active:scale-95">
+                    <a href="?page=calendar" class="px-3.5 py-2 rounded-xl bg-[#1E5CE6] hover:bg-[#1749B8] text-white text-xs font-bold transition-all shadow-md shadow-blue-600/20 flex items-center gap-1.5 active:scale-95">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                         <span>Buka Kalender Tugas &rarr;</span>
                     </a>
@@ -494,7 +497,7 @@ if (!function_exists('formatActivityAction')) {
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                         <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Aktivitas Terkini</h3>
                     </div>
-                    <a href="?page=activities" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1">
+                    <a href="?page=activities" class="text-xs font-bold text-[#1E5CE6] hover:text-[#1749B8] flex items-center gap-1">
                         Semua Log &rarr;
                     </a>
                 </div>
@@ -507,16 +510,16 @@ if (!function_exists('formatActivityAction')) {
                     <?php foreach($dash_recent_activities as $act): 
                         $tType = strtolower($act['target_type'] ?? '');
                         if (str_contains($tType, 'auth') || str_contains($tType, 'login')) {
-                            $badgeColor = 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200/50';
+                            $badgeColor = 'bg-amber-50 text-amber-600 border-amber-200/50';
                             $icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>';
                         } elseif (str_contains($tType, 'doc') || str_contains($tType, 'file')) {
-                            $badgeColor = 'bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 border-sky-200/50';
+                            $badgeColor = 'bg-sky-50 text-sky-600 border-sky-200/50';
                             $icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>';
                         } elseif (str_contains($tType, 'todo') || str_contains($tType, 'task')) {
-                            $badgeColor = 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200/50';
+                            $badgeColor = 'bg-emerald-50 text-emerald-600 border-emerald-200/50';
                             $icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>';
                         } else {
-                            $badgeColor = 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border-indigo-200/50';
+                            $badgeColor = 'bg-blue-50 text-[#1E5CE6] border-blue-200/50';
                             $icon = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>';
                         }
                     ?>
@@ -550,18 +553,18 @@ if (!function_exists('formatActivityAction')) {
                         </div>
                         <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Catatan &amp; Ide Terbaru</h3>
                     </div>
-                    <a href="?page=notes" class="p-1.5 flex items-center gap-1 font-bold text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">Buka Semua &rarr;</a>
+                    <a href="?page=notes" class="p-1.5 flex items-center gap-1 font-bold text-xs text-[#1E5CE6] hover:text-[#1749B8]">Buka Semua &rarr;</a>
                 </div>
                 <?php if (empty($recent_notes)): ?>
                 <div class="p-8 text-center">
                     <p class="text-slate-500 dark:text-slate-400 text-xs font-semibold">Belum ada catatan tersimpan.
-                        <a href="?page=notes" class="text-indigo-600 dark:text-indigo-400 underline font-bold ml-1">Mulai Tulis</a>
+                        <a href="?page=notes" class="text-[#1E5CE6] hover:text-[#1749B8] underline font-bold ml-1">Mulai Tulis</a>
                     </p>
                 </div>
                 <?php else: ?>
                 <div class="p-4 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <?php foreach($recent_notes as $note): ?>
-                    <a href="?page=notes" class="group flex flex-col justify-between p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-sm transition-all duration-200">
+                    <a href="?page=notes" class="group flex flex-col justify-between p-4 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-blue-300 hover:shadow-sm transition-all duration-200">
                         <div>
                             <div class="flex items-center justify-between gap-2 mb-2">
                                 <span class="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
@@ -569,14 +572,14 @@ if (!function_exists('formatActivityAction')) {
                                 </span>
                                 <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span>
                             </div>
-                            <h4 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors line-clamp-1 mb-1.5">
+                            <h4 class="text-xs font-bold text-slate-900 dark:text-white group-hover:text-[#1E5CE6] transition-colors line-clamp-1 mb-1.5">
                                 <?php echo htmlspecialchars($note['title']); ?>
                             </h4>
                             <p class="text-[11px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
                                 <?php echo htmlspecialchars(substr($note['content'], 0, 90)); ?>
                             </p>
                         </div>
-                        <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                        <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400 group-hover:text-[#1E5CE6]">
                             <span>Buka Catatan</span>
                             <svg class="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                         </div>
@@ -603,7 +606,7 @@ if (!function_exists('formatActivityAction')) {
                             <p class="text-[11px] text-slate-500 dark:text-slate-400 font-medium mt-0.5">7 hari ke depan</p>
                         </div>
                     </div>
-                    <a href="?page=calendar" class="p-1.5 flex items-center gap-1 font-bold text-xs text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">Lihat Semua &rarr;</a>
+                    <a href="?page=calendar" class="p-1.5 flex items-center gap-1 font-bold text-xs text-[#1E5CE6] hover:text-[#1749B8]">Lihat Semua &rarr;</a>
                 </div>
                 <?php if (empty($upcoming_todos)): ?>
                 <div class="p-8 text-center">
@@ -611,15 +614,15 @@ if (!function_exists('formatActivityAction')) {
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                     </div>
                     <p class="text-slate-600 dark:text-slate-300 font-bold text-xs mb-1.5">Tidak ada tugas terjadwal untuk 7 hari mendatang.</p>
-                    <a href="?page=calendar" class="text-indigo-600 dark:text-indigo-400 font-extrabold text-xs hover:underline">+ Buat Tugas Baru</a>
+                    <a href="?page=calendar" class="text-[#1E5CE6] hover:text-[#1749B8] font-extrabold text-xs hover:underline">+ Buat Tugas Baru</a>
                 </div>
                 <?php else: ?>
                     <div class="divide-y divide-slate-100 dark:divide-slate-800/80">
                     <?php foreach($upcoming_todos as $todo):
                         $dl = (int)((strtotime($todo['todo_date']) - strtotime('today')) / 86400);
-                        if ($dl === 0)      $badge = ['Hari Ini','text-red-700 dark:text-red-300 bg-red-50 dark:bg-red-950/50 border-red-200/60 dark:border-red-900/50'];
-                        elseif ($dl === 1)  $badge = ['Besok','text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/50 border-amber-200/60 dark:border-amber-900/50'];
-                        else               $badge = [$dl.' hari lagi','text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 border-indigo-200/60 dark:border-indigo-900/50'];
+                        if ($dl === 0)      $badge = ['Hari Ini','text-red-700 bg-red-50 border-red-200/60'];
+                        elseif ($dl === 1)  $badge = ['Besok','text-amber-700 bg-amber-50 border-amber-200/60'];
+                        else               $badge = [$dl.' hari lagi','text-blue-700 bg-blue-50 border-blue-200/60'];
                     ?>
                     <div class="d-row">
                         <div class="w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center border <?php echo $todo['completed'] ? 'bg-emerald-50 dark:bg-emerald-950/60 border-emerald-300 text-emerald-600' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-400'; ?>">
@@ -653,11 +656,11 @@ if (!function_exists('formatActivityAction')) {
                     <span class="text-[11px] font-semibold text-slate-400">Pintasan Kerja</span>
                 </div>
                 <div class="p-3.5 grid grid-cols-3 gap-2.5">
-                    <a href="?page=calendar" class="quick-action-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 hover:bg-indigo-50/70 dark:hover:bg-indigo-950/40 border border-slate-200/80 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-500/50 text-center transition-all group">
-                        <div class="w-9 h-9 rounded-xl bg-indigo-100/80 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
+                    <a href="?page=calendar" class="quick-action-btn flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50 hover:bg-blue-50/70 border border-slate-200/80 hover:border-blue-300 text-center transition-all group">
+                        <div class="w-9 h-9 rounded-xl bg-blue-100/80 text-[#1E5CE6] flex items-center justify-center mb-1.5 group-hover:scale-110 transition-transform">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                         </div>
-                        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">Tugas Baru</span>
+                        <span class="text-xs font-bold text-slate-800 group-hover:text-[#1E5CE6] transition-colors">Tugas Baru</span>
                         <span class="text-[10px] text-slate-400 mt-0.5">Jadwal</span>
                     </a>
 
@@ -683,7 +686,7 @@ if (!function_exists('formatActivityAction')) {
             <div class="glass-surface overflow-hidden">
                 <div class="d-section-head">
                     <h3 class="text-sm font-extrabold text-slate-900 dark:text-white">Dokumen Terbaru</h3>
-                    <a href="?page=documents" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700">Lihat Semua &rarr;</a>
+                    <a href="?page=documents" class="text-xs font-bold text-[#1E5CE6] hover:text-[#1749B8]">Lihat Semua &rarr;</a>
                 </div>
                 <?php if (empty($recent_docs)): ?>
                 <div class="p-6 text-center">
@@ -732,7 +735,7 @@ if (!function_exists('formatActivityAction')) {
                     </div>
                     <?php endforeach; ?>
                     <a href="?page=admin"
-                       class="mt-5 min-h-[42px] flex items-center justify-center rounded-xl font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/30">
+                       class="mt-5 min-h-[42px] flex items-center justify-center rounded-xl font-bold text-xs text-white bg-[#1E5CE6] hover:bg-[#1749B8] transition-colors shadow-lg shadow-blue-600/30">
                         Kelola Pengguna Sistem &rarr;
                     </a>
                 </div>
