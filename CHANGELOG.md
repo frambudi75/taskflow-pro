@@ -6,6 +6,27 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.4.0] - 2026-11-18
+
+### 🌓 Sistem Dark Mode Paripurna, Tombol Alih Tema Header, & Navigasi Melayang Mobile
+- **Implementasi Dark Mode Menyeluruh & Paripurna (100% Cohesive Dark Theme)**:
+  - Menyempurnakan palet warna gelap Midnight Navy (`#0B1120`, `#0F172A`, `#1E293B`) di seluruh halaman modul tanpa silau atau teks tersembunyi:
+    - **Manajemen Dokumen (`pages/documents.php`)**: Kartu berkas grid, baris tabel dokumen, filter kategori, dropzone unggah, serta modal unggah, berbagi publik berbatas waktu, dan penampil pratinjau.
+    - **Papan Kanban Proyek (`pages/projects.php`)**: Jalur kolom status (*kanban lane*), kartu tugas seret-lepas (*task card*), tombol aksi cepat, pagination kolom, dan modal tambah tugas.
+    - **Aktivitas & Log Jejak Audit (`pages/activities.php`)**: Garis waktu real-time (*audit timeline*), pembatas tanggal (*date dividers*), lencana pengguna, filter tab, dan pagination.
+    - **Dasbor & Kalender (`pages/dashboard.php`, `pages/calendar.php`)**: Konsistensi kartu metrik ringkasan, grafik tren, dan matriks tanggal.
+  - Skrip anti-kedip (*Anti-FOUC*) di `<head>` untuk deteksi tema instan dari `localStorage` sebelum perenderan awal dokumen.
+- **Tombol Alih Tema Langsung di Top Header (`index.php`)**:
+  - Tombol toggle tema satu klik (ikon Matahari ☀️ / Bulan 🌙) di samping lencana profil pengguna.
+  - Integrasi aksi alih tema langsung dari Command Palette (`Ctrl + K`).
+- **Bilah Navigasi Melayang untuk Perangkat Bergerak (*Mobile Floating Bottom Bar*)**:
+  - Bilah navigasi kapsul mengambang (*floating pill bar*) di bagian bawah layar ponsel (`< md`) untuk akses cepat satu jempol ke Dasbor, Kalender, Catatan, Dokumen, dan Proyek.
+- **Pembaruan Service Worker & Mitigasi Kesalahan Konsol Jaringan (`sw.js`)**:
+  - Peningkatan cache PWA ke `taskflow-pwa-v3.4.0`.
+  - Pembatasan mutlak pencegatan *same-origin* sehingga tidak mengintersepsi skrip pihak ketiga (Cloudflare Web Analytics, beacon, ad-blocker) dan selalu mengembalikan objek `Response` valid tanpa melempar galat Promise.
+
+---
+
 ## [3.3.3] - 2026-11-18
 
 ### 💎 Penyempurnaan Navigasi Sidebar, Eliminasi Tautan Kuota, & Pengerasan Stabilitas PWA

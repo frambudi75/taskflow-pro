@@ -568,6 +568,16 @@ function docIconSvg($type, $color) {
     box-shadow: 0 12px 30px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
     transform: translateY(-2px);
 }
+.dark .doc-grid-card {
+    background: rgba(30, 41, 59, 0.75);
+    border-color: rgba(51, 65, 85, 0.6);
+    box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.35);
+}
+.dark .doc-grid-card:hover {
+    background: rgba(30, 41, 59, 0.95);
+    border-color: rgba(30, 92, 230, 0.6);
+    box-shadow: 0 12px 30px -4px rgba(0, 0, 0, 0.5);
+}
 
 .doc-glass-panel {
     background: rgba(255, 255, 255, 0.76);
@@ -579,12 +589,20 @@ function docIconSvg($type, $color) {
         0 1px 3px rgba(15, 23, 42, 0.02),
         inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
+.dark .doc-glass-panel {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(30, 41, 59, 0.8);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
+}
 
 .doc-table-row {
     transition: all 0.15s ease;
 }
 .doc-table-row:hover {
     background-color: rgba(248, 250, 252, 0.85);
+}
+.dark .doc-table-row:hover {
+    background-color: rgba(30, 41, 59, 0.6);
 }
 </style>
 
@@ -636,8 +654,8 @@ window.closeUploadModal = closeUploadModal;
             <div class="relative w-48 sm:w-64">
                 <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" id="docSearchInput" oninput="handleDocSearch(this.value)" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari nama berkas.."
-                       class="w-full pl-9 pr-8 py-2.5 text-xs font-semibold rounded-full text-slate-900 bg-[#F3F5F8] border-none focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 transition-all placeholder:text-slate-400">
-                <button type="button" id="docSearchClear" onclick="clearDocSearch()" class="<?php echo $search ? '' : 'hidden'; ?> absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold w-5 h-5 flex items-center justify-center">✕</button>
+                       class="w-full pl-9 pr-8 py-2.5 text-xs font-semibold rounded-full text-slate-900 dark:text-white bg-[#F3F5F8] dark:bg-slate-800 border-none focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 transition-all placeholder:text-slate-400">
+                <button type="button" id="docSearchClear" onclick="clearDocSearch()" class="<?php echo $search ? '' : 'hidden'; ?> absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 text-xs font-bold w-5 h-5 flex items-center justify-center">✕</button>
             </div>
             <!-- Grid/List Switcher Button -->
             <button
@@ -645,7 +663,7 @@ window.closeUploadModal = closeUploadModal;
                 id="docLayoutToggleBtn"
                 onclick="switchDocView(currentDocView === 'grid' ? 'list' : 'grid')"
                 title="Ganti Tampilan Grid / Tabel"
-                class="w-10 h-10 rounded-[11px] bg-[#F1F3F7] hover:bg-[#E4E8F0] text-slate-600 hover:text-[#1E5CE6] flex items-center justify-center transition-all cursor-pointer"
+                class="w-10 h-10 rounded-[11px] bg-[#F1F3F7] dark:bg-slate-800 hover:bg-[#E4E8F0] dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] flex items-center justify-center transition-all cursor-pointer"
             >
                 <svg id="docLayoutIcon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                     <rect x="3" y="3" width="6" height="4" rx="1"/>
@@ -807,13 +825,13 @@ window.closeUploadModal = closeUploadModal;
             <!-- Folder 4: Dokumen Terkini (Quick Doc Card) -->
             <?php $recent_doc = !empty($my_documents) ? $my_documents[0] : null; ?>
             <div class="pt-[18px] block">
-                <div class="h-[150px] rounded-[18px] bg-[#F3F5F9] hover:bg-[#EAEEF6] transition-all duration-200 p-4 flex flex-col justify-between relative group hover:-translate-y-1">
+                <div class="h-[150px] rounded-[18px] bg-[#F3F5F9] dark:bg-slate-800/90 hover:bg-[#EAEEF6] dark:hover:bg-slate-700/80 border border-transparent dark:border-slate-700/80 transition-all duration-200 p-4 flex flex-col justify-between relative group hover:-translate-y-1">
                     <div>
                         <div class="flex items-start justify-between mb-2">
-                            <div class="w-7 h-7 rounded-lg border-[1.8px] border-[#1E5CE6] text-[#1E5CE6] flex items-center justify-center bg-white shadow-2xs">
+                            <div class="w-7 h-7 rounded-lg border-[1.8px] border-[#1E5CE6] text-[#1E5CE6] flex items-center justify-center bg-white dark:bg-slate-900 shadow-2xs">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 8h12M6 12h12M6 16h7"/></svg>
                             </div>
-                            <span class="text-[10px] font-bold uppercase tracking-wider bg-white px-2 py-0.5 rounded-md text-slate-600 border border-slate-200">TERKINI</span>
+                            <span class="text-[10px] font-bold uppercase tracking-wider bg-white dark:bg-slate-900 px-2 py-0.5 rounded-md text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">TERKINI</span>
                         </div>
                         <p class="text-xs font-bold text-[#1E5CE6] leading-snug line-clamp-2 truncate">
                             <?php echo $recent_doc ? htmlspecialchars($recent_doc['name']) : 'Belum Ada Berkas'; ?>
@@ -821,7 +839,7 @@ window.closeUploadModal = closeUploadModal;
                     </div>
                     <div>
                         <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">TERAKHIR DIUBAH</p>
-                        <p class="text-[11px] font-semibold text-slate-700">
+                        <p class="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
                             <?php echo $recent_doc ? date('d M Y, H:i', strtotime($recent_doc['upload_date'])) : '-'; ?>
                         </p>
                     </div>
@@ -831,36 +849,36 @@ window.closeUploadModal = closeUploadModal;
     </div>
 
     <!-- Navigation Tabs & View Mode Switcher -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 pb-3">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200/80 dark:border-slate-800 pb-3">
         <!-- Tabs with Clean Pill Styles (Fixed Typo: DIBAGIKAN KE SAYA) -->
         <div class="flex items-center gap-2">
             <a href="?page=documents&tab=my" 
-               class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'my' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'; ?>">
+               class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'my' ? 'bg-[#1E5CE6] text-white shadow-xs' : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/80'; ?>">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
                 Dokumen Saya
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?php echo $tab === 'my' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-600'; ?>">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?php echo $tab === 'my' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'; ?>">
                     <?php echo count($my_documents); ?>
                 </span>
             </a>
             <a href="?page=documents&tab=shared" 
-               class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'shared' ? 'bg-indigo-600 text-white shadow-xs' : 'bg-white text-slate-600 hover:text-slate-900 border border-slate-200/80 hover:bg-slate-50'; ?>">
+               class="px-4 py-2 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all flex items-center gap-2 <?php echo $tab === 'shared' ? 'bg-[#1E5CE6] text-white shadow-xs' : 'bg-white dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white border border-slate-200/80 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/80'; ?>">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Dibagikan ke Saya
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?php echo $tab === 'shared' ? 'bg-indigo-700 text-white' : 'bg-slate-100 text-slate-600'; ?>">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-black <?php echo $tab === 'shared' ? 'bg-white/20 text-white' : 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300'; ?>">
                     <?php echo count($shared_documents); ?>
                 </span>
             </a>
         </div>
 
         <!-- View Switcher (Grid vs List View) -->
-        <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200/80 self-start sm:self-auto">
+        <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700 self-start sm:self-auto">
             <button type="button" id="btnViewGrid" onclick="setDocViewMode('grid')" title="Tampilan Kisi (Grid)"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white text-slate-900 shadow-xs">
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-xs cursor-pointer">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 <span>Grid</span>
             </button>
             <button type="button" id="btnViewList" onclick="setDocViewMode('list')" title="Tampilan Tabel (List)"
-                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-500 hover:text-slate-900">
+                    class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
                 <span>Tabel</span>
             </button>
@@ -872,20 +890,20 @@ window.closeUploadModal = closeUploadModal;
 
         <?php if (empty($documents)): ?>
         <!-- Empty State Card -->
-        <div class="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-12 md:p-16 text-center">
-            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-indigo-50 text-indigo-600 border border-indigo-100 shadow-sm">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 shadow-sm p-12 md:p-16 text-center">
+            <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] dark:text-blue-400 border border-blue-100 dark:border-blue-900/50 shadow-sm">
                 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>
             </div>
-            <h3 class="text-slate-900 font-black text-base mb-1.5">
+            <h3 class="text-slate-900 dark:text-white font-black text-base mb-1.5">
                 <?php echo $tab === 'shared' ? 'Belum Ada Dokumen Dibagikan' : 'Belum Ada Dokumen Tersimpan'; ?>
             </h3>
-            <p class="text-slate-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed font-medium mb-6">
+            <p class="text-slate-400 dark:text-slate-400 text-xs md:text-sm max-w-md mx-auto leading-relaxed font-medium mb-6">
                 <?php echo $tab === 'shared' 
                     ? 'Ketika rekan kerja membagikan berkas ke akun Anda, berkas akan muncul di panel ini secara instan.' 
                     : 'Unggah berkas foto, PDF, laporan dokumen, atau spreadsheet Anda untuk mulai mengelola dokumen kerja secara terorganisir.'; ?>
             </p>
             <?php if ($tab === 'my'): ?>
-            <button type="button" onclick="openUploadModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition-transform active:scale-95 shadow-sm shadow-indigo-600/20">
+            <button type="button" onclick="openUploadModal()" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#1E5CE6] hover:bg-[#1749B8] text-white text-xs font-bold transition-transform active:scale-95 shadow-md shadow-blue-600/20 cursor-pointer">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Unggah Berkas Sekarang
             </button>
@@ -908,7 +926,7 @@ window.closeUploadModal = closeUploadModal;
                 $pubShare           = $public_shares_by_doc[$doc['id']] ?? null;
                 $isImage            = !empty($info['is_image']) && $has_physical_file && !empty($serve_view_url);
             ?>
-            <div class="doc-grid-card relative rounded-2xl border border-slate-200/80 bg-white shadow-xs overflow-hidden flex flex-col justify-between group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-indigo-300"
+            <div class="doc-grid-card relative rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs overflow-hidden flex flex-col justify-between group cursor-pointer transition-all hover:shadow-lg hover:-translate-y-1 hover:border-[#1E5CE6]"
                  data-id="<?php echo $doc['id']; ?>"
                  data-name="<?php echo htmlspecialchars($doc['name']); ?>"
                  data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>"
@@ -916,8 +934,8 @@ window.closeUploadModal = closeUploadModal;
                 
                 <!-- Multi-select Checkbox in Corner -->
                 <div class="absolute top-2.5 left-2.5 z-20" onclick="event.stopPropagation()">
-                    <label class="cursor-pointer p-1 rounded-lg bg-white/85 backdrop-blur-md border border-slate-200/60 shadow-xs flex items-center justify-center hover:bg-white transition-colors">
-                        <input type="checkbox" class="doc-select-chk w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer" 
+                    <label class="cursor-pointer p-1 rounded-lg bg-white/85 dark:bg-slate-800/85 backdrop-blur-md border border-slate-200/60 dark:border-slate-700 shadow-xs flex items-center justify-center hover:bg-white dark:hover:bg-slate-700 transition-colors">
+                        <input type="checkbox" class="doc-select-chk w-4 h-4 rounded border-slate-300 text-[#1E5CE6] focus:ring-[#1E5CE6]/20 cursor-pointer" 
                                value="<?php echo $doc['id']; ?>" onchange="onDocSelectChange()">
                     </label>
                 </div>
@@ -925,15 +943,15 @@ window.closeUploadModal = closeUploadModal;
                 <div>
                     <!-- Consistent Fixed-Height (h-36) Header for Perfect Grid Alignment -->
                     <?php if ($isImage): ?>
-                    <div class="h-36 w-full overflow-hidden bg-slate-50 relative border-b border-slate-100 flex items-center justify-center">
+                    <div class="h-36 w-full overflow-hidden bg-slate-50 dark:bg-slate-800 relative border-b border-slate-100 dark:border-slate-800 flex items-center justify-center">
                         <img src="<?php echo htmlspecialchars($serve_view_url); ?>" 
                              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
                              loading="lazy" 
                              alt="<?php echo htmlspecialchars($doc['name']); ?>"
                              onerror="this.onerror=null; this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
                         <!-- Safe Fallback Placeholder if Image Fails to Load -->
-                        <div class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-100/80 text-slate-400">
-                            <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200 flex items-center justify-center shadow-xs">
+                        <div class="hidden w-full h-full flex flex-col items-center justify-center bg-slate-100/80 dark:bg-slate-800 text-slate-400">
+                            <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center shadow-xs">
                                 <?php echo $iconSvg; ?>
                             </div>
                             <span class="text-[10px] font-semibold text-slate-400 mt-1.5">Berkas Gambar</span>
@@ -944,8 +962,8 @@ window.closeUploadModal = closeUploadModal;
                         </span>
                     </div>
                     <?php else: ?>
-                    <div class="h-36 w-full flex flex-col items-center justify-center relative border-b border-slate-100 transition-colors"
-                         style="background: linear-gradient(180deg, <?php echo $info['bg']; ?> 0%, #FFFFFF 100%);">
+                    <div class="h-36 w-full flex flex-col items-center justify-center relative border-b border-slate-100 dark:border-slate-800 transition-colors"
+                         style="background: linear-gradient(180deg, <?php echo $info['bg']; ?> 0%, rgba(255,255,255,0.03) 100%);">
                         <div class="w-12 h-12 rounded-2xl flex items-center justify-center border shadow-xs group-hover:scale-110 transition-transform duration-200"
                              style="background:<?php echo $info['bg']; ?>; border-color:<?php echo $info['border']; ?>;">
                             <?php echo $iconSvg; ?>
@@ -960,12 +978,12 @@ window.closeUploadModal = closeUploadModal;
                     <!-- Card Body Content -->
                     <div class="p-4">
                         <!-- Document Name -->
-                        <h3 class="font-black text-slate-900 text-xs sm:text-sm group-hover:text-indigo-600 transition-colors line-clamp-2 leading-snug mb-1">
+                        <h3 class="font-black text-slate-900 dark:text-white text-xs sm:text-sm group-hover:text-[#1E5CE6] dark:group-hover:text-blue-400 transition-colors line-clamp-2 leading-snug mb-1">
                             <?php echo htmlspecialchars($doc['name']); ?>
                         </h3>
 
                         <!-- Compact Meta Info: Size • Date -->
-                        <div class="text-[11px] font-semibold text-slate-400 mb-2 flex items-center gap-1.5">
+                        <div class="text-[11px] font-semibold text-slate-400 dark:text-slate-400 mb-2 flex items-center gap-1.5">
                             <span><?php echo formatSize($doc['file_size']); ?></span>
                             <span>•</span>
                             <span><?php echo date('d M Y', strtotime($doc['upload_date'])); ?></span>
@@ -974,19 +992,19 @@ window.closeUploadModal = closeUploadModal;
                         <!-- Tags / Collaboration Chips in Rounded-Full Pastel Pills -->
                         <div class="flex flex-wrap items-center gap-1.5">
                             <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 rounded-full">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 px-2.5 py-0.5 rounded-full">
                                 👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
                             </span>
                             <?php endif; ?>
 
                             <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2.5 py-0.5 rounded-full">
                                 🔗 Tim (<?php echo $doc['share_count']; ?>)
                             </span>
                             <?php endif; ?>
 
                             <?php if (!empty($pubShare)): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full" 
+                            <span class="inline-flex items-center gap-1 text-[10px] font-extrabold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2.5 py-0.5 rounded-full" 
                                   title="Tautan publik aktif hingga <?php echo $pubShare['expires_formatted']; ?>">
                                 🌐 Publik: <?php echo $pubShare['remaining_text']; ?>
                             </span>
@@ -996,7 +1014,7 @@ window.closeUploadModal = closeUploadModal;
                             <button type="button" 
                                     onclick="event.stopPropagation(); filterByDocTag('<?php echo htmlspecialchars(addslashes($tag)); ?>')" 
                                     title="Filter dokumen dengan tag #<?php echo htmlspecialchars($tag); ?>"
-                                    class="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 hover:bg-indigo-100 hover:border-indigo-200 transition-colors">
+                                    class="inline-flex items-center text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-50 dark:bg-slate-800 text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-slate-700 hover:bg-indigo-100 dark:hover:bg-slate-700 transition-colors">
                                 #<?php echo htmlspecialchars($tag); ?>
                             </button>
                             <?php endforeach; ?>
@@ -1005,12 +1023,12 @@ window.closeUploadModal = closeUploadModal;
                 </div>
 
                 <!-- Footer Action Buttons (Balanced Layout: Primary Action Left, Secondary Actions Right) -->
-                <div class="px-4 py-3 border-t border-slate-100 flex items-center justify-between gap-2 mt-auto" onclick="event.stopPropagation()">
+                <div class="px-4 py-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2 mt-auto" onclick="event.stopPropagation()">
                     <!-- Primary Quick Action: Pratinjau Button -->
                     <button type="button" 
                             onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
                             title="Lihat Pratinjau Berkas" aria-label="Lihat dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                            class="px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-indigo-50 text-slate-700 hover:text-indigo-600 border border-slate-200/80 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs">
+                            class="px-3 py-1.5 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-indigo-600 dark:hover:text-blue-400 border border-slate-200/80 dark:border-slate-700 text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                         <span>Pratinjau</span>
                     </button>
@@ -1021,11 +1039,11 @@ window.closeUploadModal = closeUploadModal;
                         <?php if ($has_physical_file): ?>
                         <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
                            title="Unduh Berkas" aria-label="Unduh dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                           class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-emerald-50 text-slate-500 hover:text-emerald-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                           class="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-slate-500 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         </a>
                         <?php else: ?>
-                        <span title="Berkas fisik tidak ditemukan di server" class="w-8 h-8 rounded-xl bg-slate-50 text-slate-300 border border-slate-200/80 flex items-center justify-center cursor-not-allowed">
+                        <span title="Berkas fisik tidak ditemukan di server" class="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-300 dark:text-slate-600 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center cursor-not-allowed">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         </span>
                         <?php endif; ?>
@@ -1035,7 +1053,7 @@ window.closeUploadModal = closeUploadModal;
                         <button type="button" 
                                 onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
                                 title="Bagikan Dokumen" aria-label="Bagikan dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-sky-50 text-slate-500 hover:text-sky-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                                class="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/50 text-slate-500 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                         </button>
                         <?php endif; ?>
@@ -1045,7 +1063,7 @@ window.closeUploadModal = closeUploadModal;
                         <button type="button" 
                                 onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
                                 title="Hapus Dokumen" aria-label="Hapus dokumen <?php echo htmlspecialchars($doc['name']); ?>"
-                                class="w-8 h-8 rounded-xl bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                                class="w-8 h-8 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                         </button>
                         <?php endif; ?>
@@ -1059,11 +1077,11 @@ window.closeUploadModal = closeUploadModal;
         <div id="docContainerList" class="doc-glass-panel rounded-3xl overflow-hidden hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-xs">
-                    <thead class="bg-slate-50/80 text-[10px] font-black uppercase tracking-wider text-slate-500 border-b border-slate-200/80">
+                    <thead class="bg-slate-50/80 dark:bg-slate-800/80 text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400 border-b border-slate-200/80 dark:border-slate-700/80">
                         <tr>
                             <th class="w-10 px-4 py-3.5 text-center">
                                 <input type="checkbox" id="selectAllDocsHeader" onchange="toggleSelectAllDocs(this.checked)" 
-                                       class="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer"
+                                       class="w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#1E5CE6] focus:ring-[#1E5CE6]/20 cursor-pointer"
                                        title="Pilih Semua Dokumen">
                             </th>
                             <th class="px-5 py-3.5">Dokumen</th>
@@ -1073,7 +1091,7 @@ window.closeUploadModal = closeUploadModal;
                             <th class="px-5 py-3.5 text-right">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-slate-100">
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                         <?php foreach ($documents as $doc):
                             $clean_path         = !empty($doc['file_path']) ? str_replace('\\', '/', $doc['file_path']) : '';
                             $has_physical_file  = !empty($clean_path) && file_exists(__DIR__ . '/../' . $clean_path);
@@ -1086,7 +1104,7 @@ window.closeUploadModal = closeUploadModal;
                         ?>
                         <tr class="doc-table-row" data-id="<?php echo $doc['id']; ?>" data-name="<?php echo htmlspecialchars($doc['name']); ?>" data-tags="<?php echo htmlspecialchars($doc['tags'] ?? ''); ?>">
                             <td class="px-4 py-3.5 text-center" onclick="event.stopPropagation()">
-                                <input type="checkbox" class="doc-select-chk w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500/20 cursor-pointer" 
+                                <input type="checkbox" class="doc-select-chk w-4 h-4 rounded border-slate-300 dark:border-slate-600 text-[#1E5CE6] focus:ring-[#1E5CE6]/20 cursor-pointer" 
                                        value="<?php echo $doc['id']; ?>" onchange="onDocSelectChange()">
                             </td>
                             <td class="px-5 py-3.5">
@@ -1098,7 +1116,7 @@ window.closeUploadModal = closeUploadModal;
                                     <div class="min-w-0">
                                         <button type="button" 
                                                 onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                                class="font-black text-slate-900 text-xs hover:text-indigo-600 transition-colors truncate block max-w-xs text-left">
+                                                class="font-black text-slate-900 dark:text-white text-xs hover:text-[#1E5CE6] dark:hover:text-blue-400 transition-colors truncate block max-w-xs text-left">
                                             <?php echo htmlspecialchars($doc['name']); ?>
                                         </button>
                                         <span class="text-[10px] font-extrabold uppercase" style="color:<?php echo $info['color']; ?>;">
@@ -1107,26 +1125,26 @@ window.closeUploadModal = closeUploadModal;
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-3.5 font-bold text-slate-600 whitespace-nowrap">
+                            <td class="px-4 py-3.5 font-bold text-slate-600 dark:text-slate-300 whitespace-nowrap">
                                 <?php echo formatSize($doc['file_size']); ?>
                             </td>
-                            <td class="px-4 py-3.5 text-slate-500 font-medium whitespace-nowrap">
+                            <td class="px-4 py-3.5 text-slate-500 dark:text-slate-400 font-medium whitespace-nowrap">
                                 <?php echo date('d M Y', strtotime($doc['upload_date'])); ?>
                             </td>
                             <td class="px-4 py-3.5">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <?php if ($tab === 'shared' && !empty($doc['owner_name'])): ?>
-                                    <span class="text-[10px] font-bold text-indigo-700 bg-indigo-50 border border-indigo-100 px-2 py-0.5 rounded-md">
+                                    <span class="text-[10px] font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 px-2 py-0.5 rounded-md">
                                         👤 <?php echo htmlspecialchars($doc['owner_name']); ?>
                                     </span>
                                     <?php endif; ?>
                                     <?php if ($is_owner && !empty($doc['share_count']) && (int)$doc['share_count'] > 0): ?>
-                                    <span class="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                                    <span class="text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-md">
                                         🔗 <?php echo $doc['share_count']; ?>
                                     </span>
                                     <?php endif; ?>
                                     <?php if (!empty($pubShare)): ?>
-                                    <span class="text-[10px] font-extrabold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
+                                    <span class="text-[10px] font-extrabold text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 border border-amber-200 dark:border-amber-800 px-2 py-0.5 rounded-md">
                                         🌐 <?php echo $pubShare['remaining_text']; ?>
                                     </span>
                                     <?php endif; ?>
@@ -1136,30 +1154,30 @@ window.closeUploadModal = closeUploadModal;
                                 <div class="inline-flex items-center gap-1.5">
                                     <button type="button" 
                                             onclick="viewDocument('<?php echo htmlspecialchars($clean_path); ?>', '<?php echo htmlspecialchars($doc['file_type']); ?>', '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', '<?php echo htmlspecialchars($serve_download_url); ?>')"
-                                            title="Lihat" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 flex items-center justify-center transition-colors">
+                                            title="Lihat" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-blue-400 flex items-center justify-center transition-colors">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
                                     </button>
                                     <?php if ($has_physical_file): ?>
                                     <a href="<?php echo htmlspecialchars($serve_download_url); ?>" 
-                                       title="Unduh" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-emerald-50 text-slate-600 hover:text-emerald-600 flex items-center justify-center transition-colors">
+                                       title="Unduh" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-emerald-50 dark:hover:bg-emerald-950/50 text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 flex items-center justify-center transition-colors">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     </a>
                                     <?php else: ?>
-                                    <span title="Berkas fisik tidak ditemukan di server" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-300 flex items-center justify-center cursor-not-allowed">
+                                    <span title="Berkas fisik tidak ditemukan di server" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 flex items-center justify-center cursor-not-allowed">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                                     </span>
                                     <?php endif; ?>
                                     <?php if ($is_owner): ?>
                                     <button type="button" 
                                             onclick="openShareModal(<?php echo $doc['id']; ?>, '<?php echo htmlspecialchars(addslashes($doc['name'])); ?>', <?php echo !empty($pubShare) ? htmlspecialchars(json_encode($pubShare), ENT_QUOTES, 'UTF-8') : 'null'; ?>)"
-                                            title="Bagikan" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-sky-50 text-slate-600 hover:text-sky-600 flex items-center justify-center transition-colors">
+                                            title="Bagikan" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/50 text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-sky-400 flex items-center justify-center transition-colors">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                                     </button>
                                     <?php endif; ?>
                                     <?php if ($is_owner || isAdmin()): ?>
                                     <button type="button" 
                                             onclick="confirmDelete(<?php echo $doc['id']; ?>, '<?php echo addslashes($doc['name']); ?>')"
-                                            title="Hapus" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-rose-50 text-slate-400 hover:text-rose-600 flex items-center justify-center transition-colors">
+                                            title="Hapus" class="w-7 h-7 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/50 text-slate-400 dark:text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center transition-colors">
                                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                                     </button>
                                     <?php endif; ?>
@@ -1188,28 +1206,28 @@ window.closeUploadModal = closeUploadModal;
 <!-- 0. DEDICATED UPLOAD MODAL (Clean, Non-Redundant & Focused) -->
 <!-- ============================================================== -->
 <div id="uploadModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle">
-    <div class="bg-white rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-modal-pop" onclick="event.stopPropagation()">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-modal-pop" onclick="event.stopPropagation()">
         
         <!-- Modal Header -->
-        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/70">
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/70 dark:bg-slate-800/50">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-md shadow-indigo-600/25">
+                <div class="w-10 h-10 rounded-2xl bg-[#1E5CE6] text-white flex items-center justify-center shadow-md shadow-blue-600/25">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </div>
                 <div>
-                    <h3 class="text-base font-black text-slate-900" id="uploadModalTitle">Unggah Dokumen Baru</h3>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white" id="uploadModalTitle">Unggah Dokumen Baru</h3>
                     <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
                             Kompresi Cerdas Aktif
                         </span>
-                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full border border-slate-200">
+                        <span class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-full border border-slate-200 dark:border-slate-700">
                             Sisa Kuota: <?php echo $storage_remaining_formatted; ?>
                         </span>
                     </div>
                 </div>
             </div>
-            <button type="button" onclick="closeUploadModal()" aria-label="Tutup modal unggah" class="w-8 h-8 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors flex items-center justify-center">
+            <button type="button" onclick="closeUploadModal()" aria-label="Tutup modal unggah" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -1221,27 +1239,27 @@ window.closeUploadModal = closeUploadModal;
 
             <!-- Drag & Drop Zone -->
             <div>
-                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Pilih Berkas</label>
+                <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Pilih Berkas</label>
                 <label for="fileInput" 
                        id="dropZone"
-                       class="flex flex-col items-center justify-center gap-2.5 px-4 py-8 rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-500 bg-slate-50/50 hover:bg-indigo-50/20 transition-all cursor-pointer group">
-                    <div class="w-12 h-12 rounded-2xl bg-white border border-slate-200/80 flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:scale-105 transition-all shadow-xs">
+                       class="flex flex-col items-center justify-center gap-2.5 px-4 py-8 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-[#1E5CE6] dark:hover:border-blue-500 bg-slate-50/50 dark:bg-slate-800/40 hover:bg-blue-50/20 dark:hover:bg-blue-900/10 transition-all cursor-pointer group">
+                    <div class="w-12 h-12 rounded-2xl bg-white dark:bg-slate-800 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center text-slate-400 group-hover:text-[#1E5CE6] group-hover:scale-105 transition-all shadow-xs">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
                     <div class="text-center">
-                        <span class="text-slate-800 text-xs font-bold block mb-0.5">Pilih atau Seret Berkas ke Sini</span>
-                        <span class="text-slate-400 text-[10px]">Foto (JPG, PNG), PDF, Dokumen Word, Excel, TXT, ZIP</span>
+                        <span class="text-slate-800 dark:text-white text-xs font-bold block mb-0.5">Pilih atau Seret Berkas ke Sini</span>
+                        <span class="text-slate-400 dark:text-slate-400 text-[10px]">Foto (JPG, PNG), PDF, Dokumen Word, Excel, TXT, ZIP</span>
                     </div>
                     <input type="file" name="file" required class="hidden" id="fileInput" onchange="handleFileSelect(this)">
                 </label>
 
                 <!-- Selected File Preview Chip -->
-                <div id="fileSelectedBox" class="hidden mt-2.5 p-3 rounded-xl bg-indigo-50/80 border border-indigo-200/80 flex items-center justify-between gap-2">
+                <div id="fileSelectedBox" class="hidden mt-2.5 p-3 rounded-xl bg-indigo-50/80 dark:bg-slate-800 border border-indigo-200/80 dark:border-slate-700 flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2 min-w-0">
-                        <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">✓</span>
+                        <span class="w-6 h-6 rounded-lg bg-[#1E5CE6] text-white flex items-center justify-center text-[10px] font-black flex-shrink-0">✓</span>
                         <div class="min-w-0">
-                            <p id="selectedFileName" class="text-xs font-black text-indigo-950 truncate"></p>
-                            <p id="selectedFileSize" class="text-[10px] font-semibold text-indigo-600"></p>
+                            <p id="selectedFileName" class="text-xs font-black text-indigo-950 dark:text-white truncate"></p>
+                            <p id="selectedFileSize" class="text-[10px] font-semibold text-[#1E5CE6] dark:text-blue-400"></p>
                         </div>
                     </div>
                     <button type="button" onclick="clearSelectedFile()" class="text-xs font-bold text-slate-400 hover:text-rose-600 p-1">✕</button>
@@ -1250,26 +1268,26 @@ window.closeUploadModal = closeUploadModal;
 
             <!-- Name -->
             <div>
-                <label for="docNameInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Nama Dokumen</label>
+                <label for="docNameInput" class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Nama Dokumen</label>
                 <input type="text" name="name" id="docNameInput" placeholder="Contoh: Laporan Keuangan Q4" required
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400">
             </div>
 
             <!-- Tags -->
             <div>
-                <label for="docTagsInput" class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tag Kategori (pisahkan dengan koma)</label>
+                <label for="docTagsInput" class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Tag Kategori (pisahkan dengan koma)</label>
                 <input type="text" name="tags" id="docTagsInput" placeholder="keuangan, penting, internal"
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400">
             </div>
 
             <!-- Modal Action Buttons -->
-            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100">
+            <div class="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
                 <button type="button" onclick="closeUploadModal()"
-                        class="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold hover:bg-slate-100 transition-all text-xs">
+                        class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition-all text-xs">
                     Batal
                 </button>
                 <button type="submit" id="btnUploadSubmit"
-                        class="px-5 py-2.5 rounded-xl font-bold text-white transition-transform active:scale-95 flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/25 text-xs">
+                        class="px-5 py-2.5 rounded-xl font-bold text-white transition-transform active:scale-95 flex items-center justify-center gap-2 bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/25 text-xs">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     <span>Unggah &amp; Kompres Berkas</span>
                 </button>
@@ -1279,36 +1297,37 @@ window.closeUploadModal = closeUploadModal;
 </div>
 
 <!-- ============================================================== -->
+<!-- ============================================================== -->
 <!-- 1. SHARE MODAL (Public Links with Expiry & Internal Sharing) -->
 <!-- ============================================================== -->
 <div id="shareModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
-    <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-modal-pop">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800 animate-modal-pop">
         
         <!-- Modal Header -->
-        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/60">
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/60 dark:bg-slate-800/50">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-xs">
+                <div class="w-10 h-10 rounded-2xl bg-[#1E5CE6]/10 text-[#1E5CE6] dark:text-blue-400 flex items-center justify-center border border-[#1E5CE6]/20 shadow-xs">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
                 </div>
                 <div>
-                    <h3 class="text-base font-black text-slate-900" id="shareModalTitle">Bagikan Dokumen</h3>
-                    <p class="text-xs text-slate-400 font-medium truncate max-w-[260px]" id="shareDocName"></p>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white" id="shareModalTitle">Bagikan Dokumen</h3>
+                    <p class="text-xs text-slate-400 dark:text-slate-400 font-medium truncate max-w-[260px]" id="shareDocName"></p>
                 </div>
             </div>
-            <button type="button" onclick="closeShareModal()" aria-label="Tutup modal berbagi" class="w-8 h-8 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors flex items-center justify-center">
+            <button type="button" onclick="closeShareModal()" aria-label="Tutup modal berbagi" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
 
         <!-- Share Tabs Switcher -->
-        <div class="flex border-b border-slate-100 bg-slate-50/80 p-1.5 gap-1.5 text-xs font-bold">
+        <div class="flex border-b border-slate-100 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-800/80 p-1.5 gap-1.5 text-xs font-bold">
             <button type="button" id="tabBtnExternal" onclick="switchShareModalTab('external')"
-                    class="flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-2 bg-white text-indigo-700 shadow-xs border border-slate-200/80">
+                    class="flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-2 bg-white dark:bg-slate-700 text-[#1E5CE6] dark:text-blue-400 shadow-xs border border-slate-200/80 dark:border-slate-600">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                 Tautan Publik Berbatas Waktu
             </button>
             <button type="button" id="tabBtnInternal" onclick="switchShareModalTab('internal')"
-                    class="flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-2 text-slate-500 hover:text-slate-900">
+                    class="flex-1 py-2 px-3 rounded-xl transition-all flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 Rekan Tim Internal
             </button>
@@ -1320,20 +1339,20 @@ window.closeUploadModal = closeUploadModal;
                 
                 <!-- If Active Share Exists -->
                 <div id="sharePublicActiveBlock" class="hidden space-y-4">
-                    <div class="p-4 rounded-2xl bg-amber-50/70 border border-amber-200/80 text-amber-950">
+                    <div class="p-4 rounded-2xl bg-amber-50/70 dark:bg-amber-950/40 border border-amber-200/80 dark:border-amber-800 text-amber-950 dark:text-amber-200">
                         <div class="flex items-center justify-between mb-2">
-                            <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-800">
+                            <span class="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-amber-800 dark:text-amber-300">
                                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                                 Tautan Aktif
                             </span>
-                            <span id="pubExpiryPill" class="text-[11px] font-bold text-amber-900 bg-amber-100 px-2.5 py-0.5 rounded-full border border-amber-200"></span>
+                            <span id="pubExpiryPill" class="text-[11px] font-bold text-amber-900 dark:text-amber-200 bg-amber-100 dark:bg-amber-900/60 px-2.5 py-0.5 rounded-full border border-amber-200 dark:border-amber-700"></span>
                         </div>
-                        <p class="text-xs text-amber-900 font-medium mb-3">Siapa pun yang memiliki tautan ini dapat mengunduh dokumen sebelum batas waktu habis.</p>
+                        <p class="text-xs text-amber-900 dark:text-amber-300 font-medium mb-3">Siapa pun yang memiliki tautan ini dapat mengunduh dokumen sebelum batas waktu habis.</p>
 
                         <!-- Copy Link Field -->
                         <div class="flex items-center gap-2">
                             <input type="text" id="pubShareUrlInput" readonly
-                                   class="flex-1 bg-white border border-amber-300 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 outline-none select-all">
+                                   class="flex-1 bg-white dark:bg-slate-800 border border-amber-300 dark:border-amber-700 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 dark:text-slate-100 outline-none select-all">
                             <button type="button" id="copyBtn" onclick="copyShareLink()"
                                     class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-1.5 shadow-sm">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
@@ -1342,7 +1361,7 @@ window.closeUploadModal = closeUploadModal;
                         </div>
 
                         <!-- Stats Views & Downloads -->
-                        <div class="mt-3 pt-3 border-t border-amber-200/80 flex items-center justify-between text-[11px] text-amber-900 font-semibold">
+                        <div class="mt-3 pt-3 border-t border-amber-200/80 dark:border-amber-800 flex items-center justify-between text-[11px] text-amber-900 dark:text-amber-300 font-semibold">
                             <span id="pubViewsText">Dilihat: 0 kali</span>
                             <span id="pubDownloadsText">Diunduh: 0 kali</span>
                         </div>
@@ -1353,7 +1372,7 @@ window.closeUploadModal = closeUploadModal;
                         <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                         <input type="hidden" name="revoke_public_share" value="1">
                         <input type="hidden" name="pub_share_id" id="revokePubShareId">
-                        <button type="submit" class="w-full py-2.5 rounded-xl border border-rose-200 hover:bg-rose-50 text-rose-700 font-bold text-xs transition-colors flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full py-2.5 rounded-xl border border-rose-200 dark:border-rose-900 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-rose-700 dark:text-rose-400 font-bold text-xs transition-colors flex items-center justify-center gap-2">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
                             Cabut &amp; Nonaktifkan Tautan Publik
                         </button>
@@ -1362,7 +1381,7 @@ window.closeUploadModal = closeUploadModal;
 
                 <!-- If No Active Share (Create Form) -->
                 <div id="sharePublicCreateBlock" class="space-y-4">
-                    <p class="text-xs text-slate-500 font-medium leading-relaxed">
+                    <p class="text-xs text-slate-500 dark:text-slate-400 font-medium leading-relaxed">
                         Buat tautan aman untuk dibagikan ke klien atau pihak luar. Tautan otomatis kedaluwarsa setelah durasi yang Anda tentukan.
                     </p>
 
@@ -1372,8 +1391,8 @@ window.closeUploadModal = closeUploadModal;
                         <input type="hidden" name="doc_id" id="pubDocId">
 
                         <div>
-                            <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Masa Berlaku Tautan (Expired)</label>
-                            <select name="duration" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500">
+                            <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Masa Berlaku Tautan (Expired)</label>
+                            <select name="duration" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                                 <option value="1_hour">1 Jam</option>
                                 <option value="6_hours">6 Jam</option>
                                 <option value="24_hours" selected>24 Jam (1 Hari)</option>
@@ -1383,7 +1402,7 @@ window.closeUploadModal = closeUploadModal;
                             </select>
                         </div>
 
-                        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
+                        <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
                             Buat Tautan Publik Berwaktu
                         </button>
@@ -1400,8 +1419,8 @@ window.closeUploadModal = closeUploadModal;
                     <input type="hidden" name="doc_id" id="shareDocId">
 
                     <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Pilih Rekan Kerja</label>
-                        <select name="target_user_id" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500">
+                        <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Pilih Rekan Kerja</label>
+                        <select name="target_user_id" required class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                             <option value="">-- Pilih Anggota Tim --</option>
                             <?php foreach($system_users as $su): ?>
                             <option value="<?php echo $su['id']; ?>"><?php echo htmlspecialchars($su['display_name']); ?> (<?php echo htmlspecialchars($su['email']); ?>)</option>
@@ -1410,14 +1429,14 @@ window.closeUploadModal = closeUploadModal;
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Hak Akses</label>
-                        <select name="permission" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500">
+                        <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Hak Akses</label>
+                        <select name="permission" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                             <option value="view">Hanya Pratinjau (Lihat Saja)</option>
                             <option value="download">Pratinjau &amp; Boleh Unduh</option>
                         </select>
                     </div>
 
-                    <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
+                    <button type="submit" class="w-full py-3 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                         Berikan Akses Internal
                     </button>
@@ -1431,22 +1450,22 @@ window.closeUploadModal = closeUploadModal;
 <!-- 2. DOCUMENT PREVIEW MODAL (LIGHTBOX) -->
 <!-- ============================================================== -->
 <div id="viewModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="viewModalTitle">
-    <div class="bg-white rounded-3xl max-w-5xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 animate-modal-pop">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-5xl w-full shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-slate-200 dark:border-slate-800 animate-modal-pop">
         
         <!-- Modal Top Bar -->
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center flex-shrink-0 bg-slate-50/70">
+        <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center flex-shrink-0 bg-slate-50/70 dark:bg-slate-800/50">
             <div>
-                <h3 class="text-base font-black text-slate-900" id="viewModalTitle">Pratinjau Dokumen</h3>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" id="viewModalType"></p>
+                <h3 class="text-base font-black text-slate-900 dark:text-white" id="viewModalTitle">Pratinjau Dokumen</h3>
+                <p class="text-[10px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-widest" id="viewModalType"></p>
             </div>
             <div class="flex items-center gap-2">
                 <a id="viewModalDownload" href="#" download
-                   class="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all text-slate-700 bg-white border border-slate-200 hover:bg-slate-50 shadow-xs">
+                   class="flex items-center gap-2 px-4 py-2 text-xs font-bold rounded-xl transition-all text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 shadow-xs">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                     <span>Unduh Berkas</span>
                 </a>
                 <button type="button" onclick="closeModal()" aria-label="Tutup pratinjau" 
-                        class="w-8 h-8 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors flex items-center justify-center">
+                        class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                 </button>
             </div>
@@ -1454,7 +1473,7 @@ window.closeUploadModal = closeUploadModal;
 
         <!-- Document Viewer Content Area -->
         <div class="flex-1 overflow-auto p-6 min-h-[480px]">
-            <div id="documentViewer" class="w-full h-full rounded-2xl flex items-center justify-center min-h-[460px] bg-slate-50"></div>
+            <div id="documentViewer" class="w-full h-full rounded-2xl flex items-center justify-center min-h-[460px] bg-slate-50 dark:bg-slate-950"></div>
         </div>
     </div>
 </div>

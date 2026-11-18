@@ -98,11 +98,11 @@ function getActionStyle($action) {
 function renderTimeline($activities, $tabId) {
     if (empty($activities)) {
         echo '
-        <div class="bg-white/80 backdrop-blur-md rounded-3xl p-14 text-center border border-slate-200/90 shadow-sm">
-            <div class="w-14 h-14 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 shadow-xs">
+        <div class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-14 text-center border border-slate-200/90 dark:border-slate-800 shadow-sm">
+            <div class="w-14 h-14 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-indigo-100 dark:border-indigo-800 shadow-xs">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
             </div>
-            <h3 class="text-base font-black text-slate-900 mb-1">Belum Ada Catatan Aktivitas</h3>
+            <h3 class="text-base font-black text-slate-900 dark:text-white mb-1">Belum Ada Catatan Aktivitas</h3>
             <p class="text-slate-400 font-medium text-xs max-w-xs mx-auto">Sistem belum mencatat rekaman jejak audit untuk kategori ini.</p>
         </div>';
         return;
@@ -125,15 +125,15 @@ function renderTimeline($activities, $tabId) {
         if ($displayDate) {
             echo '
             <div class="date-divider relative flex items-center gap-4 my-2" data-date="' . htmlspecialchars($dateLabel) . '" data-tab="' . $tabId . '">
-                <div class="h-px flex-1 bg-slate-200/80"></div>
-                <span class="bg-white px-4 py-1 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-wider border border-slate-200/80 shadow-2xs">' . htmlspecialchars($dateLabel) . '</span>
-                <div class="h-px flex-1 bg-slate-200/80"></div>
+                <div class="h-px flex-1 bg-slate-200/80 dark:bg-slate-800"></div>
+                <span class="bg-white dark:bg-slate-800 px-4 py-1 rounded-full text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider border border-slate-200/80 dark:border-slate-700 shadow-2xs">' . htmlspecialchars($dateLabel) . '</span>
+                <div class="h-px flex-1 bg-slate-200/80 dark:bg-slate-800"></div>
             </div>';
         }
         
         $photoHtml = $hasPhoto 
             ? '<img src="uploads/avatars/' . htmlspecialchars($act['profile_photo']) . '" alt="' . htmlspecialchars($act['display_name']) . '" class="w-full h-full object-cover">'
-            : '<span class="text-[9px] font-black text-slate-500">' . htmlspecialchars($initials) . '</span>';
+            : '<span class="text-[9px] font-black text-slate-500 dark:text-slate-400">' . htmlspecialchars($initials) . '</span>';
             
         echo '
         <div class="activity-item group relative flex gap-4 items-start" 
@@ -141,25 +141,25 @@ function renderTimeline($activities, $tabId) {
              data-date="' . htmlspecialchars($dateLabel) . '"
              data-text="' . strtolower(htmlspecialchars($act['action'] . ' ' . ($act['display_name'] ?? '') . ' ' . $dateLabel)) . '">
             <div class="hidden sm:flex flex-col items-end w-14 pt-2.5 flex-shrink-0">
-                <span class="text-xs font-black text-slate-900 leading-none">' . htmlspecialchars($timeLabel) . '</span>
+                <span class="text-xs font-black text-slate-900 dark:text-white leading-none">' . htmlspecialchars($timeLabel) . '</span>
                 <span class="text-[9px] font-extrabold text-slate-400 uppercase tracking-wider mt-1">WIB</span>
             </div>
-            <div class="flex-1 bg-white/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 shadow-xs hover:bg-white/95 hover:border-indigo-300 hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center gap-3.5">
+            <div class="flex-1 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-white/90 dark:border-slate-800 shadow-xs hover:bg-white/95 dark:hover:bg-slate-800/90 hover:border-indigo-300 dark:hover:border-blue-500 hover:shadow-md transition-all duration-200 flex flex-col sm:flex-row sm:items-center gap-3.5">
                 <div class="w-10 h-10 rounded-xl flex items-center justify-center border flex-shrink-0 shadow-xs ' . $style[1] . '">
                     ' . $style[0] . '
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="text-slate-900 font-bold leading-snug text-sm mb-2">' . htmlspecialchars($act['action']) . '</p>
+                    <p class="text-slate-900 dark:text-white font-bold leading-snug text-sm mb-2">' . htmlspecialchars($act['action']) . '</p>
                     <div class="flex flex-wrap items-center gap-2">
-                        <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-50/80 border border-slate-200/80 rounded-lg">
-                            <div class="w-5 h-5 rounded-md overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                        <div class="inline-flex items-center gap-2 px-2.5 py-1 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 rounded-lg">
+                            <div class="w-5 h-5 rounded-md overflow-hidden bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 flex items-center justify-center">
                                 ' . $photoHtml . '
                             </div>
-                            <span class="text-xs font-bold text-slate-700">' . htmlspecialchars($act['display_name'] ?? 'System') . '</span>
-                            <span class="w-1 h-1 rounded-full bg-slate-300"></span>
-                            <span class="text-[10px] font-extrabold text-indigo-600 uppercase tracking-wider">' . htmlspecialchars($act['user_role'] ?? 'user') . '</span>
+                            <span class="text-xs font-bold text-slate-700 dark:text-slate-200">' . htmlspecialchars($act['display_name'] ?? 'System') . '</span>
+                            <span class="w-1 h-1 rounded-full bg-slate-300 dark:bg-slate-600"></span>
+                            <span class="text-[10px] font-extrabold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider">' . htmlspecialchars($act['user_role'] ?? 'user') . '</span>
                         </div>
-                        <div class="sm:hidden flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-50 px-2 py-0.5 rounded-md border border-slate-200/60">
+                        <div class="sm:hidden flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-50 dark:bg-slate-800 px-2 py-0.5 rounded-md border border-slate-200/60 dark:border-slate-700">
                             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                             <span>' . htmlspecialchars($timeLabel) . ' WIB</span>
                         </div>
@@ -167,7 +167,7 @@ function renderTimeline($activities, $tabId) {
                     </div>
                 </div>
                 <div class="hidden md:block flex-shrink-0">
-                    <span class="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-slate-200/60">Tercatat</span>
+                    <span class="px-3 py-1 bg-slate-50 dark:bg-slate-800 text-slate-400 text-[10px] font-black uppercase tracking-wider rounded-lg border border-slate-200/60 dark:border-slate-700">Tercatat</span>
                 </div>
             </div>
         </div>';
@@ -176,23 +176,23 @@ function renderTimeline($activities, $tabId) {
 
     // Empty search state
     echo '
-    <div id="empty-search-' . $tabId . '" class="hidden bg-white/80 backdrop-blur-md rounded-3xl p-12 text-center border border-slate-200/90 shadow-sm mt-4">
-        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+    <div id="empty-search-' . $tabId . '" class="hidden bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-12 text-center border border-slate-200/90 dark:border-slate-800 shadow-sm mt-4">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center mx-auto mb-3">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
         </div>
-        <p class="text-slate-700 font-bold text-sm">Tidak ada aktivitas yang sesuai.</p>
+        <p class="text-slate-700 dark:text-white font-bold text-sm">Tidak ada aktivitas yang sesuai.</p>
         <p class="text-slate-400 text-xs font-medium mt-1">Coba gunakan kata kunci lain dalam pencarian Anda.</p>
     </div>';
 
     // Pagination Bar
     echo '
-    <div id="pagination-' . $tabId . '" class="activity-pagination-bar no-print mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
-        <div class="flex items-center gap-3 text-xs font-bold text-slate-500">
+    <div id="pagination-' . $tabId . '" class="activity-pagination-bar no-print mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xs">
+        <div class="flex items-center gap-3 text-xs font-bold text-slate-500 dark:text-slate-400">
             <span id="info-' . $tabId . '" class="pagination-info">Menampilkan...</span>
-            <span class="text-slate-300">•</span>
-            <label class="flex items-center gap-1.5 text-xs text-slate-500 font-semibold">
+            <span class="text-slate-300 dark:text-slate-700">•</span>
+            <label class="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-semibold">
                 Per hal:
-                <select id="size-' . $tabId . '" onchange="changeActPageSize(this.value)" class="bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer">
+                <select id="size-' . $tabId . '" onchange="changeActPageSize(this.value)" class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                     <option value="10">10</option>
                     <option value="15" selected>15</option>
                     <option value="25">25</option>
@@ -242,30 +242,30 @@ function renderTimeline($activities, $tabId) {
     </div>
     
     <!-- Executive Header Section (Glassmorphic) -->
-    <div class="rounded-3xl p-6 md:p-7 bg-white/76 backdrop-blur-xl border border-white/85 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div class="rounded-3xl p-6 md:p-7 bg-white/76 dark:bg-slate-900/80 backdrop-blur-xl border border-white/85 dark:border-slate-800 shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
-                <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold uppercase tracking-widest mb-2.5">
+                <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 Audit Log &amp; Timeline Real-time
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Aktivitas Sistem</h1>
-            <p class="text-slate-500 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1">Aktivitas Sistem</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
                 Rekaman jejak aktivitas tugas, berkas dokumen, autentikasi, dan interaksi pengguna secara real-time.
             </p>
         </div>
         
         <div class="flex items-center gap-3 flex-shrink-0 no-print">
             <button type="button" onclick="window.print()" 
-                    class="px-4 py-2.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 hover:text-indigo-600 border border-slate-200/90 text-xs font-bold transition-all shadow-xs flex items-center gap-2">
+                    class="px-4 py-2.5 rounded-2xl bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] dark:hover:text-blue-400 border border-slate-200/90 dark:border-slate-700 text-xs font-bold transition-all shadow-xs flex items-center gap-2">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
                 <span>Cetak Rekap Laporan</span>
             </button>
-            <div class="bg-slate-50 px-4 py-2.5 rounded-2xl border border-slate-200/90 shadow-xs flex items-center gap-3.5">
+            <div class="bg-slate-50 dark:bg-slate-800 px-4 py-2.5 rounded-2xl border border-slate-200/90 dark:border-slate-700 shadow-xs flex items-center gap-3.5">
                 <div class="text-right">
-                    <div class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Total Log</div>
-                    <div class="text-xl font-black text-slate-900 leading-tight"><?php echo $total_activities; ?></div>
+                    <div class="text-[10px] font-black text-slate-400 dark:text-slate-400 uppercase tracking-widest">Total Log</div>
+                    <div class="text-xl font-black text-slate-900 dark:text-white leading-tight"><?php echo $total_activities; ?></div>
                 </div>
-                <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600 border border-indigo-100 shadow-xs">
+                <div class="w-10 h-10 bg-indigo-50 dark:bg-slate-700 rounded-xl flex items-center justify-center text-indigo-600 dark:text-blue-400 border border-indigo-100 dark:border-slate-600 shadow-xs">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                 </div>
             </div>
@@ -275,17 +275,17 @@ function renderTimeline($activities, $tabId) {
     <!-- Controls: Search & Tabs -->
     <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 no-print">
         <!-- Segmented Tabs -->
-        <div class="inline-flex p-1 rounded-2xl bg-slate-100 border border-slate-200/90">
+        <div class="inline-flex p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700">
             <button onclick="switchActTab('all')" id="tab-btn-all" 
-                    class="px-4 py-2 rounded-xl text-xs font-extrabold transition-all bg-white text-slate-900 shadow-xs">
+                    class="px-4 py-2 rounded-xl text-xs font-extrabold transition-all bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs">
                 Semua (<?php echo count($all_activities); ?>)
             </button>
             <button onclick="switchActTab('work')" id="tab-btn-work" 
-                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-900">
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 Tugas &amp; Dokumen (<?php echo count($work_activities); ?>)
             </button>
             <button onclick="switchActTab('system')" id="tab-btn-system" 
-                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 hover:text-slate-900">
+                    class="px-4 py-2 rounded-xl text-xs font-bold transition-all text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
                 Sistem &amp; Akun (<?php echo count($system_activities); ?>)
             </button>
         </div>
@@ -294,7 +294,7 @@ function renderTimeline($activities, $tabId) {
         <div class="relative">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" id="actSearchInput" placeholder="Cari aktivitas atau nama..." oninput="handleActSearch(this.value)"
-                   class="pl-9 pr-4 py-2 text-xs font-bold w-full sm:w-64 rounded-xl text-slate-900 bg-white border border-slate-200/90 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400">
+                   class="pl-9 pr-4 py-2 text-xs font-bold w-full sm:w-64 rounded-xl text-slate-900 dark:text-white bg-white dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400">
         </div>
     </div>
 

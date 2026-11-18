@@ -99,6 +99,18 @@ try {
     <link rel="shortcut icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <link rel="apple-touch-icon" href="<?php echo htmlspecialchars($app_logo_info['url']); ?>">
     <script>
+        // Anti-FOUC Dark Mode Immediate Initialization
+        (function() {
+            try {
+                const savedTheme = localStorage.getItem('taskflow_theme');
+                const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            } catch (e) {}
+        })();
         // Suppress Tailwind CDN production notice in console
         (function() {
             const _warn = console.warn;
@@ -151,6 +163,12 @@ try {
             width: 100vw;
             margin: 0;
             overflow: hidden;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .dark body {
+            background-color: #0B1120;
+            color: #E2E8F0;
         }
 
         /* 100% Full-Width Application Frame */
@@ -163,12 +181,19 @@ try {
             flex-direction: column;
             position: relative;
         }
+        .dark .app-frame {
+            background-color: #0B1120;
+        }
 
         /* Distinctive Curved Royal Blue Sidebar */
         .curved-sidebar {
             background: linear-gradient(180deg, #1E5CE6 0%, #1B55D8 100%);
             border-top-right-radius: 46px;
-            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1), background 0.3s ease;
+        }
+        .dark .curved-sidebar {
+            background: linear-gradient(180deg, #133E9E 0%, #0F2F7A 100%);
+            border-right: 1px solid rgba(30, 58, 138, 0.45);
         }
         @media (max-width: 1023px) {
             .curved-sidebar {
@@ -209,7 +234,7 @@ try {
             border-radius: 18px;
             border-top-left-radius: 0;
             padding: 20px 20px 18px 20px;
-            transition: background-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease;
+            transition: background-color 0.25s ease, box-shadow 0.25s ease, color 0.25s ease, border-color 0.25s ease;
         }
         .folder-card-wrapper.active .folder-tab {
             background-color: #1E5CE6;
@@ -225,19 +250,38 @@ try {
         .folder-card-wrapper.inactive .folder-tab {
             background-color: #F3F5F9;
         }
+        .dark .folder-card-wrapper.inactive .folder-tab {
+            background-color: #1E293B;
+        }
         .folder-card-wrapper.inactive .folder-body {
             background-color: #F3F5F9;
             box-shadow: 0 4px 12px rgba(15, 23, 42, 0.02);
         }
+        .dark .folder-card-wrapper.inactive .folder-body {
+            background-color: #1E293B;
+            border: 1px solid rgba(51, 65, 85, 0.6);
+            color: #E2E8F0;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+        }
         .folder-card-wrapper.inactive .curve-fill {
             fill: #F3F5F9;
+        }
+        .dark .folder-card-wrapper.inactive .curve-fill {
+            fill: #1E293B;
         }
         .folder-card-wrapper.inactive:hover .folder-body,
         .folder-card-wrapper.inactive:hover .folder-tab {
             background-color: #EAEEF6;
         }
+        .dark .folder-card-wrapper.inactive:hover .folder-body,
+        .dark .folder-card-wrapper.inactive:hover .folder-tab {
+            background-color: #273549;
+        }
         .folder-card-wrapper.inactive:hover .curve-fill {
             fill: #EAEEF6;
+        }
+        .dark .folder-card-wrapper.inactive:hover .curve-fill {
+            fill: #273549;
         }
 
         /* Sidebar Navigation Items */
@@ -400,10 +444,10 @@ try {
     <div class="app-frame w-full h-screen flex flex-col relative bg-white overflow-hidden">
 
         <!-- ==================== TOP HEADER BAR ==================== -->
-        <header class="w-full bg-white px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 z-20 border-b border-slate-100 flex-shrink-0">
+        <header class="w-full bg-white dark:bg-[#0F172A] px-6 lg:px-8 py-3.5 flex items-center justify-between gap-4 z-20 border-b border-slate-100 dark:border-slate-800 flex-shrink-0 transition-colors">
             <!-- Left: Logo + Brand Title + Mobile Menu Toggle -->
             <div class="flex items-center gap-3">
-                <button id="mobileMenuBtn" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors" aria-label="Toggle navigation">
+                <button id="mobileMenuBtn" onclick="toggleSidebar()" class="lg:hidden p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" aria-label="Toggle navigation">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                 </button>
                 <a href="<?php echo route('dashboard'); ?>" class="flex items-center gap-2.5 group">
@@ -424,49 +468,49 @@ try {
 
             <!-- Center: Pill Search Input (Triggers Command Palette Ctrl + K) -->
             <div class="flex-1 max-w-[440px] mx-auto hidden sm:block">
-                <div onclick="openCmdPalette()" class="relative flex items-center w-full bg-[#F3F5F8] hover:bg-[#EBEEF4] focus-within:bg-white rounded-full px-4 py-2.5 transition-all duration-200 cursor-pointer group shadow-2xs">
-                    <svg class="w-4 h-4 text-slate-400 mr-2.5 shrink-0 group-hover:text-[#1E5CE6] transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <div onclick="openCmdPalette()" class="relative flex items-center w-full bg-[#F3F5F8] dark:bg-slate-800/80 hover:bg-[#EBEEF4] dark:hover:bg-slate-700/80 focus-within:bg-white dark:focus-within:bg-slate-800 rounded-full px-4 py-2.5 transition-all duration-200 cursor-pointer group shadow-2xs border border-transparent dark:border-slate-700/60">
+                    <svg class="w-4 h-4 text-slate-400 dark:text-slate-400 mr-2.5 shrink-0 group-hover:text-[#1E5CE6] transition-colors" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <circle cx="11" cy="11" r="7"></circle>
                         <path stroke-linecap="round" d="M20 20l-3.5-3.5"></path>
                     </svg>
-                    <span class="text-xs text-slate-400 font-medium group-hover:text-slate-600 transition-colors select-none">Cari di TaskFlow..</span>
-                    <kbd class="ml-auto px-2 py-0.5 text-[10px] font-bold text-slate-400 bg-white border border-slate-200 rounded-full shadow-2xs">Ctrl+K</kbd>
+                    <span class="text-xs text-slate-400 dark:text-slate-300 font-medium group-hover:text-slate-600 dark:group-hover:text-slate-200 transition-colors select-none">Cari di TaskFlow..</span>
+                    <kbd class="ml-auto px-2 py-0.5 text-[10px] font-bold text-slate-400 dark:text-slate-300 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-full shadow-2xs">Ctrl+K</kbd>
                 </div>
             </div>
 
             <!-- Right: Action Icons, Notifications, User Profile & Modals -->
-            <div class="flex items-center gap-2 sm:gap-4 relative">
+            <div class="flex items-center gap-2 sm:gap-3 relative">
                 <!-- Mobile Search Button -->
-                <button onclick="openCmdPalette()" class="sm:hidden p-2 text-slate-600 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 transition-colors" title="Pencarian">
+                <button onclick="openCmdPalette()" class="sm:hidden p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Pencarian">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path stroke-linecap="round" d="M20 20l-3.5-3.5"></path></svg>
                 </button>
 
                 <!-- Notification Bell -->
                 <div class="relative">
-                    <button onclick="toggleDropdown('notifDropdown')" class="relative p-2 text-slate-600 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 transition-colors" title="Notifikasi" aria-label="Notifikasi">
+                    <button onclick="toggleDropdown('notifDropdown')" class="relative p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Notifikasi" aria-label="Notifikasi">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
                         </svg>
                         <?php if (!empty($recent_activities)): ?>
-                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white animate-pulse"></span>
+                        <span class="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse"></span>
                         <?php endif; ?>
                     </button>
                     <!-- Notification Dropdown -->
-                    <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white rounded-2xl shadow-2xl border border-slate-100 p-4 z-50">
-                        <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
-                            <span class="font-bold text-xs uppercase tracking-wider text-slate-800">Aktivitas Terkini</span>
+                    <div id="notifDropdown" class="hidden absolute right-0 mt-3 w-80 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-4 z-50">
+                        <div class="flex items-center justify-between pb-2.5 border-b border-slate-100 dark:border-slate-800">
+                            <span class="font-bold text-xs uppercase tracking-wider text-slate-800 dark:text-slate-100">Aktivitas Terkini</span>
                             <a href="<?php echo route('activities'); ?>" class="text-[11px] text-[#1E5CE6] font-semibold hover:underline">Semua Log &rarr;</a>
                         </div>
-                        <div class="divide-y divide-slate-100 max-h-60 overflow-y-auto mt-1">
+                        <div class="divide-y divide-slate-100 dark:divide-slate-800 max-h-60 overflow-y-auto mt-1">
                             <?php if (empty($recent_activities)): ?>
                                 <p class="text-xs text-slate-400 py-3 text-center">Belum ada riwayat aktivitas terbaru.</p>
                             <?php else: ?>
                                 <?php foreach ($recent_activities as $ra): ?>
                                 <div class="py-2.5 flex items-start gap-3">
-                                    <div class="w-7 h-7 rounded-full bg-blue-50 text-[#1E5CE6] flex items-center justify-center shrink-0 font-bold text-xs">⚡</div>
+                                    <div class="w-7 h-7 rounded-full bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center shrink-0 font-bold text-xs">⚡</div>
                                     <div class="flex-1 min-w-0">
-                                        <p class="text-xs font-semibold text-slate-800 truncate"><?php echo htmlspecialchars($ra['action']); ?></p>
-                                        <p class="text-[11px] text-slate-500 truncate"><?php echo htmlspecialchars($ra['details']); ?></p>
+                                        <p class="text-xs font-semibold text-slate-800 dark:text-slate-200 truncate"><?php echo htmlspecialchars($ra['action']); ?></p>
+                                        <p class="text-[11px] text-slate-500 dark:text-slate-400 truncate"><?php echo htmlspecialchars($ra['details']); ?></p>
                                         <span class="text-[10px] text-slate-400"><?php echo time_elapsed_string($ra['created_at']); ?></span>
                                     </div>
                                 </div>
@@ -476,8 +520,28 @@ try {
                     </div>
                 </div>
 
+                <!-- Dark / Light Mode Toggle Button -->
+                <button onclick="toggleTheme()" id="themeToggleBtn" class="p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] dark:hover:text-blue-400 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" title="Beralih Tema (Gelap / Terang)" aria-label="Beralih Tema">
+                    <!-- Sun Icon (Active in Dark Mode) -->
+                    <svg id="themeIconSun" class="w-5 h-5 hidden" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                    <!-- Moon Icon (Active in Light Mode) -->
+                    <svg id="themeIconMoon" class="w-5 h-5 block" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+
                 <!-- Help Shortcuts Button (?) -->
-                <button onclick="openShortcutsModal()" class="p-2 text-slate-600 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 transition-colors" title="Pintasan Keyboard & Bantuan" aria-label="Bantuan">
+                <button onclick="openShortcutsModal()" class="p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Pintasan Keyboard & Bantuan" aria-label="Bantuan">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="9"></circle>
                         <path stroke-linecap="round" stroke-linejoin="round" d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3m.08 4h.01"/>
@@ -485,7 +549,7 @@ try {
                 </button>
 
                 <!-- Settings Gear -->
-                <a href="<?php echo isAdmin() ? route('settings') : route('profile'); ?>" class="p-2 text-slate-600 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 transition-colors" title="Pengaturan" aria-label="Pengaturan">
+                <a href="<?php echo isAdmin() ? route('settings') : route('profile'); ?>" class="p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Pengaturan" aria-label="Pengaturan">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                         <circle cx="12" cy="12" r="3"/>
@@ -501,9 +565,9 @@ try {
                 ?>
                 <div class="relative">
                     <div onclick="toggleDropdown('userDropdown')" class="flex items-center gap-2.5 pl-1.5 cursor-pointer group">
-                        <span class="text-xs font-semibold text-slate-700 group-hover:text-[#1E5CE6] transition-colors hidden md:inline truncate max-w-[120px]"><?php echo htmlspecialchars($display_name); ?></span>
+                        <span class="text-xs font-semibold text-slate-700 dark:text-slate-200 group-hover:text-[#1E5CE6] transition-colors hidden md:inline truncate max-w-[120px]"><?php echo htmlspecialchars($display_name); ?></span>
                         <?php if ($hasAvatar): ?>
-                            <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-8 h-8 rounded-full object-cover shadow-xs border border-blue-200 group-hover:ring-4 group-hover:ring-blue-100 transition-all"/>
+                            <img src="<?php echo $avatarSrc; ?>" alt="Avatar" class="w-8 h-8 rounded-full object-cover shadow-xs border border-blue-200 dark:border-slate-700 group-hover:ring-4 group-hover:ring-blue-100 transition-all"/>
                         <?php else: ?>
                             <div class="w-8 h-8 rounded-full bg-[#1E5CE6] text-white font-bold text-xs flex items-center justify-center shadow-xs group-hover:ring-4 group-hover:ring-blue-100 transition-all">
                                 <?php echo $initial; ?>
@@ -511,22 +575,22 @@ try {
                         <?php endif; ?>
                     </div>
                     <!-- User Dropdown Menu -->
-                    <div id="userDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-2xl border border-slate-100 p-2 z-50">
-                        <div class="px-3 py-2.5 border-b border-slate-100">
-                            <p class="text-xs font-bold text-slate-800 truncate"><?php echo htmlspecialchars($display_name); ?></p>
+                    <div id="userDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-100 dark:border-slate-800 p-2 z-50">
+                        <div class="px-3 py-2.5 border-b border-slate-100 dark:border-slate-800">
+                            <p class="text-xs font-bold text-slate-800 dark:text-slate-100 truncate"><?php echo htmlspecialchars($display_name); ?></p>
                             <p class="text-[11px] text-slate-400 truncate"><?php echo htmlspecialchars($email ?: ($role === 'admin' ? 'Super Admin' : 'Anggota Tim')); ?></p>
                         </div>
                         <div class="py-1">
-                            <a href="<?php echo route('profile'); ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-[#1E5CE6] hover:bg-blue-50 rounded-xl transition-colors">
+                            <a href="<?php echo route('profile'); ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[#1E5CE6] hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                 Profil &amp; Keamanan
                             </a>
-                            <a href="<?php echo route('reset-password'); ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 hover:text-[#1E5CE6] hover:bg-blue-50 rounded-xl transition-colors">
+                            <a href="<?php echo route('reset-password'); ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-[#1E5CE6] hover:bg-blue-50 dark:hover:bg-slate-800 rounded-xl transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                                 Ubah Password
                             </a>
-                            <div class="my-1 border-t border-slate-100"></div>
-                            <a href="<?php echo route('logout'); ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 rounded-xl transition-colors">
+                            <div class="my-1 border-t border-slate-100 dark:border-slate-800"></div>
+                            <a href="<?php echo route('logout'); ?>" class="flex items-center gap-2.5 px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                                 Keluar Sistem
                             </a>
@@ -535,14 +599,14 @@ try {
                 </div>
 
                 <!-- Filter Sliders Button (Quick Actions) -->
-                <button onclick="openCmdPalette()" class="p-2 text-slate-600 hover:text-[#1E5CE6] rounded-lg hover:bg-slate-100 transition-colors" title="Pencarian & Perintah Cepat">
+                <button onclick="openCmdPalette()" class="p-2 text-slate-600 dark:text-slate-300 hover:text-[#1E5CE6] rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" title="Pencarian & Perintah Cepat">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <line x1="4" y1="6" x2="20" y2="6" stroke-linecap="round"/>
-                        <circle cx="15" cy="6" r="2" fill="#FFFFFF" stroke="currentColor" stroke-width="1.8"/>
+                        <circle cx="15" cy="6" r="2" fill="#FFFFFF" class="dark:fill-slate-800" stroke="currentColor" stroke-width="1.8"/>
                         <line x1="4" y1="12" x2="20" y2="12" stroke-linecap="round"/>
-                        <circle cx="9" cy="12" r="2" fill="#FFFFFF" stroke="currentColor" stroke-width="1.8"/>
+                        <circle cx="9" cy="12" r="2" fill="#FFFFFF" class="dark:fill-slate-800" stroke="currentColor" stroke-width="1.8"/>
                         <line x1="4" y1="18" x2="20" y2="18" stroke-linecap="round"/>
-                        <circle cx="14" cy="18" r="2" fill="#FFFFFF" stroke="currentColor" stroke-width="1.8"/>
+                        <circle cx="14" cy="18" r="2" fill="#FFFFFF" class="dark:fill-slate-800" stroke="currentColor" stroke-width="1.8"/>
                     </svg>
                 </button>
             </div>
@@ -708,7 +772,7 @@ try {
             </aside>
 
             <!-- ==================== MAIN CONTENT WORKSPACE ==================== -->
-            <main class="flex-1 flex flex-col overflow-hidden relative bg-[#FAFBFD]" style="min-width:0">
+            <main class="flex-1 flex flex-col overflow-hidden relative bg-[#FAFBFD] dark:bg-[#0B1120] transition-colors" style="min-width:0">
                 <div id="ajaxContent" class="flex-1 overflow-y-auto custom-scrollbar px-4 sm:px-8 lg:px-10 py-6 flex flex-col relative z-10">
                     <?php
                     // Simple Page Router
@@ -740,35 +804,35 @@ try {
     <!-- GLOBAL QUICK CREATE MODAL ("+ Buat Cepat") -->
     <!-- ============================================================== -->
     <div id="globalCreateModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 p-6 animate-modal-pop">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 p-6 animate-modal-pop">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#1E5CE6] flex items-center justify-center font-bold">⚡</div>
-                    <h3 class="font-extrabold text-slate-800 text-base">Buat Aksi Cepat</h3>
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center font-bold">⚡</div>
+                    <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-base">Buat Aksi Cepat</h3>
                 </div>
-                <button onclick="closeGlobalCreateModal()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
+                <button onclick="closeGlobalCreateModal()" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                <a href="<?php echo route('calendar'); ?>" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 hover:border-blue-300 hover:bg-blue-50/50 flex flex-col items-center text-center gap-2 transition-all group">
-                    <div class="w-10 h-10 rounded-xl bg-blue-100 text-[#1E5CE6] flex items-center justify-center group-hover:scale-110 transition-transform">📅</div>
-                    <span class="font-bold text-xs text-slate-800">Tugas Kalender</span>
+                <a href="<?php echo route('calendar'); ?>" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:border-blue-300 dark:hover:border-blue-500/50 hover:bg-blue-50/50 dark:hover:bg-slate-800 flex flex-col items-center text-center gap-2 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/50 text-[#1E5CE6] dark:text-blue-400 flex items-center justify-center group-hover:scale-110 transition-transform">📅</div>
+                    <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Tugas Kalender</span>
                     <span class="text-[10px] text-slate-400">Jadwal kerja baru</span>
                 </a>
-                <a href="<?php echo route('documents'); ?>&openUpload=1" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 hover:border-emerald-300 hover:bg-emerald-50/50 flex flex-col items-center text-center gap-2 transition-all group">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">📄</div>
-                    <span class="font-bold text-xs text-slate-800">Unggah Berkas</span>
+                <a href="<?php echo route('documents'); ?>&openUpload=1" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:border-emerald-300 dark:hover:border-emerald-500/50 hover:bg-emerald-50/50 dark:hover:bg-slate-800 flex flex-col items-center text-center gap-2 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center group-hover:scale-110 transition-transform">📄</div>
+                    <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Unggah Berkas</span>
                     <span class="text-[10px] text-slate-400">Simpan dokumen baru</span>
                 </a>
-                <a href="<?php echo route('notes'); ?>" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 hover:border-purple-300 hover:bg-purple-50/50 flex flex-col items-center text-center gap-2 transition-all group">
-                    <div class="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform">📝</div>
-                    <span class="font-bold text-xs text-slate-800">Catatan Baru</span>
+                <a href="<?php echo route('notes'); ?>" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:border-purple-300 dark:hover:border-purple-500/50 hover:bg-purple-50/50 dark:hover:bg-slate-800 flex flex-col items-center text-center gap-2 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-900/50 text-purple-600 dark:text-purple-400 flex items-center justify-center group-hover:scale-110 transition-transform">📝</div>
+                    <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Catatan Baru</span>
                     <span class="text-[10px] text-slate-400">Ide &amp; memo kerja</span>
                 </a>
-                <a href="<?php echo route('projects'); ?>" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 hover:border-amber-300 hover:bg-amber-50/50 flex flex-col items-center text-center gap-2 transition-all group">
-                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">📌</div>
-                    <span class="font-bold text-xs text-slate-800">Proyek Kanban</span>
+                <a href="<?php echo route('projects'); ?>" onclick="closeGlobalCreateModal()" class="p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-800/40 hover:border-amber-300 dark:hover:border-amber-500/50 hover:bg-amber-50/50 dark:hover:bg-slate-800 flex flex-col items-center text-center gap-2 transition-all group">
+                    <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center group-hover:scale-110 transition-transform">📌</div>
+                    <span class="font-bold text-xs text-slate-800 dark:text-slate-200">Proyek Kanban</span>
                     <span class="text-[10px] text-slate-400">Kelola target kerja</span>
                 </a>
             </div>
@@ -779,36 +843,36 @@ try {
     <!-- SHORTCUTS HELP MODAL (?) -->
     <!-- ============================================================== -->
     <div id="shortcutsModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs" role="dialog" aria-modal="true">
-        <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 p-6 animate-modal-pop">
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-100 dark:border-slate-800 p-6 animate-modal-pop">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
                 <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#1E5CE6] flex items-center justify-center font-bold">⌨️</div>
-                    <h3 class="font-extrabold text-slate-800 text-base">Pintasan Keyboard</h3>
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center font-bold">⌨️</div>
+                    <h3 class="font-extrabold text-slate-800 dark:text-slate-100 text-base">Pintasan Keyboard</h3>
                 </div>
-                <button onclick="closeShortcutsModal()" class="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100 transition-colors">
+                <button onclick="closeShortcutsModal()" class="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
             <div class="space-y-3 text-xs">
-                <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
-                    <span class="text-slate-600 font-medium">Buka Pencarian &amp; Perintah</span>
-                    <kbd class="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-slate-700">Ctrl + K</kbd>
+                <div class="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-800/80">
+                    <span class="text-slate-600 dark:text-slate-300 font-medium">Buka Pencarian &amp; Perintah</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md font-bold text-slate-700 dark:text-slate-200">Ctrl + K</kbd>
                 </div>
-                <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
-                    <span class="text-slate-600 font-medium">Tutup Modal / Popup</span>
-                    <kbd class="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-slate-700">ESC</kbd>
+                <div class="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-800/80">
+                    <span class="text-slate-600 dark:text-slate-300 font-medium">Tutup Modal / Popup</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md font-bold text-slate-700 dark:text-slate-200">ESC</kbd>
                 </div>
-                <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
-                    <span class="text-slate-600 font-medium">Navigasi Pilihan Perintah</span>
-                    <kbd class="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-slate-700">↑ / ↓</kbd>
+                <div class="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-800/80">
+                    <span class="text-slate-600 dark:text-slate-300 font-medium">Navigasi Pilihan Perintah</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md font-bold text-slate-700 dark:text-slate-200">↑ / ↓</kbd>
                 </div>
-                <div class="flex items-center justify-between py-1.5 border-b border-slate-50">
-                    <span class="text-slate-600 font-medium">Eksekusi Perintah Terpilih</span>
-                    <kbd class="px-2 py-1 bg-slate-100 border border-slate-200 rounded-md font-bold text-slate-700">Enter</kbd>
+                <div class="flex items-center justify-between py-1.5 border-b border-slate-50 dark:border-slate-800/80">
+                    <span class="text-slate-600 dark:text-slate-300 font-medium">Eksekusi Perintah Terpilih</span>
+                    <kbd class="px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-md font-bold text-slate-700 dark:text-slate-200">Enter</kbd>
                 </div>
             </div>
-            <div class="mt-5 pt-3 border-t border-slate-100 text-center">
-                <button onclick="closeShortcutsModal()" class="px-5 py-2.5 rounded-xl bg-[#1E5CE6] text-white font-bold text-xs hover:bg-[#1749B8] transition-colors w-full">
+            <div class="mt-5 pt-3 border-t border-slate-100 dark:border-slate-800 text-center">
+                <button onclick="closeShortcutsModal()" class="px-5 py-2.5 rounded-xl bg-[#1E5CE6] text-white font-bold text-xs hover:bg-[#1749B8] transition-colors w-full cursor-pointer">
                     Mengerti
                 </button>
             </div>
@@ -819,89 +883,96 @@ try {
     <!-- GLOBAL COMMAND PALETTE MODAL (Ctrl + K / Cmd + K) -->
     <!-- ============================================================== -->
     <div id="cmdPaletteModal" class="fixed inset-0 hidden z-50 items-start justify-center pt-20 md:pt-28 p-4 bg-slate-950/60 backdrop-blur-md" role="dialog" aria-modal="true">
-        <div class="bg-white/95 backdrop-blur-2xl rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200/90 flex flex-col transition-all animate-modal-pop">
+        <div class="bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-3xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200/90 dark:border-slate-800 flex flex-col transition-all animate-modal-pop">
             <!-- Search bar -->
-            <div class="p-4 border-b border-slate-100 flex items-center gap-3 bg-slate-50/60">
+            <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3 bg-slate-50/60 dark:bg-slate-800/50">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E5CE6" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" id="cmdInput" placeholder="Ketik perintah atau cari halaman... (cth: kalender, dokumen, proyek)" 
-                       class="flex-1 bg-transparent border-none text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-medium"
+                       class="flex-1 bg-transparent border-none text-sm font-bold text-slate-900 dark:text-white outline-none placeholder:text-slate-400 placeholder:font-medium"
                        oninput="filterCmdList(this.value)" autocomplete="off">
-                <kbd class="px-2 py-0.5 text-[10px] font-black uppercase text-slate-400 bg-white border border-slate-200 rounded-lg shadow-2xs">ESC</kbd>
+                <kbd class="px-2 py-0.5 text-[10px] font-black uppercase text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-2xs">ESC</kbd>
             </div>
 
             <!-- Command items list -->
             <div id="cmdItemsList" class="p-2 max-h-80 overflow-y-auto space-y-1 custom-scrollbar text-xs">
                 <!-- Group: Navigasi -->
                 <div class="cmd-group-label px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Navigasi Halaman</div>
-                <a href="<?php echo route('dashboard'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('dashboard'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">📊</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">📊</span>
                         Dasbor Utama
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
-                <a href="<?php echo route('calendar'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('calendar'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">📅</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">📅</span>
                         Kalender Produktivitas
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
-                <a href="<?php echo route('documents'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('documents'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">📂</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">📂</span>
                         Pusat Dokumen &amp; Berkas
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
-                <a href="<?php echo route('notes'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('notes'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">📝</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">📝</span>
                         Catatan &amp; Ide Kerja
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
-                <a href="<?php echo route('projects'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('projects'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">📌</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">📌</span>
                         Papan Kanban Proyek
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
-                <a href="<?php echo route('activities'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('activities'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">⚡</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">⚡</span>
                         Audit Log &amp; Aktivitas
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
-                <a href="<?php echo route('profile'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 text-slate-700 hover:text-[#1E5CE6] font-bold transition-colors">
+                <a href="<?php echo route('profile'); ?>" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-[#1E5CE6] font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#1E5CE6] flex items-center justify-center text-xs">👤</span>
+                        <span class="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-[#1E5CE6] flex items-center justify-center text-xs">👤</span>
                         Profil &amp; Keamanan Akun
                     </span>
                     <span class="text-[10px] text-slate-400 font-semibold">Buka &rarr;</span>
                 </a>
 
-                <!-- Group: Aksi Cepat -->
-                <div class="cmd-group-label px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Aksi Cepat</div>
-                <a href="<?php echo route('calendar'); ?>" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 font-bold transition-colors">
+                <!-- Group: Aksi Cepat & Pengaturan -->
+                <div class="cmd-group-label px-3 pt-3 pb-1.5 text-[10px] font-black uppercase tracking-wider text-slate-400">Aksi Cepat &amp; Pengaturan</div>
+                <button type="button" onclick="toggleTheme(); closeCmdPalette();" class="cmd-item w-full flex items-center justify-between p-2.5 rounded-xl hover:bg-indigo-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-indigo-700 dark:hover:text-blue-400 font-bold transition-colors cursor-pointer text-left">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">➕</span>
+                        <span class="w-7 h-7 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xs">🌓</span>
+                        Beralih Tema (Gelap / Terang)
+                    </span>
+                    <span class="text-[10px] text-indigo-600 dark:text-blue-400 font-bold">Ganti Tema</span>
+                </button>
+                <a href="<?php echo route('calendar'); ?>" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-emerald-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-emerald-700 font-bold transition-colors">
+                    <span class="flex items-center gap-2.5">
+                        <span class="w-7 h-7 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xs">➕</span>
                         Tambah Tugas Baru
                     </span>
                     <span class="text-[10px] text-emerald-600 font-bold">Aksi Cepat</span>
                 </a>
-                <a href="<?php echo route('documents'); ?>&openUpload=1" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-sky-50 text-slate-700 hover:text-sky-700 font-bold transition-colors">
+                <a href="<?php echo route('documents'); ?>&openUpload=1" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-sky-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-sky-700 font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center text-xs">⬆️</span>
+                        <span class="w-7 h-7 rounded-lg bg-sky-50 dark:bg-sky-950/60 text-sky-600 dark:text-sky-400 flex items-center justify-center text-xs">⬆️</span>
                         Unggah Dokumen Berkas
                     </span>
                     <span class="text-[10px] text-sky-600 font-bold">Aksi Cepat</span>
                 </a>
-                <a href="<?php echo route('notes'); ?>" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-violet-50 text-slate-700 hover:text-violet-700 font-bold transition-colors">
+                <a href="<?php echo route('notes'); ?>" onclick="closeCmdPalette()" class="cmd-item flex items-center justify-between p-2.5 rounded-xl hover:bg-violet-50 dark:hover:bg-slate-800/80 text-slate-700 dark:text-slate-200 hover:text-violet-700 font-bold transition-colors">
                     <span class="flex items-center gap-2.5">
-                        <span class="w-7 h-7 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center text-xs">✍️</span>
+                        <span class="w-7 h-7 rounded-lg bg-violet-50 dark:bg-violet-950/60 text-violet-600 dark:text-violet-400 flex items-center justify-center text-xs">✍️</span>
                         Tulis Draf Catatan Baru
                     </span>
                     <span class="text-[10px] text-violet-600 font-bold">Aksi Cepat</span>
@@ -909,16 +980,42 @@ try {
             </div>
 
             <!-- Footer instructions -->
-            <div class="px-4 py-2.5 bg-slate-50/80 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-400 font-medium">
+            <div class="px-4 py-2.5 bg-slate-50/80 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-[11px] text-slate-400 font-medium">
                 <div class="flex items-center gap-2">
-                    <span>Gunakan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">↑</kbd> <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">↓</kbd> untuk memilih</span>
+                    <span>Gunakan <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-[9px] font-bold">↑</kbd> <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-[9px] font-bold">↓</kbd> untuk memilih</span>
                     <span>·</span>
-                    <span><kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">Enter</kbd> untuk buka</span>
+                    <span><kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-[9px] font-bold">Enter</kbd> untuk buka</span>
                 </div>
-                <span>Tekan <kbd class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[9px] font-bold">ESC</kbd> untuk menutup</span>
+                <span>Tekan <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-[9px] font-bold">ESC</kbd> untuk menutup</span>
             </div>
         </div>
     </div>
+
+    <!-- ============================================================== -->
+    <!-- MOBILE FLOATING BOTTOM NAVIGATION BAR (< md screens) -->
+    <!-- ============================================================== -->
+    <nav class="md:hidden fixed bottom-3 inset-x-3 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200/90 dark:border-slate-800/90 rounded-2xl shadow-2xl px-2 py-1.5 flex items-center justify-around">
+        <a href="<?php echo route('dashboard'); ?>" class="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl <?php echo $page === 'dashboard' ? 'text-[#1E5CE6] font-bold' : 'text-slate-500 dark:text-slate-400'; ?> transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+            <span class="text-[10px]">Dasbor</span>
+        </a>
+        <a href="<?php echo route('calendar'); ?>" class="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl <?php echo $page === 'calendar' ? 'text-[#1E5CE6] font-bold' : 'text-slate-500 dark:text-slate-400'; ?> transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span class="text-[10px]">Kalender</span>
+        </a>
+        <!-- Center Floating Action Button -->
+        <button onclick="openGlobalCreateModal()" class="w-11 h-11 -mt-4 rounded-full bg-[#1E5CE6] hover:bg-[#1749B8] text-white flex items-center justify-center shadow-lg shadow-blue-600/35 active:scale-95 transition-transform cursor-pointer" title="Buat Aksi Cepat">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        </button>
+        <a href="<?php echo route('notes'); ?>" class="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl <?php echo $page === 'notes' ? 'text-[#1E5CE6] font-bold' : 'text-slate-500 dark:text-slate-400'; ?> transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            <span class="text-[10px]">Catatan</span>
+        </a>
+        <a href="<?php echo route('documents'); ?>" class="flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl <?php echo $page === 'documents' ? 'text-[#1E5CE6] font-bold' : 'text-slate-500 dark:text-slate-400'; ?> transition-colors">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span class="text-[10px]">Dokumen</span>
+        </a>
+    </nav>
 
     <!-- ============================================================== -->
     <!-- FLOATING TOAST NOTIFICATION CONTAINER -->
@@ -1302,6 +1399,37 @@ document.getElementById('globalCreateModal')?.addEventListener('click', function
 document.getElementById('shortcutsModal')?.addEventListener('click', function(e) {
     if (e.target === this) closeShortcutsModal();
 });
+
+// Theme Management (Dark / Light Mode)
+function updateThemeIcon() {
+    const isDark = document.documentElement.classList.contains('dark');
+    const sun = document.getElementById('themeIconSun');
+    const moon = document.getElementById('themeIconMoon');
+    if (sun && moon) {
+        if (isDark) {
+            sun.classList.remove('hidden');
+            sun.classList.add('block');
+            moon.classList.remove('block');
+            moon.classList.add('hidden');
+        } else {
+            sun.classList.remove('block');
+            sun.classList.add('hidden');
+            moon.classList.remove('hidden');
+            moon.classList.add('block');
+        }
+    }
+}
+
+window.toggleTheme = function() {
+    const isDark = document.documentElement.classList.toggle('dark');
+    try {
+        localStorage.setItem('taskflow_theme', isDark ? 'dark' : 'light');
+    } catch (e) {}
+    updateThemeIcon();
+    showToast(isDark ? 'Tema Gelap diaktifkan' : 'Tema Terang diaktifkan', 'success');
+};
+
+document.addEventListener('DOMContentLoaded', updateThemeIcon);
 
 // Register Service Worker for PWA with cache-busting and instant activation
 if ('serviceWorker' in navigator) {

@@ -121,6 +121,16 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
     border-color: #6366f1;
     box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
 }
+.dark .kanban-lane {
+    background: rgba(30, 41, 59, 0.65);
+    border-color: rgba(51, 65, 85, 0.6);
+    box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.4);
+}
+.dark .kanban-lane.dragover {
+    background: rgba(30, 58, 138, 0.4);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.3);
+}
 
 .kanban-task-card {
     background: rgba(255, 255, 255, 0.84);
@@ -137,6 +147,16 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
     box-shadow: 0 10px 24px -4px rgba(79, 70, 229, 0.12), inset 0 1px 0 #ffffff;
     transform: translateY(-2px);
 }
+.dark .kanban-task-card {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(51, 65, 85, 0.8);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.dark .kanban-task-card:hover {
+    background: rgba(15, 23, 42, 0.98);
+    border-color: rgba(59, 130, 246, 0.5);
+    box-shadow: 0 10px 24px -4px rgba(0, 0, 0, 0.6);
+}
 .kanban-task-card.is-dragging {
     opacity: 0.4;
     transform: scale(0.98);
@@ -149,6 +169,11 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
     border: 1px solid rgba(255, 255, 255, 0.85);
     box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.95);
 }
+.dark .kanban-glass-panel {
+    background: rgba(15, 23, 42, 0.85);
+    border-color: rgba(51, 65, 85, 0.7);
+    box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+}
 </style>
 
 <div class="p-4 md:p-8 w-full space-y-6">
@@ -156,30 +181,30 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
     <!-- Executive Header Section (Glassmorphic) -->
     <div class="rounded-3xl p-6 md:p-7 kanban-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
-                <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-extrabold uppercase tracking-widest mb-2.5">
+                <svg class="w-3.5 h-3.5 text-indigo-600 dark:text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
                 Manajemen Proyek Visual
             </div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Papan Kanban</h1>
-            <p class="text-slate-500 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
+            <h1 class="text-2xl md:text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-1">Papan Kanban</h1>
+            <p class="text-slate-500 dark:text-slate-400 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
                 Kelola aliran tugas secara visual dengan seret-dan-lepas (drag &amp; drop) dan pantau persentase penyelesaian proyek.
             </p>
         </div>
 
         <!-- Header Actions: Quick Add Modal Trigger + Stats Progress -->
         <div class="flex flex-wrap items-center gap-4 flex-shrink-0">
-            <div class="hidden sm:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-50 border border-slate-200/90">
+            <div class="hidden sm:flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/90 dark:border-slate-700">
                 <div class="text-right">
-                    <div class="text-[10px] font-black uppercase tracking-wider text-slate-500">Penyelesaian</div>
-                    <div class="text-xs font-black text-slate-900"><?php echo $done_tasks; ?> dari <?php echo $total_tasks; ?> (<?php echo $overall_pct; ?>%)</div>
+                    <div class="text-[10px] font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">Penyelesaian</div>
+                    <div class="text-xs font-black text-slate-900 dark:text-white"><?php echo $done_tasks; ?> dari <?php echo $total_tasks; ?> (<?php echo $overall_pct; ?>%)</div>
                 </div>
-                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xs border border-indigo-100">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-slate-700 text-indigo-600 dark:text-blue-400 flex items-center justify-center font-black text-xs border border-indigo-100 dark:border-slate-600">
                     <?php echo $overall_pct; ?>%
                 </div>
             </div>
 
             <button type="button" onclick="openAddTaskModal('todo')" 
-                    class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-2 shadow-sm shadow-indigo-600/25">
+                    class="px-5 py-2.5 rounded-xl bg-[#1E5CE6] hover:bg-blue-600 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-2 shadow-sm shadow-blue-600/25">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Tambah Tugas Baru</span>
             </button>
@@ -187,20 +212,20 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
     </div>
 
     <!-- Filter & Pagination Bar -->
-    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 backdrop-blur-md border border-slate-200/80 shadow-xs">
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 p-4 rounded-2xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border border-slate-200/80 dark:border-slate-800 shadow-xs">
         <div class="flex items-center gap-3">
             <div class="relative w-full sm:w-80">
                 <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                 <input type="text" id="kanbanSearchInput" placeholder="Cari kartu tugas di papan..." oninput="filterKanban(this.value)"
-                       class="pl-9 pr-4 py-2 text-xs font-bold w-full rounded-xl text-slate-900 bg-slate-50 border border-slate-200/90 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+                       class="pl-9 pr-4 py-2 text-xs font-bold w-full rounded-xl text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 border border-slate-200/90 dark:border-slate-700 focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400">
             </div>
         </div>
 
         <div class="flex items-center gap-3 justify-end">
-            <label class="flex items-center gap-2 text-xs font-semibold text-slate-500">
+            <label class="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
                 <span>Tampilan per kolom:</span>
                 <select id="kanbanPageSizeSelect" onchange="changeKanbanPageSize(this.value)" 
-                        class="bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer">
+                        class="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs font-bold text-slate-700 dark:text-slate-200 outline-none hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer">
                     <option value="5" selected>5 Tugas</option>
                     <option value="10">10 Tugas</option>
                     <option value="20">20 Tugas</option>
@@ -227,19 +252,19 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
             <div class="flex items-center justify-between mb-2 px-1">
                 <div class="flex items-center gap-2.5">
                     <span class="w-2.5 h-2.5 rounded-full <?php echo $cdata['dot']; ?>"></span>
-                    <h2 class="font-black text-slate-900 text-sm tracking-tight"><?php echo $cdata['title']; ?></h2>
+                    <h2 class="font-black text-slate-900 dark:text-white text-sm tracking-tight"><?php echo $cdata['title']; ?></h2>
                 </div>
                 <span id="badge-count-<?php echo $cid; ?>" class="px-2.5 py-0.5 rounded-full text-xs font-black border <?php echo $cdata['badge_bg']; ?>">
                     <?php echo $count; ?>
                 </span>
             </div>
-            <p class="text-[11px] text-slate-400 font-medium mb-4 px-1 leading-tight">
+            <p class="text-[11px] text-slate-400 dark:text-slate-400 font-medium mb-4 px-1 leading-tight">
                 <?php echo $cdata['subtitle']; ?>
             </p>
 
             <!-- Quick Add Button Per Column -->
             <button type="button" onclick="openAddTaskModal('<?php echo $cid; ?>')" 
-                    class="w-full mb-3.5 py-2 px-3 rounded-xl border border-dashed border-slate-300 hover:border-indigo-500 hover:bg-white text-slate-500 hover:text-indigo-600 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs">
+                    class="w-full mb-3.5 py-2 px-3 rounded-xl border border-dashed border-slate-300 dark:border-slate-700 hover:border-[#1E5CE6] hover:bg-white dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-[#1E5CE6] dark:hover:text-blue-400 text-xs font-bold transition-all flex items-center justify-center gap-1.5 shadow-2xs">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 <span>Tambah ke <?php echo $cdata['title']; ?></span>
             </button>
@@ -262,27 +287,27 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                     
                     <!-- Card Header: Title -->
                     <div class="mb-2.5">
-                        <h3 class="font-black text-slate-900 text-xs sm:text-[13px] leading-snug group-hover:text-indigo-600 transition-colors">
+                        <h3 class="font-black text-slate-900 dark:text-white text-xs sm:text-[13px] leading-snug group-hover:text-[#1E5CE6] dark:group-hover:text-blue-400 transition-colors">
                             <?php echo htmlspecialchars($todo['title']); ?>
                         </h3>
                     </div>
 
                     <!-- Card Footer: Due Date Badge & Status Advance Button -->
-                    <div class="flex items-center justify-between pt-2.5 border-t border-slate-100 mt-auto text-xs">
+                    <div class="flex items-center justify-between pt-2.5 border-t border-slate-100 dark:border-slate-800 mt-auto text-xs">
                         <!-- Date Chip -->
                         <div class="flex items-center gap-1.5">
                             <?php if ($isOverdue): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-rose-700 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-800 px-2 py-0.5 rounded-md">
                                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                                 <?php echo $dateFmt; ?> (Terlambat)
                             </span>
                             <?php elseif ($isToday): ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-md">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 rounded-md">
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                 Hari Ini
                             </span>
                             <?php else: ?>
-                            <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500">
+                            <span class="inline-flex items-center gap-1 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/></svg>
                                 <?php echo $dateFmt; ?>
                             </span>
@@ -295,7 +320,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                             <button type="button" 
                                     onclick="changeKanbanStatus(<?php echo $todo['id']; ?>, '<?php echo $cdata['next_status']; ?>')"
                                     title="<?php echo $cdata['next_label']; ?>" aria-label="<?php echo $cdata['next_label']; ?>"
-                                    class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-400 hover:text-indigo-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                                    class="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-slate-700 text-slate-400 hover:text-[#1E5CE6] dark:hover:text-blue-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                             </button>
 
@@ -303,7 +328,7 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                             <button type="button" 
                                     onclick="confirmDeleteTask(<?php echo $todo['id']; ?>, '<?php echo addslashes($todo['title']); ?>')"
                                     title="Hapus tugas" aria-label="Hapus tugas"
-                                    class="w-7 h-7 rounded-lg bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-600 border border-slate-200/80 flex items-center justify-center transition-colors">
+                                    class="w-7 h-7 rounded-lg bg-slate-50 dark:bg-slate-800 hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 border border-slate-200/80 dark:border-slate-700 flex items-center justify-center transition-colors">
                                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                             </button>
                         </div>
@@ -312,24 +337,24 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                 <?php endforeach; ?>
 
                 <!-- Empty Column Drop Area -->
-                <div id="empty-lane-<?php echo $cid; ?>" class="<?php echo empty($tasks) ? 'flex' : 'hidden'; ?> flex-1 min-h-[140px] flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200/90 rounded-2xl bg-white/60">
-                    <p class="text-xs font-bold text-slate-400 mb-0.5">Tidak ada tugas</p>
-                    <p class="text-[10px] text-slate-400">Tarik kartu ke sini untuk memindahkan</p>
+                <div id="empty-lane-<?php echo $cid; ?>" class="<?php echo empty($tasks) ? 'flex' : 'hidden'; ?> flex-1 min-h-[140px] flex-col items-center justify-center text-center p-6 border-2 border-dashed border-slate-200/90 dark:border-slate-700 rounded-2xl bg-white/60 dark:bg-slate-800/40">
+                    <p class="text-xs font-bold text-slate-400 dark:text-slate-400 mb-0.5">Tidak ada tugas</p>
+                    <p class="text-[10px] text-slate-400 dark:text-slate-500">Tarik kartu ke sini untuk memindahkan</p>
                 </div>
             </div>
 
             <!-- Lane Pagination Footer -->
-            <div id="lane-pagination-<?php echo $cid; ?>" class="pt-3 mt-auto border-t border-slate-200/70 flex items-center justify-between text-xs font-bold text-slate-500">
+            <div id="lane-pagination-<?php echo $cid; ?>" class="pt-3 mt-auto border-t border-slate-200/70 dark:border-slate-800 flex items-center justify-between text-xs font-bold text-slate-500 dark:text-slate-400">
                 <button type="button" onclick="prevLanePage('<?php echo $cid; ?>')" id="prev-btn-<?php echo $cid; ?>" 
-                        class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shadow-2xs">
+                        class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shadow-2xs">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg>
                 </button>
                 <div class="flex items-center gap-1.5">
-                    <span id="lane-indicator-<?php echo $cid; ?>" class="text-[11px] font-extrabold text-slate-600">Hal 1 / 1</span>
-                    <span id="lane-count-<?php echo $cid; ?>" class="text-[10px] text-slate-400 font-semibold">(<?php echo $count; ?> tugas)</span>
+                    <span id="lane-indicator-<?php echo $cid; ?>" class="text-[11px] font-extrabold text-slate-600 dark:text-slate-300">Hal 1 / 1</span>
+                    <span id="lane-count-<?php echo $cid; ?>" class="text-[10px] text-slate-400 dark:text-slate-500 font-semibold">(<?php echo $count; ?> tugas)</span>
                 </div>
                 <button type="button" onclick="nextLanePage('<?php echo $cid; ?>')" id="next-btn-<?php echo $cid; ?>" 
-                        class="w-7 h-7 rounded-lg bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shadow-2xs">
+                        class="w-7 h-7 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 disabled:opacity-30 disabled:pointer-events-none flex items-center justify-center transition-all shadow-2xs">
                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
                 </button>
             </div>
@@ -349,19 +374,19 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
 <!-- QUICK ADD TASK MODAL -->
 <!-- ============================================================== -->
 <div id="addTaskModal" class="fixed inset-0 hidden z-50 items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="addTaskModalTitle">
-    <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-md w-full shadow-2xl overflow-hidden flex flex-col border border-slate-200 dark:border-slate-800">
         
-        <div class="px-6 py-5 border-b border-slate-100 flex justify-between items-center bg-slate-50/60">
+        <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/60 dark:bg-slate-800/50">
             <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100 shadow-xs">
+                <div class="w-10 h-10 rounded-2xl bg-[#1E5CE6]/10 text-[#1E5CE6] dark:text-blue-400 flex items-center justify-center border border-[#1E5CE6]/20 shadow-xs">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 </div>
                 <div>
-                    <h3 class="text-base font-black text-slate-900" id="addTaskModalTitle">Tambah Tugas Baru</h3>
-                    <p class="text-xs text-slate-400 font-medium">Buat kartu tugas baru untuk papan visual Anda</p>
+                    <h3 class="text-base font-black text-slate-900 dark:text-white" id="addTaskModalTitle">Tambah Tugas Baru</h3>
+                    <p class="text-xs text-slate-400 dark:text-slate-400 font-medium">Buat kartu tugas baru untuk papan visual Anda</p>
                 </div>
             </div>
-            <button type="button" onclick="closeAddTaskModal()" aria-label="Tutup modal" class="w-8 h-8 rounded-xl hover:bg-slate-200 text-slate-400 hover:text-slate-900 transition-colors flex items-center justify-center">
+            <button type="button" onclick="closeAddTaskModal()" aria-label="Tutup modal" class="w-8 h-8 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
@@ -371,16 +396,16 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
             <input type="hidden" name="add_task" value="1">
 
             <div>
-                <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Judul Tugas</label>
+                <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Judul Tugas</label>
                 <input type="text" name="title" required placeholder="Contoh: Selesaikan revisi laporan keuangan"
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500 transition-all placeholder:text-slate-400">
+                       class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6] transition-all placeholder:text-slate-400">
             </div>
 
             <div class="grid grid-cols-2 gap-3">
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Kolom Status</label>
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Kolom Status</label>
                     <select name="status" id="addTaskStatusSelect"
-                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500">
+                            class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                         <option value="todo">Belum Mulai</option>
                         <option value="in_progress">Sedang Dikerjakan</option>
                         <option value="done">Selesai</option>
@@ -388,15 +413,15 @@ $overall_pct = $total_tasks > 0 ? round(($done_tasks / $total_tasks) * 100) : 0;
                 </div>
 
                 <div>
-                    <label class="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-1.5">Tenggat Waktu</label>
+                    <label class="block text-[10px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-1.5">Tenggat Waktu</label>
                     <input type="date" name="todo_date" value="<?php echo date('Y-m-d'); ?>" required
-                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:bg-white focus:border-indigo-500">
+                           class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs font-bold text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/20 focus:bg-white dark:focus:bg-slate-800 focus:border-[#1E5CE6]">
                 </div>
             </div>
 
             <div class="pt-2">
                 <button type="submit" 
-                        class="w-full py-3 rounded-xl font-bold text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
+                        class="w-full py-3 rounded-xl font-bold text-white bg-[#1E5CE6] hover:bg-blue-600 shadow-md shadow-blue-600/20 transition-transform active:scale-95 text-xs flex items-center justify-center gap-2">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
                     Simpan Kartu Tugas
                 </button>

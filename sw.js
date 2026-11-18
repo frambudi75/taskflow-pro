@@ -1,5 +1,5 @@
 // TaskFlow Pro - Progressive Web App Service Worker
-const CACHE_NAME = 'taskflow-pwa-v3.3.3';
+const CACHE_NAME = 'taskflow-pwa-v3.4.0';
 const STATIC_ASSETS = [
     './favicon.svg',
     './manifest.json'
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (event) => {
     }
 
     // Never intercept dynamic PHP scripts or API endpoints
-    if (url.pathname.endsWith('.php') || url.search.includes('page=')) {
+    if (url.pathname.endsWith('.php') || url.search.includes('page=') || url.search.length > 0) {
         return;
     }
 
@@ -69,7 +69,7 @@ self.addEventListener('fetch', (event) => {
                         cache.put(event.request, clone).catch(() => {});
                     });
                 }
-                return response;
+                return response || new Response('', { status: 404, statusText: 'Not Found' });
             }).catch(() => {
                 return cached || new Response('', { status: 404, statusText: 'Not Found' });
             });
