@@ -590,7 +590,7 @@ function docIconSvg($type, $color) {
 
 <script>
 // Early modal bindings to guarantee immediate availability on click
-window.openUploadModal = window.openUploadModal || function() {
+function openUploadModal() {
     const m = document.getElementById('uploadModal');
     if (m) {
         m.classList.remove('hidden');
@@ -598,14 +598,17 @@ window.openUploadModal = window.openUploadModal || function() {
         const fileIn = document.getElementById('fileInput');
         if (fileIn) fileIn.focus();
     }
-};
-window.closeUploadModal = window.closeUploadModal || function() {
+}
+window.openUploadModal = openUploadModal;
+
+function closeUploadModal() {
     const m = document.getElementById('uploadModal');
     if (m) {
         m.classList.add('hidden');
         m.style.display = 'none';
     }
-};
+}
+window.closeUploadModal = closeUploadModal;
 </script>
 
 <div class="p-4 md:p-6 w-full space-y-5">

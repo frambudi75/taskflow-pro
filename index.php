@@ -246,39 +246,24 @@ try {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 9.5px 16px;
+            padding: 10px 14px;
             border-radius: 12px;
             color: rgba(255, 255, 255, 0.85);
             font-size: 13px;
-            font-weight: 500;
+            font-weight: 600;
             text-decoration: none;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .nav-item::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%) scaleY(0);
-            width: 3.5px;
-            height: 20px;
-            background: #FFFFFF;
-            border-radius: 0 4px 4px 0;
-            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
-        }
         .nav-item:hover:not(.active) {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.12);
             color: #FFFFFF;
             transform: translateX(3px);
         }
         .nav-item.active {
-            background: rgba(255, 255, 255, 0.18) !important;
+            background: rgba(255, 255, 255, 0.22) !important;
             color: #FFFFFF !important;
             font-weight: 700 !important;
-            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
-        }
-        .nav-item.active::before {
-            transform: translateY(-50%) scaleY(1);
+            box-shadow: 0 4px 14px rgba(10, 30, 90, 0.16);
         }
         .nav-item .nav-icon {
             width: 18px;
@@ -378,8 +363,8 @@ try {
         }
     </style>
     <script>
-        // Early global modal helpers
-        window.openUploadModal = window.openUploadModal || function() {
+        // Universal modal helpers accessible globally before DOM completion
+        function openUploadModal() {
             if (typeof window.documentsOpenUploadModal === 'function') {
                 window.documentsOpenUploadModal();
             } else if (document.getElementById('uploadModal')) {
@@ -391,7 +376,21 @@ try {
             } else {
                 window.location.href = 'index.php?page=documents&openUpload=1';
             }
-        };
+        }
+        window.openUploadModal = openUploadModal;
+
+        function closeUploadModal() {
+            if (typeof window.documentsCloseUploadModal === 'function') {
+                window.documentsCloseUploadModal();
+            } else {
+                const m = document.getElementById('uploadModal');
+                if (m) {
+                    m.classList.add('hidden');
+                    m.style.display = 'none';
+                }
+            }
+        }
+        window.closeUploadModal = closeUploadModal;
     </script>
 </head>
 <body class="bg-white overflow-hidden h-screen w-screen flex flex-col m-0 p-0 select-none">
@@ -693,7 +692,7 @@ try {
                     </div>
 
                     <!-- Storage Bar: Dokumen Aktif -->
-                    <div class="mb-4">
+                    <div>
                         <div class="flex items-center gap-2 text-xs text-white/95 mb-1.5">
                             <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 12V4a4 4 0 014 4h-4zm0 0h8a4 4 0 01-4 4v-4zm0 0v8a4 4 0 01-4-4h4zm0 0H4a4 4 0 014-4v4z"/>
@@ -704,19 +703,6 @@ try {
                             <div class="storage-bar-fill h-full bg-white rounded-full" style="width: <?php echo min(100, max(5, $sidebar_doc_count * 5)); ?>%;"></div>
                         </div>
                         <p class="text-[10px] text-blue-100/80 font-sans"><?php echo $sidebar_doc_count; ?> berkas tersimpan</p>
-                    </div>
-
-                    <!-- Upgrade / Kelola Kuota Link -->
-                    <div class="flex items-center justify-between">
-                        <a href="<?php echo isAdmin() ? route('cache') : route('profile'); ?>" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-white hover:text-blue-100 group transition-colors">
-                            <span>Kelola Kuota</span>
-                            <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M7 17L17 7M9 7h8v8"/>
-                            </svg>
-                        </a>
-                        <a href="<?php echo route('logout'); ?>" class="text-white/80 hover:text-rose-200 transition-colors" title="Keluar">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                        </a>
                     </div>
                 </div>
             </aside>

@@ -6,6 +6,24 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.3.3] - 2026-11-18
+
+### 💎 Penyempurnaan Navigasi Sidebar, Eliminasi Tautan Kuota, & Pengerasan Stabilitas PWA
+- **Penyempurnaan Visual Navigasi Sidebar Kiri (`index.php`)**:
+  - Menghilangkan takik putih mengambang yang canggung (`.nav-item::before` dan `.nav-item.active::before`) pada menu navigasi aktif.
+  - Memodernisasi *pill button* navigasi dengan radius sudut halus (`rounded-xl`), transisi lembut saat disorot (`bg-white/12`, `translateX(3px)`), dan status aktif bersih berkilau (`bg-white/22`, `font-weight: 700`, bayangan lembut).
+  - Menghapus baris tombol redundan *Kelola Kuota* dan tombol logout di bagian dasar sidebar lengkung agar kartu *Storage Details* tampil proporsional, lapang, dan rapi sesuai desain referensi Goodle Drive.
+- **Pengerasan Service Worker & Pencegahan Galat Jaringan PWA (`sw.js`)**:
+  - Menerapkan aturan pencegahan ketat *same-origin only* pada `sw.js`: Service Worker tidak akan pernah mengintersepsi domain pihak ketiga (seperti Cloudflare Insights, beacon analitik, atau CDN eksternal).
+  - Mengabaikan berkas PHP dinamis dan permintaan bernavigasi untuk mencegah interferensi jaringan.
+  - Memastikan seluruh *fallback* tangkapan galat selalu mengembalikan objek `Response` valid, meniadakan peringatan konsol `TypeError: Failed to convert value to 'Response'` dan `network error response: the promise was rejected`.
+- **Deklarasi Fungsi Modal Global Universal (`index.php`, `pages/documents.php`)**:
+  - Mendeklarasikan fungsi `openUploadModal` dan `closeUploadModal` secara top-level pada `window` dan cakupan global sejak tag `<head>` untuk mencegah `ReferenceError: openUploadModal is not defined`.
+- **Pembersihan Modul Kalender (`pages/calendar.php`)**:
+  - Menghapus duplikasi ikon plus pada tombol `Buat Agenda Cepat` di header kalender.
+
+---
+
 ## [3.3.2] - 2026-11-18
 
 ### 📅 Harmonisasi Tema Goodle Drive pada Kalender & Catatan Kerja

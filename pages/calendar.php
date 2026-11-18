@@ -199,7 +199,7 @@ $day_pct = $day_total > 0 ? round(($day_done / $day_total) * 100) : 0;
             <button type="button" onclick="focusAgendaInput()" 
                     class="px-4 py-2.5 rounded-xl bg-[#1E5CE6] hover:bg-[#1749B8] active:scale-95 text-white font-bold text-xs shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all cursor-pointer">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>+ Buat Agenda Cepat</span>
+                <span>Buat Agenda Cepat</span>
             </button>
         </div>
     </div>

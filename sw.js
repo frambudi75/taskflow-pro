@@ -1,5 +1,5 @@
 // TaskFlow Pro - Progressive Web App Service Worker
-const CACHE_NAME = 'taskflow-pwa-v3.3.2';
+const CACHE_NAME = 'taskflow-pwa-v3.3.3';
 const STATIC_ASSETS = [
     './favicon.svg',
     './manifest.json'
@@ -20,17 +20,14 @@ self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((keys) => {
             return Promise.all(
-                keys.map((key) => {
-                    if (key !== CACHE_NAME) {
-                        return caches.delete(key);
-                    }
-                })
+                keys.filter((key) => key !== CACHE_NAME).map((key) => caches.delete(key))
             );
         }).then(() => self.clients.claim())
     );
 });
 
-// Precision Fetch: ONLY handle static local assets, NEVER touch dynamic PHP, navigation, or third-party beacons
+// Precision Fetch: ONLY handle same-origin static local assets.
+// NEVER intercept external domains (Cloudflare insights, beacons, CDNs), PHP files, or HTML navigation.
 self.addEventListener('fetch', (event) => {
     // Only handle GET requests
     if (event.request.method !== 'GET') return;
@@ -45,15 +42,18 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Never intercept third-party domains (e.g. Cloudflare Insights, Google Analytics, beacons)
+    // STRICT: Only intercept SAME-ORIGIN requests. Cross-origin (Cloudflare, Google, CDNs) are left 100% to browser native
     if (url.origin !== self.location.origin) {
-        if (!url.hostname.includes('fonts.googleapis.com') && !url.hostname.includes('fonts.gstatic.com')) {
-            return;
-        }
+        return;
     }
 
-    // Only cache static file extensions
-    const isStaticAsset = url.pathname.match(/\.(svg|png|jpg|jpeg|webp|ico|css|woff2?)$/i) || url.hostname.includes('fonts.');
+    // Never intercept dynamic PHP scripts or API endpoints
+    if (url.pathname.endsWith('.php') || url.search.includes('page=')) {
+        return;
+    }
+
+    // Only cache known static file extensions
+    const isStaticAsset = /\.(svg|png|jpg|jpeg|webp|ico|css|js|woff2?)$/i.test(url.pathname);
     if (!isStaticAsset) {
         return;
     }
@@ -63,9 +63,11 @@ self.addEventListener('fetch', (event) => {
         caches.match(event.request).then((cached) => {
             if (cached) return cached;
             return fetch(event.request).then((response) => {
-                if (response && response.status === 200) {
+                if (response && response.status === 200 && response.type === 'basic') {
                     const clone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, clone).catch(() => {});
+                    });
                 }
                 return response;
             }).catch(() => {
