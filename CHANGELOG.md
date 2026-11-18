@@ -6,6 +6,34 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
 
 ---
 
+## [3.3.0] - 2026-11-18
+
+### 💎 Desain Antarmuka Cloud Storage Generasi Baru (Goodle Drive UI Integration)
+- **Implementasi Desain Antarmuka Goodle Drive Cloud Storage (`index.php`)**:
+  - Mengadopsi arsitektur visual modern berbasis **Goodle Drive UI** (`https://github.com/LALUARIFTA/goodle_drive_cloud_storage_ui.git`):
+    - Kanvas luar bergradasi *royal blue radial* (`#235EE7`, `#326FF5`, `#1A4EC9`) dengan *App Frame* putih mengambang bersudut kurva elegan (`rounded-[34px]`) dan elevasi bayangan mewah (`shadow-[0_32px_70px_-15px_rgba(10,29,77,0.45)]`).
+    - *Top Header Bar* putih bersih: Logo geometris bersegi, kolom pencarian kapsul (*pill search*) terintegrasi Command Palette (`Ctrl + K`), lonceng notifikasi interaktif dengan riwayat audit log, tombol bantuan pintasan (`?`), roda gigi pengaturan, dan *profile pill* pengguna.
+    - *Curved Royal Blue Sidebar*: Bilah sisi biru melengkung khas dengan *border-top-right-radius: 54px*, tombol utama kapsul putih `+ Buat Cepat`, dan panel metrik *STORAGE DETAILS* ganda (status kapasitas penyimpanan dan jumlah dokumen aktif dengan visual baris progres lembut).
+- **Penyesuaian Penuh dengan Seluruh Menu Sistem TaskFlow Pro**:
+  - Menu navigasi diselaraskan 100% dengan alur kerja yang ada:
+    - **Dasbor** (`dashboard`)
+    - **Kalender** (`calendar`)
+    - **Catatan** (`notes`)
+    - **Dokumen** (`documents`)
+    - **Proyek (Kanban)** (`projects`) dengan lencana jumlah tugas aktif
+    - **Aktivitas** (`activities`)
+    - **Profil Saya** (`profile`)
+    - Sub-menu Administrasi: **Pengguna** (`admin`), **Cadangan Data** (`backup`), **Optimasi Cache** (`cache`), **Pengaturan Sistem** (`settings`).
+- **Pembaruan Modul Dokumen 3.0 (`pages/documents.php`)**:
+  - Transformasi kartu metrik atas menjadi **Kartu Folder Tab Siluet Berlekuk S-Curve** (`.folder-card-wrapper`, `.folder-tab`, `.folder-tab-curve`, `.folder-body`):
+    - Kartu 1 (Aktif): Royal Blue Folder Tab Dokumen Saya.
+    - Kartu 2: Tab Folder Kapasitas Penyimpanan & Bar Kuota Terpakai.
+    - Kartu 3: Tab Folder Kolaborasi & Dokumen Bersama.
+    - Kartu 4: Kartu Pratinjau Dokumen Terkini (*Quick Doc Card*) dengan indikator modifikasi waktu nyata.
+  - Header halaman dilengkapi tombol cepat unggah berkas kotak biru membulat (`w-10 h-10 rounded-[11px] bg-[#1E5CE6]`) dan pengalih tata letak Grid/Tabel.
+
+---
+
 ## [3.2.11] - 2026-11-18
 
 ### 🧹 Kebersihan Konsol Pengembang (*Zero Warning Console*) & Analisis RUM Edge

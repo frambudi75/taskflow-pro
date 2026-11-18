@@ -608,36 +608,48 @@ window.closeUploadModal = window.closeUploadModal || function() {
 };
 </script>
 
-<div class="p-4 md:p-8 w-full space-y-6">
+<div class="p-4 md:p-6 w-full space-y-5">
 
-    <!-- Executive Header Section (Glassmorphic) -->
-    <div class="rounded-3xl p-6 md:p-7 doc-glass-panel relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-extrabold uppercase tracking-widest mb-2.5">
-                <svg class="w-3.5 h-3.5 text-indigo-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-                Penyimpanan &amp; Berbagi Dokumen
-            </div>
-            <h1 class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight mb-1">Manajemen Dokumen</h1>
-            <p class="text-slate-500 text-xs md:text-sm max-w-xl leading-relaxed font-medium">
-                Simpan berkas kerja terkompresi berkualitas tinggi, pratinjau instan visual, dan kelola kolaborasi tim secara terpadu.
-            </p>
+    <!-- Dynamic Page Header Row (Matches Goodle Drive UI) -->
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+            <h1 class="text-[24px] sm:text-[28px] font-extrabold text-[#1E5CE6] tracking-tight">Pusat Dokumen</h1>
+            <!-- Blue Rounded Square New Upload Button -->
+            <button
+                type="button"
+                onclick="openUploadModal()"
+                title="Unggah Berkas Baru"
+                aria-label="Unggah Berkas Baru"
+                class="w-10 h-10 rounded-[11px] bg-[#1E5CE6] hover:bg-[#1749B8] active:scale-95 text-white flex items-center justify-center shadow-md shadow-blue-600/25 transition-all cursor-pointer"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+            </button>
         </div>
 
-        <!-- Search Bar with Instant Debounce & Upload CTA -->
-        <div class="flex flex-wrap items-center gap-3 flex-shrink-0">
-            <!-- Instant Search Input -->
-            <div class="relative w-full sm:w-64 md:w-72">
-                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="docSearchInput" oninput="handleDocSearch(this.value)" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari nama berkas atau tag..." aria-label="Cari dokumen"
-                       class="w-full pl-9 pr-8 py-2.5 text-xs font-bold rounded-xl text-slate-900 bg-slate-50 border border-slate-200/90 focus:bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all placeholder:text-slate-400">
+        <!-- Right: Search Bar & Actions -->
+        <div class="flex items-center gap-2.5">
+            <div class="relative w-48 sm:w-64">
+                <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="docSearchInput" oninput="handleDocSearch(this.value)" value="<?php echo htmlspecialchars($search); ?>" placeholder="Cari nama berkas.."
+                       class="w-full pl-9 pr-8 py-2.5 text-xs font-semibold rounded-full text-slate-900 bg-[#F3F5F8] border-none focus:outline-none focus:ring-2 focus:ring-[#1E5CE6]/30 transition-all placeholder:text-slate-400">
                 <button type="button" id="docSearchClear" onclick="clearDocSearch()" class="<?php echo $search ? '' : 'hidden'; ?> absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-bold w-5 h-5 flex items-center justify-center">✕</button>
             </div>
-
-            <!-- Single Primary Upload Action (Opens Upload Modal) -->
-            <button type="button" onclick="openUploadModal()"
-                    class="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition-transform active:scale-95 flex items-center gap-2 shadow-sm shadow-indigo-600/20">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Unggah Berkas</span>
+            <!-- Grid/List Switcher Button -->
+            <button
+                type="button"
+                id="docLayoutToggleBtn"
+                onclick="switchDocView(currentDocView === 'grid' ? 'list' : 'grid')"
+                title="Ganti Tampilan Grid / Tabel"
+                class="w-10 h-10 rounded-[11px] bg-[#F1F3F7] hover:bg-[#E4E8F0] text-slate-600 hover:text-[#1E5CE6] flex items-center justify-center transition-all cursor-pointer"
+            >
+                <svg id="docLayoutIcon" class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <rect x="3" y="3" width="6" height="4" rx="1"/>
+                    <rect x="3" y="9" width="6" height="8" rx="1"/>
+                    <rect x="11" y="3" width="6" height="8" rx="1"/>
+                    <rect x="11" y="13" width="6" height="4" rx="1"/>
+                </svg>
             </button>
         </div>
     </div>
@@ -714,96 +726,104 @@ window.closeUploadModal = window.closeUploadModal || function() {
     </div>
     <?php endif; ?>
 
-    <!-- Document Summary KPI Stats (4 Standard Cards with Storage Quota Bar) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Card 1: Dokumen Saya -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-indigo-500 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dokumen Saya</span>
-                    <div class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center border border-indigo-100">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                    </div>
-                </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none"><?php echo count($my_documents); ?></span>
-                </div>
-            </div>
-            <div class="text-[11px] text-slate-400 font-semibold mt-2">berkas tersimpan</div>
+    <!-- ==================== QUICK ACCESS FOLDERS (Goodle Drive Design) ==================== -->
+    <div class="mb-4">
+        <div class="flex items-center justify-between mb-2">
+            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Akses Cepat Folder</h2>
+            <span class="text-[11px] text-slate-400 font-medium hidden sm:inline">Pilih kartu folder untuk beralih tampilan berkas</span>
         </div>
 
-        <!-- Card 2: Kapasitas Penyimpanan Terpakai -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-emerald-500 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Penyimpanan Terpakai</span>
-                    <div class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <!-- Folder 1: Dokumen Saya (Active Blue Folder Tab) -->
+            <a href="?page=documents&tab=my" class="folder-card-wrapper <?php echo $tab === 'my' ? 'active' : 'inactive'; ?> block">
+                <div class="folder-tab"></div>
+                <svg class="folder-tab-curve" viewBox="0 0 28 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path class="curve-fill transition-colors duration-200" d="M0 0 C10 0, 14 19, 28 19 L0 19 Z"/>
+                </svg>
+                <div class="folder-body flex flex-col justify-between h-[150px]">
+                    <div class="flex items-start justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-wider <?php echo $tab === 'my' ? 'text-blue-100' : 'text-slate-500'; ?>">FOLDER SAYA</span>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold <?php echo $tab === 'my' ? 'bg-white text-[#1E5CE6]' : 'bg-slate-200 text-slate-700'; ?>">
+                            Buka &rarr;
+                        </span>
+                    </div>
+                    <div class="pt-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider <?php echo $tab === 'my' ? 'text-blue-200' : 'text-slate-400'; ?> mb-0.5">DOKUMEN UTAMA</div>
+                        <h3 class="font-extrabold text-sm <?php echo $tab === 'my' ? 'text-white' : 'text-slate-800'; ?> truncate">Dokumen Saya</h3>
+                        <p class="text-[11px] <?php echo $tab === 'my' ? 'text-blue-100' : 'text-slate-500'; ?> mt-0.5"><?php echo count($my_documents); ?> berkas tersimpan</p>
                     </div>
                 </div>
-                <div class="flex items-baseline gap-1.5 flex-wrap">
-                    <span class="text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-none"><?php echo $my_storage_formatted; ?></span>
-                    <span class="text-xs font-bold text-slate-400">/ <?php echo $storage_quota_formatted; ?></span>
-                </div>
-            </div>
-            <div class="mt-3">
-                <div class="w-full bg-slate-100 rounded-full h-2 overflow-hidden border border-slate-200/60">
-                    <?php 
-                    $barGradient = 'from-emerald-400 to-emerald-500';
-                    if (!$is_unlimited) {
-                        if ($storage_pct >= 90) {
-                            $barGradient = 'from-rose-500 to-red-600';
-                        } elseif ($storage_pct >= 75) {
-                            $barGradient = 'from-amber-400 to-amber-500';
-                        }
-                    } else {
-                        $barGradient = 'from-indigo-400 to-indigo-600';
-                    }
-                    ?>
-                    <div class="bg-gradient-to-r <?php echo $barGradient; ?> h-full rounded-full transition-all duration-500 shadow-xs" style="width: <?php echo max(3, $storage_bar_pct); ?>%"></div>
-                </div>
-                <div class="flex items-center justify-between text-[10px] text-slate-400 font-bold mt-1.5">
-                    <?php if ($is_unlimited): ?>
-                        <span class="text-indigo-600 font-bold">♾️ Kuota Bebas</span>
-                        <span>Tanpa Batas</span>
-                    <?php else: ?>
-                        <span class="<?php echo $storage_pct >= 90 ? 'text-rose-600 font-black' : ''; ?>"><?php echo $storage_pct; ?>% kuota terpakai</span>
-                        <span>Sisa <?php echo $storage_remaining_formatted; ?></span>
-                    <?php endif; ?>
-                </div>
-            </div>
-        </div>
+            </a>
 
-        <!-- Card 3: Dibagikan ke Saya (Neutral zero state) -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-sky-500 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Dibagikan ke Saya</span>
-                    <div class="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            <!-- Folder 2: Kapasitas Penyimpanan (Folder Tab) -->
+            <div class="folder-card-wrapper inactive block">
+                <div class="folder-tab"></div>
+                <svg class="folder-tab-curve" viewBox="0 0 28 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path class="curve-fill transition-colors duration-200" d="M0 0 C10 0, 14 19, 28 19 L0 19 Z"/>
+                </svg>
+                <div class="folder-body flex flex-col justify-between h-[150px]">
+                    <div class="flex items-start justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500">PENYIMPANAN</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
+                            <?php echo $is_unlimited ? 'Bebas' : $storage_pct . '%'; ?>
+                        </span>
+                    </div>
+                    <div class="pt-2">
+                        <h3 class="font-extrabold text-xs text-slate-800 truncate mb-1">
+                            <?php echo $my_storage_formatted; ?> <span class="text-slate-400 font-semibold text-[11px]">/ <?php echo $storage_quota_formatted; ?></span>
+                        </h3>
+                        <div class="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden mb-1">
+                            <div class="bg-[#1E5CE6] h-full rounded-full transition-all duration-500" style="width: <?php echo max(3, $storage_bar_pct); ?>%"></div>
+                        </div>
+                        <p class="text-[10.5px] text-slate-500">Sisa <?php echo $storage_remaining_formatted; ?></p>
                     </div>
                 </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-2xl md:text-3xl font-black tracking-tight leading-none <?php echo count($shared_documents) > 0 ? 'text-sky-600' : 'text-slate-400'; ?>"><?php echo count($shared_documents); ?></span>
-                </div>
             </div>
-            <div class="text-[11px] text-slate-400 font-semibold mt-2">dari rekan kerja</div>
-        </div>
 
-        <!-- Card 4: Tautan Publik Aktif (Neutral zero state) -->
-        <div class="doc-card-kpi p-5 border-t-[3px] border-t-amber-500 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">Tautan Publik Aktif</span>
-                    <div class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-100">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            <!-- Folder 3: Dibagikan ke Saya (Folder Tab) -->
+            <a href="?page=documents&tab=shared" class="folder-card-wrapper <?php echo $tab === 'shared' ? 'active' : 'inactive'; ?> block">
+                <div class="folder-tab"></div>
+                <svg class="folder-tab-curve" viewBox="0 0 28 19" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path class="curve-fill transition-colors duration-200" d="M0 0 C10 0, 14 19, 28 19 L0 19 Z"/>
+                </svg>
+                <div class="folder-body flex flex-col justify-between h-[150px]">
+                    <div class="flex items-start justify-between">
+                        <span class="text-[10px] font-bold uppercase tracking-wider <?php echo $tab === 'shared' ? 'text-blue-100' : 'text-slate-500'; ?>">KOLABORASI TIM</span>
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold <?php echo $tab === 'shared' ? 'bg-white text-[#1E5CE6]' : 'bg-slate-200 text-slate-700'; ?>">
+                            Buka &rarr;
+                        </span>
+                    </div>
+                    <div class="pt-3">
+                        <div class="text-[10px] font-bold uppercase tracking-wider <?php echo $tab === 'shared' ? 'text-blue-200' : 'text-slate-400'; ?> mb-0.5">DIBAGIKAN KE SAYA</div>
+                        <h3 class="font-extrabold text-sm <?php echo $tab === 'shared' ? 'text-white' : 'text-slate-800'; ?> truncate">Dokumen Bersama</h3>
+                        <p class="text-[11px] <?php echo $tab === 'shared' ? 'text-blue-100' : 'text-slate-500'; ?> mt-0.5"><?php echo count($shared_documents); ?> berkas dari rekan</p>
                     </div>
                 </div>
-                <div class="flex items-baseline gap-2">
-                    <span class="text-2xl md:text-3xl font-black tracking-tight leading-none <?php echo count($public_shares_raw) > 0 ? 'text-amber-600' : 'text-slate-400'; ?>"><?php echo count($public_shares_raw); ?></span>
+            </a>
+
+            <!-- Folder 4: Dokumen Terkini (Quick Doc Card) -->
+            <?php $recent_doc = !empty($my_documents) ? $my_documents[0] : null; ?>
+            <div class="pt-[18px] block">
+                <div class="h-[150px] rounded-[18px] bg-[#F3F5F9] hover:bg-[#EAEEF6] transition-all duration-200 p-4 flex flex-col justify-between relative group hover:-translate-y-1">
+                    <div>
+                        <div class="flex items-start justify-between mb-2">
+                            <div class="w-7 h-7 rounded-lg border-[1.8px] border-[#1E5CE6] text-[#1E5CE6] flex items-center justify-center bg-white shadow-2xs">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 8h12M6 12h12M6 16h7"/></svg>
+                            </div>
+                            <span class="text-[10px] font-bold uppercase tracking-wider bg-white px-2 py-0.5 rounded-md text-slate-600 border border-slate-200">TERKINI</span>
+                        </div>
+                        <p class="text-xs font-bold text-[#1E5CE6] leading-snug line-clamp-2 truncate">
+                            <?php echo $recent_doc ? htmlspecialchars($recent_doc['name']) : 'Belum Ada Berkas'; ?>
+                        </p>
+                    </div>
+                    <div>
+                        <p class="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">TERAKHIR DIUBAH</p>
+                        <p class="text-[11px] font-semibold text-slate-700">
+                            <?php echo $recent_doc ? date('d M Y, H:i', strtotime($recent_doc['upload_date'])) : '-'; ?>
+                        </p>
+                    </div>
                 </div>
             </div>
-            <div class="text-[11px] text-slate-400 font-semibold mt-2">siap diakses luar</div>
         </div>
     </div>
 
