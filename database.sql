@@ -126,6 +126,8 @@ CREATE TABLE `todos` (
   `todo_date` date NOT NULL,
   `completed` tinyint(1) DEFAULT 0,
   `status` varchar(20) DEFAULT 'todo',
+  `priority` varchar(20) NOT NULL DEFAULT 'medium',
+  `description` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `idx_user_date` (`user_id`,`todo_date`),
@@ -139,9 +141,21 @@ CREATE TABLE `todos` (
 
 LOCK TABLES `todos` WRITE;
 /*!40000 ALTER TABLE `todos` DISABLE KEYS */;
-INSERT INTO `todos` VALUES (1,1,'tes','2026-03-14',0,'todo','2026-03-14 07:01:12'),(2,1,'dfgdfg','2026-03-14',0,'todo','2026-03-14 07:06:11'),(3,1,'efgtgrgreg','2026-03-14',0,'todo','2026-03-14 07:07:49'),(4,3,'tht','2026-03-14',0,'todo','2026-03-14 07:33:37'),(5,4,'gfegrgre','2026-03-22',1,'done','2026-03-22 17:49:01'),(6,4,'afaf','2026-03-23',1,'done','2026-03-22 17:49:28'),(8,4,'tes','2026-03-24',1,'done','2026-03-24 02:19:37'),(9,4,'tes2','2026-03-24',1,'done','2026-03-24 02:56:23'),(10,4,'test','2026-03-28',0,'todo','2026-03-27 12:39:55'),(11,4,'test','2026-03-28',0,'todo','2026-03-27 12:39:59'),(12,4,'testkjsahfhjewf','2026-03-30',0,'todo','2026-03-27 12:40:09');
+INSERT INTO `todos` (`id`, `user_id`, `title`, `todo_date`, `completed`, `status`, `created_at`) VALUES (1,1,'tes','2026-03-14',0,'todo','2026-03-14 07:01:12'),(2,1,'dfgdfg','2026-03-14',0,'todo','2026-03-14 07:06:11'),(3,1,'efgtgrgreg','2026-03-14',0,'todo','2026-03-14 07:07:49'),(4,3,'tht','2026-03-14',0,'todo','2026-03-14 07:33:37'),(5,4,'gfegrgre','2026-03-22',1,'done','2026-03-22 17:49:01'),(6,4,'afaf','2026-03-23',1,'done','2026-03-22 17:49:28'),(8,4,'tes','2026-03-24',1,'done','2026-03-24 02:19:37'),(9,4,'tes2','2026-03-24',1,'done','2026-03-24 02:56:23'),(10,4,'test','2026-03-28',0,'todo','2026-03-27 12:39:55'),(11,4,'test','2026-03-28',0,'todo','2026-03-27 12:39:59'),(12,4,'testkjsahfhjewf','2026-03-30',0,'todo','2026-03-27 12:40:09');
 /*!40000 ALTER TABLE `todos` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `todo_checklists`;
+CREATE TABLE `todo_checklists` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `todo_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `is_completed` tinyint(1) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `idx_todo_chk` (`todo_id`),
+  CONSTRAINT `todo_chk_fk` FOREIGN KEY (`todo_id`) REFERENCES `todos` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
