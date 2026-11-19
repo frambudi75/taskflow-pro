@@ -163,7 +163,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             <?php endif; ?>
 
             <!-- Login Form -->
-            <form method="POST" action="login.php" class="space-y-4" id="mainLoginForm">
+            <form method="POST" action="<?php echo route('login'); ?>" class="space-y-4" id="mainLoginForm">
                 
                 <!-- Email Input -->
                 <div>

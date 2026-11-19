@@ -389,15 +389,15 @@ $pub_stmt->execute([$user_id]);
 $public_shares_raw = $pub_stmt->fetchAll();
 $public_shares_by_doc = [];
 
-// Base URL for public sharing
+// Base URL for clean public sharing
 $configured_app_url = getSetting('app_url');
 if (!empty($configured_app_url)) {
-    $share_base_url = rtrim($configured_app_url, '/') . '/share.php?token=';
+    $share_base_url = rtrim($configured_app_url, '/') . '/share/';
 } else {
     $protocol = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
     $dir = rtrim(dirname($_SERVER['PHP_SELF']), '/\\');
-    $share_base_url = $protocol . '://' . $host . ($dir ? $dir : '') . '/share.php?token=';
+    $share_base_url = $protocol . '://' . $host . ($dir ? $dir : '') . '/share/';
 }
 
 foreach ($public_shares_raw as $ps) {

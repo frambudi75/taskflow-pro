@@ -7,33 +7,37 @@ Options -Indexes
 # Enable mod_rewrite for clean URLs
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteBase /taskflow/
 
-    # Clean URLs for core pages
-    RewriteRule ^auth$ login.php [L,QSA]
-    RewriteRule ^dashboard$ index.php?page=dashboard [L,QSA]
-    RewriteRule ^calendar$ index.php?page=calendar [L,QSA]
-    RewriteRule ^notes$ index.php?page=notes [L,QSA]
-    RewriteRule ^dokumen$ index.php?page=documents [L,QSA]
-    RewriteRule ^kanban$ index.php?page=projects [L,QSA]
-    RewriteRule ^activities$ index.php?page=activities [L,QSA]
-    RewriteRule ^settings$ index.php?page=settings [L,QSA]
-    RewriteRule ^profile$ index.php?page=profile [L,QSA]
-    RewriteRule ^reset-password$ index.php?page=reset-password [L,QSA]
-    RewriteRule ^pengguna$ index.php?page=admin [L,QSA]
-    RewriteRule ^backup$ index.php?page=backup [L,QSA]
-    RewriteRule ^cache$ index.php?page=cache [L,QSA]
-    RewriteRule ^notif-harian$ notif_harian.php [L,QSA]
-    RewriteRule ^test-mail$ test_mail.php [L,QSA]
-    RewriteRule ^logout$ index.php?logout=1 [L,QSA]
+    # Prevent rewrite loops on internal subrequests
+    RewriteCond %{ENV:REDIRECT_STATUS} 200
+    RewriteRule ^ - [L]
 
-    # "Encrypted" style link example
-    RewriteRule ^secure-login-([a-f0-9]{8})$ login.php?token=$1 [L,QSA]
+    # Clean Public Document Share URLs: /share/TOKEN or /s/TOKEN
+    RewriteRule ^share/([a-zA-Z0-9_-]+)/?$ share.php?token=$1 [L,QSA]
+    RewriteRule ^s/([a-zA-Z0-9_-]+)/?$ share.php?token=$1 [L,QSA]
 
-    # Fallback to index.php if not a file or directory
+    # Clean URLs for core pages (both English & Indonesian aliases)
+    RewriteRule ^(auth|login)/?$ login.php [L,QSA]
+    RewriteRule ^logout/?$ index.php?logout=1 [L,QSA]
+    RewriteRule ^dashboard/?$ index.php?page=dashboard [L,QSA]
+    RewriteRule ^calendar/?$ index.php?page=calendar [L,QSA]
+    RewriteRule ^notes/?$ index.php?page=notes [L,QSA]
+    RewriteRule ^(documents|dokumen)/?$ index.php?page=documents [L,QSA]
+    RewriteRule ^(projects|kanban)/?$ index.php?page=projects [L,QSA]
+    RewriteRule ^activities/?$ index.php?page=activities [L,QSA]
+    RewriteRule ^settings/?$ index.php?page=settings [L,QSA]
+    RewriteRule ^profile/?$ index.php?page=profile [L,QSA]
+    RewriteRule ^reset-password/?$ index.php?page=reset-password [L,QSA]
+    RewriteRule ^(admin|pengguna)/?$ index.php?page=admin [L,QSA]
+    RewriteRule ^backup/?$ index.php?page=backup [L,QSA]
+    RewriteRule ^cache/?$ index.php?page=cache [L,QSA]
+    RewriteRule ^notif-harian/?$ notif_harian.php [L,QSA]
+    RewriteRule ^test-mail/?$ test_mail.php [L,QSA]
+
+    # Dynamic single-segment clean URLs (e.g. /chat, /reports)
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteCond %{REQUEST_FILENAME} !-d
-    RewriteRule ^(.*)$ index.php?path=$1 [L,QSA]
+    RewriteRule ^([a-zA-Z0-9_-]+)/?$ index.php?page=$1 [L,QSA]
 </IfModule>
 
 # Deny access to sensitive file types

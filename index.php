@@ -1287,13 +1287,51 @@ function closeShortcutsModal() {
     if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
 }
 
+// Clean routes recognized by TaskFlow Pro
+const cleanRoutes = [
+    'dashboard', 'calendar', 'notes', 'documents', 'dokumen',
+    'projects', 'kanban', 'activities', 'settings', 'profile',
+    'reset-password', 'admin', 'pengguna', 'backup', 'cache'
+];
+
+function isNavigableLink(link) {
+    if (!link) return false;
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.includes('logout') || href.includes('serve_file.php') || href.includes('download=') || href.includes('print_view=') || href.includes('export=')) return false;
+    if (href.startsWith('mailto:') || href.startsWith('tel:')) return false;
+
+    try {
+        const u = new URL(href, window.location.origin);
+        if (u.origin !== window.location.origin) return false;
+        
+        // Legacy query style (e.g. index.php?page=calendar)
+        if (u.searchParams.has('page') || u.pathname.endsWith('index.php')) return true;
+        
+        // Clean URL route style (e.g. /dashboard or /taskflow/dashboard)
+        const seg = u.pathname.replace(/\/+$/, '').split('/').pop();
+        if (cleanRoutes.includes(seg)) return true;
+    } catch(e) {}
+    
+    return false;
+}
+
 // Instant In-Memory Page Cache for 0ms Navigation
 const pageMemoryCache = new Map();
 
 function updateNavActive(targetUrl) {
     try {
         const urlObj = new URL(targetUrl, window.location.origin);
-        const page = urlObj.searchParams.get('page') || 'dashboard';
+        let page = urlObj.searchParams.get('page');
+        if (!page) {
+            const seg = urlObj.pathname.replace(/\/+$/, '').split('/').pop();
+            if (cleanRoutes.includes(seg)) {
+                if (seg === 'dokumen') page = 'documents';
+                else if (seg === 'kanban') page = 'projects';
+                else if (seg === 'pengguna') page = 'admin';
+                else page = seg;
+            }
+        }
+        page = page || 'dashboard';
         document.querySelectorAll('.nav-item').forEach(el => {
             const dataNav = el.getAttribute('data-nav');
             if (dataNav === 'profile' && (page === 'profile' || page === 'reset-password')) {
@@ -1406,27 +1444,18 @@ function executeScripts(container) {
 // Intercept internal links for AJAX
 document.addEventListener('click', e => {
     const link = e.target.closest('a');
-    if (!link) return;
+    if (!isNavigableLink(link)) return;
     
-    const href = link.getAttribute('href');
-    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.includes('logout') || href.includes('serve_file.php')) return;
-    if (href.startsWith('http') && !href.includes(window.location.host)) return;
-    
-    if (href.includes('index.php?page=') || href === 'index.php') {
-        e.preventDefault();
-        loadPage(href);
-        if (window.innerWidth < 1024) closeSidebar();
-    }
+    e.preventDefault();
+    loadPage(link.getAttribute('href'));
+    if (window.innerWidth < 1024) closeSidebar();
 });
 
 // Hover prefetch for instantaneous 0ms page loads
 document.addEventListener('mouseover', e => {
     const link = e.target.closest('a');
-    if (!link) return;
-    const href = link.getAttribute('href');
-    if (href && (href.includes('index.php?page=') || href === 'index.php')) {
-        prefetchPage(href);
-    }
+    if (!isNavigableLink(link)) return;
+    prefetchPage(link.getAttribute('href'));
 });
 
 // Intercept forms for AJAX

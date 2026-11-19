@@ -272,7 +272,7 @@ $isPdf   = $share && strtolower($share['file_type']) === 'application/pdf';
 
                 <!-- Download Primary Action -->
                 <div class="space-y-3 pt-2">
-                    <a href="share.php?token=<?php echo urlencode($token); ?>&download=1"
+                    <a href="<?php echo baseUrl('share/' . urlencode($token) . '?download=1'); ?>"
                        class="w-full py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 active:scale-[0.99] text-white font-extrabold text-sm md:text-base shadow-xl shadow-indigo-600/30 transition-all flex items-center justify-center gap-3">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                         Unduh Dokumen Sekarang

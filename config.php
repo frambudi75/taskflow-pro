@@ -65,25 +65,25 @@ function baseUrl($path = '') {
 }
 
 function route($page) {
-    // Map pages to standard PHP URLs for broad compatibility
+    // Clean URLs without .php extension (handled dynamically by .htaccess mod_rewrite)
     $map = [
-        'login' => 'login.php',
-        'dashboard' => 'index.php?page=dashboard',
-        'calendar' => 'index.php?page=calendar',
-        'notes' => 'index.php?page=notes',
-        'documents' => 'index.php?page=documents',
-        'projects' => 'index.php?page=projects',
-        'activities' => 'index.php?page=activities',
-        'settings' => 'index.php?page=settings',
-        'profile' => 'index.php?page=profile',
-        'reset-password' => 'index.php?page=reset-password',
-        'admin' => 'index.php?page=admin',
-        'backup' => 'index.php?page=backup',
-        'cache' => 'index.php?page=cache',
-        'notif-harian' => 'notif_harian.php',
-        'logout' => 'index.php?logout=1'
+        'login' => 'login',
+        'dashboard' => 'dashboard',
+        'calendar' => 'calendar',
+        'notes' => 'notes',
+        'documents' => 'documents',
+        'projects' => 'projects',
+        'activities' => 'activities',
+        'settings' => 'settings',
+        'profile' => 'profile',
+        'reset-password' => 'reset-password',
+        'admin' => 'admin',
+        'backup' => 'backup',
+        'cache' => 'cache',
+        'notif-harian' => 'notif-harian',
+        'logout' => 'logout'
     ];
-    return baseUrl($map[$page] ?? "index.php?page=" . $page);
+    return baseUrl($map[$page] ?? $page);
 }
 
 // Database Configuration
