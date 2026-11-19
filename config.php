@@ -139,80 +139,84 @@ function isAjax() {
     return isset($_SERVER['HTTP_X_REQUESTED_WITH']) && $_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest';
 }
 
-// Ensure database tables exist
-try {
-    $pdo->exec("CREATE TABLE IF NOT EXISTS document_shares (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        document_id INT NOT NULL,
-        shared_with_user_id INT NOT NULL,
-        shared_by_user_id INT NOT NULL,
-        permission VARCHAR(20) DEFAULT 'view',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
-        FOREIGN KEY (shared_with_user_id) REFERENCES users(id) ON DELETE CASCADE,
-        FOREIGN KEY (shared_by_user_id) REFERENCES users(id) ON DELETE CASCADE,
-        UNIQUE KEY unique_doc_share (document_id, shared_with_user_id)
-    )");
+// Ensure database tables exist (Cached per session to avoid running 8 DDL/metadata queries on every navigation)
+if (empty($_SESSION['tf_db_migrated_v350'])) {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS document_shares (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            document_id INT NOT NULL,
+            shared_with_user_id INT NOT NULL,
+            shared_by_user_id INT NOT NULL,
+            permission VARCHAR(20) DEFAULT 'view',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+            FOREIGN KEY (shared_with_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (shared_by_user_id) REFERENCES users(id) ON DELETE CASCADE,
+            UNIQUE KEY unique_doc_share (document_id, shared_with_user_id)
+        )");
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        user_id INT NOT NULL,
-        name VARCHAR(255) NOT NULL,
-        description TEXT NULL,
-        status VARCHAR(50) DEFAULT 'active',
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_user_projects (user_id)
-    )");
+        $pdo->exec("CREATE TABLE IF NOT EXISTS projects (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            user_id INT NOT NULL,
+            name VARCHAR(255) NOT NULL,
+            description TEXT NULL,
+            status VARCHAR(50) DEFAULT 'active',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_user_projects (user_id)
+        )");
 
-    $pdo->exec("CREATE TABLE IF NOT EXISTS document_public_shares (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        document_id INT NOT NULL,
-        share_token VARCHAR(64) UNIQUE NOT NULL,
-        created_by INT NOT NULL,
-        expires_at DATETIME NOT NULL,
-        views_count INT NOT NULL DEFAULT 0,
-        downloads_count INT NOT NULL DEFAULT 0,
-        is_active TINYINT(1) NOT NULL DEFAULT 1,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
-        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
-        INDEX idx_public_token (share_token),
-        INDEX idx_public_expires (expires_at)
-    )");
+        $pdo->exec("CREATE TABLE IF NOT EXISTS document_public_shares (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            document_id INT NOT NULL,
+            share_token VARCHAR(64) UNIQUE NOT NULL,
+            created_by INT NOT NULL,
+            expires_at DATETIME NOT NULL,
+            views_count INT NOT NULL DEFAULT 0,
+            downloads_count INT NOT NULL DEFAULT 0,
+            is_active TINYINT(1) NOT NULL DEFAULT 1,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (document_id) REFERENCES documents(id) ON DELETE CASCADE,
+            FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE,
+            INDEX idx_public_token (share_token),
+            INDEX idx_public_expires (expires_at)
+        )");
 
-    // Ensure storage_quota and status columns exist in users
-    $checkCol = $pdo->query("SHOW COLUMNS FROM users LIKE 'storage_quota'")->fetchAll();
-    if (empty($checkCol)) {
-        $pdo->exec("ALTER TABLE users ADD COLUMN storage_quota BIGINT UNSIGNED NOT NULL DEFAULT 5368709120 AFTER role");
-    }
-    $checkStatus = $pdo->query("SHOW COLUMNS FROM users LIKE 'status'")->fetchAll();
-    if (empty($checkStatus)) {
-        $pdo->exec("ALTER TABLE users ADD COLUMN status ENUM('active', 'inactive') NOT NULL DEFAULT 'active' AFTER role");
-    }
+        // Ensure storage_quota and status columns exist in users
+        $checkCol = $pdo->query("SHOW COLUMNS FROM users LIKE 'storage_quota'")->fetchAll();
+        if (empty($checkCol)) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN storage_quota BIGINT UNSIGNED NOT NULL DEFAULT 5368709120 AFTER role");
+        }
+        $checkStatus = $pdo->query("SHOW COLUMNS FROM users LIKE 'status'")->fetchAll();
+        if (empty($checkStatus)) {
+            $pdo->exec("ALTER TABLE users ADD COLUMN status ENUM('active', 'inactive') NOT NULL DEFAULT 'active' AFTER role");
+        }
 
-    // Ensure priority and description columns exist in todos
-    $checkPriority = $pdo->query("SHOW COLUMNS FROM todos LIKE 'priority'")->fetchAll();
-    if (empty($checkPriority)) {
-        $pdo->exec("ALTER TABLE todos ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER status");
-    }
-    $checkDesc = $pdo->query("SHOW COLUMNS FROM todos LIKE 'description'")->fetchAll();
-    if (empty($checkDesc)) {
-        $pdo->exec("ALTER TABLE todos ADD COLUMN description TEXT NULL AFTER priority");
-    }
+        // Ensure priority and description columns exist in todos
+        $checkPriority = $pdo->query("SHOW COLUMNS FROM todos LIKE 'priority'")->fetchAll();
+        if (empty($checkPriority)) {
+            $pdo->exec("ALTER TABLE todos ADD COLUMN priority VARCHAR(20) NOT NULL DEFAULT 'medium' AFTER status");
+        }
+        $checkDesc = $pdo->query("SHOW COLUMNS FROM todos LIKE 'description'")->fetchAll();
+        if (empty($checkDesc)) {
+            $pdo->exec("ALTER TABLE todos ADD COLUMN description TEXT NULL AFTER priority");
+        }
 
-    // Ensure todo_checklists table exists for sub-tasks
-    $pdo->exec("CREATE TABLE IF NOT EXISTS todo_checklists (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        todo_id INT NOT NULL,
-        title VARCHAR(255) NOT NULL,
-        is_completed TINYINT(1) DEFAULT 0,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        FOREIGN KEY (todo_id) REFERENCES todos(id) ON DELETE CASCADE,
-        INDEX idx_todo_chk (todo_id)
-    )");
-} catch (\Throwable $e) {}
+        // Ensure todo_checklists table exists for sub-tasks
+        $pdo->exec("CREATE TABLE IF NOT EXISTS todo_checklists (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            todo_id INT NOT NULL,
+            title VARCHAR(255) NOT NULL,
+            is_completed TINYINT(1) DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (todo_id) REFERENCES todos(id) ON DELETE CASCADE,
+            INDEX idx_todo_chk (todo_id)
+        )");
+
+        $_SESSION['tf_db_migrated_v350'] = true;
+    } catch (\Throwable $e) {}
+}
 
 /**
  * Compresses and saves uploaded files without quality loss.

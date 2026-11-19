@@ -757,8 +757,8 @@ if (!function_exists('formatActivityAction')) {
             return;
         }
         var count = 0;
-        var duration = 800; // ms
-        var stepTime = Math.max(16, Math.floor(duration / target));
+        var duration = 250; // ms (snappy count-up)
+        var stepTime = Math.max(12, Math.floor(duration / target));
         var increment = target > 50 ? Math.ceil(target / 40) : 1;
 
         var timer = setInterval(function() {
@@ -816,6 +816,7 @@ if (!function_exists('formatActivityAction')) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                animation: { duration: 350 },
                 plugins: {
                     legend: { 
                         display: true,

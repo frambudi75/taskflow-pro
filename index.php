@@ -417,18 +417,18 @@ try {
         #pageLoader {
             position: fixed; top: 0; left: 0; right: 0; height: 3px;
             background: linear-gradient(90deg, #1E5CE6, #60A5FA, #38BDF8);
-            z-index: 9999; transform: translateX(-100%); transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 9999; transform: translateX(-100%); transition: transform 0.2s ease-out;
             pointer-events: none;
             box-shadow: 0 0 10px rgba(30, 92, 230, 0.5);
         }
-        #pageLoader.loading { transform: translateX(-25%); }
+        #pageLoader.loading { transform: translateX(-20%); }
         #pageLoader.finish { transform: translateX(0); }
 
         #ajaxContent {
-            transition: opacity 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: opacity 0.08s ease;
         }
         #ajaxContent.page-fade {
-            opacity: 0.45;
+            opacity: 0.85;
         }
 
         @keyframes modalPop {
@@ -1287,11 +1287,66 @@ function closeShortcutsModal() {
     if (m) { m.classList.add('hidden'); m.classList.remove('flex'); }
 }
 
+// Instant In-Memory Page Cache for 0ms Navigation
+const pageMemoryCache = new Map();
+
+function updateNavActive(targetUrl) {
+    try {
+        const urlObj = new URL(targetUrl, window.location.origin);
+        const page = urlObj.searchParams.get('page') || 'dashboard';
+        document.querySelectorAll('.nav-item').forEach(el => {
+            const dataNav = el.getAttribute('data-nav');
+            if (dataNav === 'profile' && (page === 'profile' || page === 'reset-password')) {
+                el.classList.add('active');
+            } else {
+                el.classList.toggle('active', dataNav === page);
+            }
+        });
+    } catch (e) {}
+}
+
+// Prefetch page on hover (mouseenter/mouseover)
+function prefetchPage(url) {
+    if (!url || pageMemoryCache.has(url)) return;
+    fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(res => res.text())
+        .then(html => {
+            if (html && !html.includes('Akses Ditolak') && html.length > 50) {
+                pageMemoryCache.set(url, { html: html, time: Date.now() });
+            }
+        })
+        .catch(() => {});
+}
+
 // AJAX Navigation System
 function loadPage(url, pushState = true) {
     const loader = document.getElementById('pageLoader');
     const content = document.getElementById('ajaxContent');
     
+    // Instant optimistic active tab feedback (0ms perceived latency)
+    updateNavActive(url);
+
+    // If cached in memory (< 45s old), render INSTANTLY (0ms)
+    const cached = pageMemoryCache.get(url);
+    const isFresh = cached && (Date.now() - cached.time < 45000);
+
+    if (isFresh && content) {
+        content.innerHTML = cached.html;
+        executeScripts(content);
+        content.scrollTop = 0;
+        if (pushState) history.pushState({url: url}, '', url);
+        
+        // Background silent revalidation
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(res => res.text())
+            .then(newHtml => {
+                if (newHtml && newHtml.length > 50) {
+                    pageMemoryCache.set(url, { html: newHtml, time: Date.now() });
+                }
+            }).catch(() => {});
+        return;
+    }
+
     loader.classList.add('loading');
     if (content) content.classList.add('page-fade');
     
@@ -1307,31 +1362,23 @@ function loadPage(url, pushState = true) {
     })
     .then(html => {
         if (!html) return;
-        const content = document.getElementById('ajaxContent');
-        content.innerHTML = html;
-        executeScripts(content);
-        content.scrollTop = 0;
-        if (content) content.classList.remove('page-fade');
+        pageMemoryCache.set(url, { html: html, time: Date.now() });
+
+        if (content) {
+            content.innerHTML = html;
+            executeScripts(content);
+            content.scrollTop = 0;
+            content.classList.remove('page-fade');
+        }
         
         // Update URL
         if (pushState) history.pushState({url: url}, '', url);
-        
-        // Update active menu
-        const urlObj = new URL(url, window.location.origin);
-        const page = urlObj.searchParams.get('page') || 'dashboard';
-        document.querySelectorAll('.nav-item').forEach(el => {
-            const dataNav = el.getAttribute('data-nav');
-            if (dataNav === 'profile' && (page === 'profile' || page === 'reset-password')) {
-                el.classList.add('active');
-            } else {
-                el.classList.toggle('active', dataNav === page);
-            }
-        });
+        updateNavActive(url);
 
         loader.classList.add('finish');
         setTimeout(() => {
             loader.classList.remove('loading', 'finish');
-        }, 300);
+        }, 120);
     })
     .catch(err => {
         console.error('AJAX Load Error:', err);
@@ -1369,6 +1416,16 @@ document.addEventListener('click', e => {
         e.preventDefault();
         loadPage(href);
         if (window.innerWidth < 1024) closeSidebar();
+    }
+});
+
+// Hover prefetch for instantaneous 0ms page loads
+document.addEventListener('mouseover', e => {
+    const link = e.target.closest('a');
+    if (!link) return;
+    const href = link.getAttribute('href');
+    if (href && (href.includes('index.php?page=') || href === 'index.php')) {
+        prefetchPage(href);
     }
 });
 
