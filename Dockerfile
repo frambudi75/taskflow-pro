@@ -1,4 +1,4 @@
-FROM php:8.2-apache
+FROM php:8.5-apache
 
 # Install system dependencies & graphic libraries for GD and file processing
 RUN apt-get update && apt-get install -y \

@@ -28,6 +28,8 @@ Format pencatatan mengikuti pedoman [Keep a Changelog](https://keepachangelog.co
   - Pembuatan otomatis tabel relasional `todo_checklists` dengan integritas foreign key cascade.
 - **Peningkatan Cache PWA**:
   - Peningkatan cache Service Worker ke `taskflow-pwa-v3.5.0`.
+- **Pembaruan Lingkungan Container Docker (`Dockerfile`)**:
+  - Memperbarui base image container ke **PHP 8.5 Apache** (`FROM php:8.5-apache`) dengan dukungan ekstensi penuh (`gd`, `exif`, `pdo_mysql`, `zip`).
 
 ---
 

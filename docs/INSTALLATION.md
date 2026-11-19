@@ -5,8 +5,8 @@ TaskFlow Pro dirancang untuk kemudahan satu klik, namun beberapa konfigurasi sis
 ---
 
 ## 📋 Prasyarat Sistem
--   **PHP**: 8.0 atau lebih tinggi (Direkomendasikan 8.1+)
--   **Ext PHP**: `pdo_mysql`, `curl`, `json`, `mbstring`, `fileinfo`
+-   **PHP**: 8.0 s/d 8.5+ (Docker default: PHP 8.5-apache)
+-   **Ext PHP**: `pdo_mysql`, `curl`, `json`, `mbstring`, `fileinfo`, `gd`, `zip`, `exif`
 -   **Database**: MySQL 5.7+ atau MariaDB 10.3+
 -   **SMTP Server**: Dibutuhkan untuk fitur notifikasi email (Host, Port, User, Pass).
 
